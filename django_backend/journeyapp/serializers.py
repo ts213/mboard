@@ -7,9 +7,9 @@ import re
 
 class ThreadsSerializer(serializers.ModelSerializer):
     board = serializers.ReadOnlyField(source='board.title')
-    replies = serializers.SerializerMethodField()
+    replies = serializers.SerializerMethodField()  # stackoverflow.com/questions/64867785
 
-    def get_replies(self, obj):
+    def get_replies(self, obj):  # replies field -> get_replies method
         posts = obj.post_set.order_by('-date')[:4][::-1]
         return self.PostSerializer(posts, many=True).data
 

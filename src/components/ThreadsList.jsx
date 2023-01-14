@@ -1,12 +1,14 @@
 import { useLoaderData } from 'react-router-dom';
 import { Post } from './Post';
 import React from 'react';
+import { Thread } from './Thread.jsx';
 
 export function ThreadsList() {
   const threads = useLoaderData();
 
   const threadsList = threads.map(thread =>
     <React.Fragment key={thread.id}>
+      <section className='thread flex flex-col flex-wrap items-start'>
       <Post key={thread.id} thread={thread} isThreadsList={true} />
 
       {
@@ -15,12 +17,12 @@ export function ThreadsList() {
           }
         )
       }
-
+      </section>
     </React.Fragment>
   );
 
   return (
-      <div className='post-list m-12 flex flex-col flex-wrap items-start'>
+      <div className='post-list m-12'>
         {threadsList}
       </div>
   )

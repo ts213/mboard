@@ -1,6 +1,7 @@
 import { useLoaderData } from 'react-router-dom';
 import { PostForm } from './PostForm.jsx';
 import { Post } from './Post';
+import React from 'react';
 
 export function Thread() {
   const threadsJson = useLoaderData();

@@ -1,5 +1,6 @@
 import { useLoaderData } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 export function BoardsList() {
   const boardsJson = useLoaderData();
@@ -7,6 +8,7 @@ export function BoardsList() {
   return boardsJson.map(board =>
     <section key={board.id} className='ml-12 mb-5 text-lg text-center'>
       <Link to={'../' + board.link + '/'}>{board.title}</Link>
+        <hr className="h-px my-8 border-0 dark:bg-gray-700"/>
     </section>
   );
 }
