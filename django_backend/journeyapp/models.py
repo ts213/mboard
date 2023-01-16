@@ -6,10 +6,10 @@ class Post(models.Model):
     poster = models.CharField(max_length=35, blank=True)
     text = models.TextField(max_length=10000)
     date = models.DateTimeField(auto_now_add=True)
-    image = models.ImageField(blank=True, upload_to='post/images/%Y/%m/%d/')
-    thumb = models.ImageField(blank=True, upload_to='post/thumbs/%Y/%m/%d/')
-    video = models.FileField(blank=True, upload_to='post/videos/%Y/%m/%d/')
-    videothumb = models.ImageField(blank=True, upload_to='post/thumbs/%Y/%m/%d/')
+    file = models.ImageField(blank=True, upload_to='files/%Y/%m/%d/')  # naming ????
+    thumb = models.ImageField(blank=True, upload_to='thumbs/%Y/%m/%d/')
+    # video = models.FileField(blank=True, upload_to='post/videos/%Y/%m/%d/')
+    # videothumb = models.ImageField(blank=True, upload_to='post/thumbs/%Y/%m/%d/')
     bump = models.DateTimeField(auto_now=True)
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
 

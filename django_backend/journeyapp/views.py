@@ -2,7 +2,7 @@ from rest_framework import generics, renderers, status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 
-from .models import Post, Board
+from .models import Board
 from .serializers import BoardSerializer, ThreadsSerializer, ThreadSerialier
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -49,7 +49,6 @@ class SingleThreadAPIView(generics.ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        # print(self.request.data)
         serializer.save(board_link=self.request.data['board'],
                         thread_id=self.request.data['threadId'])
 

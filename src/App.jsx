@@ -1,23 +1,52 @@
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
-import { ThreadsList, dataLoader } from './components/ThreadsList.jsx';
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, defer } from 'react-router-dom';
 import RootLayout from './components/RootLayout.jsx';
-import { BoardsList, boardsLoader } from './components/BoardsList.jsx';
-import { ErrorCpmnt } from './components/ErrorCpmnt.jsx';
-import { Thread, threadLoader } from './components/Thread';
-import { formAction } from './components/PostForm.jsx';
+import { lazy, Suspense } from 'react';
+import { formAction } from './utils/formAction'
 
+const BoardsList = lazy(() => import('./components/BoardsList'));
+const ThreadsList = lazy(() => import('./components/ThreadsList'));
+const Thread = lazy(() => import('./components/Thread'));
+const ErrorCpmnt = lazy(() => import('./components/ErrorCpmnt'));
+// const formAction = lazy(() => import('./utils/formAction'));  // submit form not working with lazy
 
 export default function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path='/' element={<RootLayout />} errorElement={<ErrorCpmnt />}>
         <Route index element={<HomePage />} />
-        <Route path='boards' loader={boardsLoader} element={<BoardsList />} />
-        <Route path=':board' loader={dataLoader} element={<ThreadsList />} />
-        <Route path=':board/thread/:threadId' loader={threadLoader} action={formAction} element={<Thread />} />
+
+        <Route path='boards'
+               loader={() => defer({ boards: customFetch('boards') })}
+               errorElement={<ErrorCpmnt />}
+               element={
+                 <Suspense>
+                   <BoardsList />
+                 </Suspense>
+               } />
+
+        <Route path=':board'
+               loader={({ params }) => customFetch(params.board)}
+               errorElement={<ErrorCpmnt />}
+               element={
+                 <Suspense>
+                   <ThreadsList />
+                 </Suspense>
+               } />
+
+        <Route path=':board/thread/:threadId'
+               loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}/`)}
+               errorElement={<ErrorCpmnt />}
+               action={formAction}
+               element={
+                 <Suspense>
+                   <Thread />
+                 </Suspense>
+               } />
+
       </Route>
     )
   );
+
   return (
     <div className='App'>
       <RouterProvider router={router} />
@@ -31,3 +60,10 @@ function HomePage() {
   )
 }
 
+async function customFetch(addr) {
+  const r = await fetch(`/api/${addr}/`);
+  if (!r.ok) {
+    throw new Response('loader error', { status: r.status });
+  }
+  return r.json();
+}

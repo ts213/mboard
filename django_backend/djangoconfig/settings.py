@@ -2,6 +2,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+MEDIA_DIR = Path(__file__).resolve().parent.parent.parent
+
 SECRET_KEY = 'django-insecure-ms_1(dc*(xcc@)n!ryq=laphhsx!t$x85(vtfc%!_8@)y&=x3q'
 
 DEBUG = True
@@ -120,7 +122,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = MEDIA_DIR / 'media'
 MEDIA_URL = '/media/'
 
 # UPLOADED_FILES_USE_URL = False
