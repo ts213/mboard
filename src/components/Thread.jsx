@@ -6,6 +6,7 @@ import { PostsWrapper } from './PostsWrapper';
 export default function Thread() {
   const postsJson = useLoaderData();
 
+
   const posts = postsJson.posts.map(post =>
     <Post key={post.id} post={post} isThreadsList={false} />
   );

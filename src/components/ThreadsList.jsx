@@ -5,9 +5,9 @@ import { PostsWrapper } from './PostsWrapper.jsx';
 import { PostForm } from './PostForm.jsx';
 
 export default function ThreadsList() {
-  const postsJson = useLoaderData();
+  const json = useLoaderData();
 
-  const posts = postsJson.map(post =>
+  const posts = json.threads.map(post =>
     <React.Fragment key={post.id}>
       <section className={'flex flex-col flex-wrap items-start '}>
         <Post post={post} isThreadsList={true} />

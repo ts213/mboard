@@ -1,23 +1,21 @@
-import { redirect } from 'react-router-dom';
-
 export async function formAction({ request }) {
   const formData = await request.formData();
   try {
-    await submitForm(formData);
+    return await submitForm(formData);
   } catch (e) {
     return e;  // stopping here if error, error is available in useActionData()
   }
-  return redirect('');
+  // return redirect('');
 }
 
 async function submitForm(formData) {
-  const url = `/api${location.pathname}`;
+  const url = `/api/posting/`;
   const r = await fetch(url, {
     body: formData,
     method: 'POST',
   });
   if (r.status !== 201) {
-    throw { msg: 'response error', status: 422 };
+    throw { errMsg: 'response error', status: 422 };
   }
   return r.json();
 }

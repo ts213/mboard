@@ -8,7 +8,18 @@ SECRET_KEY = 'django-insecure-ms_1(dc*(xcc@)n!ryq=laphhsx!t$x85(vtfc%!_8@)y&=x3q
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.133']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.133', 'localhost']
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    "192.168.1.133",
+]
+
+# DEBUG_TOOLBAR_CONFIG = {
+#     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+# }
+
 
 # REST_FRAMEWORK = {
 #     "DEFAULT_PERMISSION_CLASSES": [
@@ -28,7 +39,7 @@ ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.133']
 
 # CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+# CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -39,14 +50,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 3rd party
     'rest_framework',
+    "debug_toolbar",
     # 'corsheaders',
     # local
     'journeyapp.apps.JourneyappConfig',
 ]
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     # "corsheaders.middleware.CorsMiddleware",
     # 'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

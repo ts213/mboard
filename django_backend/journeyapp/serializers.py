@@ -1,6 +1,7 @@
 from io import BytesIO
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db.models import Q
 from rest_framework import serializers
 from .models import Post, Board
 from django.shortcuts import get_object_or_404
@@ -30,6 +31,7 @@ class ThreadsSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Board
         fields = '__all__'
@@ -37,17 +39,22 @@ class BoardSerializer(serializers.ModelSerializer):
 
 class ThreadSerialier(serializers.ModelSerializer):
     board = serializers.ReadOnlyField(source='board.title')
+    posts = serializers.SerializerMethodField(method_name='get_posts')
+    threadId = serializers.IntegerField(source='pk')
 
-    def create(self, validated_data):
-        validated_data['text'] = escape(validated_data['text'])
-        validated_data['text'] = wrap_quoted_text_in_tag(validated_data['text'])
-        validated_data['text'] = add_link(validated_data['text'])
-        if 'file' in validated_data:
-            validated_data['thumb'] = make_thumbnail(validated_data['file'])
-        board_link = validated_data.pop('board_link')
+    def get_posts(self, thread: Post):
+        posts = Post.objects.filter(
+            Q(pk=thread.pk) |
+            Q(thread__pk=thread.pk)
+        )
+        return self.PostsSerializer(posts, many=True).data
 
-        board = get_object_or_404(Board, link=board_link)
-        return Post.objects.create(board=board, **validated_data)
+    class PostsSerializer(serializers.ModelSerializer):
+        board = serializers.ReadOnlyField(source='board.title')
+
+        class Meta:
+            model = Post
+            fields = '__all__'
 
     @staticmethod
     def validate_file(obj):
@@ -57,7 +64,21 @@ class ThreadSerialier(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ('threadId', 'board', 'date', 'bump', 'posts')
+
+
+class NewPostSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        validated_data['text'] = escape(validated_data['text'])
+        validated_data['text'] = wrap_quoted_text_in_tag(validated_data['text'])
+        validated_data['text'] = add_link(validated_data['text'])
+        if 'file' in validated_data:
+            validated_data['thumb'] = make_thumbnail(validated_data['file'])
+        return Post.objects.create(**validated_data)
+
+    class Meta:
+        model = Post
+        exclude = ['board']
 
 
 def wrap_quoted_text_in_tag(post_text: str):
