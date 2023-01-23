@@ -6,7 +6,7 @@ export function PostForm() {
   const fetcher = useFetcher();
 
   return (
-    <fetcher.Form action='/posting/' method='post' className='mb-20' encType='multipart/form-data'>
+    <fetcher.Form action='/posting/' method='POST' className='mb-20' encType='multipart/form-data'>
       <div className='text-center text-red-500 text-lg'>
         {fetcher.data && <p>{fetcher.data.errMsg}</p>}
       </div>

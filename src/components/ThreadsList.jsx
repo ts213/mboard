@@ -5,15 +5,15 @@ import { PostsWrapper } from './PostsWrapper.jsx';
 import { PostForm } from './PostForm.jsx';
 
 export default function ThreadsList() {
-  const json = useLoaderData();
+  const data = useLoaderData();
 
-  const posts = json.threads.map(post =>
-    <React.Fragment key={post.id}>
+  const posts = data.threads.map(thread =>
+    <React.Fragment key={thread.id}>
       <section className={'flex flex-col flex-wrap items-start '}>
-        <Post post={post} isThreadsList={true} />
+        <Post post={thread} isThreadsList={true} />
 
         {
-          post.replies.map(reply => {
+          thread.replies.map(reply => {
               return <Post key={reply.id} post={reply} isThreadsList={false} />
             }
           )

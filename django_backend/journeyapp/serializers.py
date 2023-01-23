@@ -4,7 +4,6 @@ from django.core.files.base import ContentFile
 from django.db.models import Q
 from rest_framework import serializers
 from .models import Post, Board
-from django.shortcuts import get_object_or_404
 from django.utils.html import escape
 import re
 from PIL import Image

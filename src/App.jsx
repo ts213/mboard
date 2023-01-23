@@ -47,9 +47,10 @@ export default function App() {
                    <Thread />
                  </Suspense>
                } />
-        <Route path='posting/'
-        action={formAction}
-        />
+
+        <Route path='posting/' action={formAction} />
+        <Route path='delete/:postId/' action={formAction} />
+        <Route path='edit/:postId/' action={formAction} />
 
       </Route>
     )

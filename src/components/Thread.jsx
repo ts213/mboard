@@ -1,11 +1,17 @@
-import { useLoaderData } from 'react-router-dom';
+import { useFetcher, useLoaderData } from 'react-router-dom';
 import { PostForm } from './PostForm.jsx';
 import { Post } from './Post';
 import { PostsWrapper } from './PostsWrapper';
+import { useState, createContext } from 'react';
+
+export const MenuContext = createContext( {} );
 
 export default function Thread() {
   const postsJson = useLoaderData();
+  const fetcher = useFetcher();
 
+  const [menuId, setMenuId] = useState(0);
+  const togglePostDropdownMenu = id => setMenuId.call(this, menuId === id ? 0 : id);
 
   const posts = postsJson.posts.map(post =>
     <Post key={post.id} post={post} isThreadsList={false} />
@@ -13,10 +19,14 @@ export default function Thread() {
 
   return (
     <>
-      <PostsWrapper posts={posts} />
+      <fetcher.Form>
+        <MenuContext.Provider value={{menuId, togglePostMenu: togglePostDropdownMenu}}>
+          <PostsWrapper posts={posts} />
+        </MenuContext.Provider>
+      </fetcher.Form>
       <PostForm />
     </>
-  )
+  );
 }
 
 // export async function threadLoader({ params }) {

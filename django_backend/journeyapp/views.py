@@ -1,6 +1,7 @@
-from rest_framework import generics, renderers
+from rest_framework import generics, renderers, status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Board, Post
 from . import serializers
@@ -50,15 +51,6 @@ class SingleThreadAPIView(generics.RetrieveAPIView):
             raise NotFound()
         return thread_qset
 
-    # def list(self, request, *args, **kwargs):
-    #     queryset = self.get_queryset()
-    #     serializer = ThreadSerialier(queryset, many=True)
-    #     return Response({
-    #         'posts': serializer.data,
-    #         'board': self.kwargs['board'],
-    #         'threadId': self.kwargs['pk'],
-    #     })
-
 
 class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
@@ -68,9 +60,20 @@ class CreateNewPostAPIView(generics.CreateAPIView):
             board=get_object_or_404(Board, link=self.request.data['board']),
             thread_id=self.request.data['threadId'])
 
-# class DeletePostAPIView(generics.DestroyAPIView):
-#     queryset = Post.objects.all()
-#
-#     def delete(self, request, *args, **kwargs):
-#         print(kwargs)
-#         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class DeletePostAPIView(APIView):
+    http_method_names = ['delete']
+
+    def delete(self, request, pk):
+        print('delettt!!')
+        post = get_object_or_404(Post, pk=pk)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PatchPostAPIView(APIView):
+    http_method_names = ['patch']
+
+    def patch(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
