@@ -1,3 +1,5 @@
+import time
+
 from rest_framework import generics, renderers, status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
@@ -72,8 +74,12 @@ class DeletePostAPIView(APIView):
 
 
 class PatchPostAPIView(APIView):
+    import time
     http_method_names = ['patch']
 
     def patch(self, request, pk):
+        time.sleep(3)
         post = get_object_or_404(Post, pk=pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        post.text = self.request.data['text']
+        post.save()
+        return Response(status=status.HTTP_200_OK)

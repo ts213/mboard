@@ -11,21 +11,24 @@ export default function ThreadsList() {
     <React.Fragment key={thread.id}>
       <section className={'flex flex-col flex-wrap items-start '}>
         <Post post={thread} isThreadsList={true} />
-
         {
-          thread.replies.map(reply => {
-              return <Post key={reply.id} post={reply} isThreadsList={false} />
-            }
+          thread.replies.map(reply =>
+            <Post key={reply.id}
+                  post={reply}
+                  isThreadsList={false}
+            />
           )
         }
       </section>
-      <hr className={'w-full border-t-gray-500'}/>
+      <hr className={'w-full border-t-gray-500'} />
     </React.Fragment>
   );
 
   return (
     <>
-      <PostsWrapper posts={posts} />
+      <PostsWrapper>
+        {posts}
+      </PostsWrapper>
       <PostForm />
     </>
   )

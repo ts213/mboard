@@ -2,27 +2,39 @@ import { useFetcher, useLoaderData } from 'react-router-dom';
 import { PostForm } from './PostForm.jsx';
 import { Post } from './Post';
 import { PostsWrapper } from './PostsWrapper';
-import { useState, createContext } from 'react';
-
-export const MenuContext = createContext( {} );
+import { useState } from 'react';
 
 export default function Thread() {
   const postsJson = useLoaderData();
   const fetcher = useFetcher();
+  // fetcher.state === 'loading' ? console.log('aaa') : undefined;
 
   const [menuId, setMenuId] = useState(0);
-  const togglePostDropdownMenu = id => setMenuId.call(this, menuId === id ? 0 : id);
+  const toggleDropdownMenu = id => setMenuId.call(this, menuId === id ? 0 : id);
+
+  const [postInput, setPostInput] = useState('');
+
+  const [postEditable, setPostEditable] = useState(0);
+  const toggleEditMenu = id => setPostEditable.call(this, postEditable === id ? 0 : id);
 
   const posts = postsJson.posts.map(post =>
-    <Post key={post.id} post={post} isThreadsList={false} />
+    <Post key={post.id}
+          post={post}
+          isThreadsList={false}
+          menuId={menuId}
+          toggleDropdownMenu={toggleDropdownMenu}
+          setPostInput={setPostInput}
+          postInput={postInput}
+          postEditable={postEditable}
+          setPostEditable={setPostEditable}
+          toggleEditMenu={toggleEditMenu}
+    />
   );
 
   return (
     <>
       <fetcher.Form>
-        <MenuContext.Provider value={{menuId, togglePostMenu: togglePostDropdownMenu}}>
-          <PostsWrapper posts={posts} />
-        </MenuContext.Provider>
+        <PostsWrapper>{posts}</PostsWrapper>
       </fetcher.Form>
       <PostForm />
     </>

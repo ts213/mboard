@@ -1,7 +1,7 @@
-export function PostsWrapper({ posts }) {
+export function PostsWrapper({ posts, children }) {
   return (
     <div className='m-12 flex flex-col flex-wrap items-start'>
-      {posts}
+      {children}
     </div>
   )
 }
