@@ -1,5 +1,4 @@
-export function PostMenuButton({ post, menuId, toggleDropdownMenu, testRef,
-                                 postInput, setPostInput, setPostEditable, toggleEditMenu }) {
+export function PostMenuButton({ post, menuId, toggleDropdownMenu, toggleEditMenu }) {
 
   return (
     <div className='ml-2 relative inline-block'>

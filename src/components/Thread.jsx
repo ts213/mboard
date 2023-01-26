@@ -7,12 +7,9 @@ import { useState } from 'react';
 export default function Thread() {
   const postsJson = useLoaderData();
   const fetcher = useFetcher();
-  // fetcher.state === 'loading' ? console.log('aaa') : undefined;
 
   const [menuId, setMenuId] = useState(0);
   const toggleDropdownMenu = id => setMenuId.call(this, menuId === id ? 0 : id);
-
-  const [postInput, setPostInput] = useState('');
 
   const [postEditable, setPostEditable] = useState(0);
   const toggleEditMenu = id => setPostEditable.call(this, postEditable === id ? 0 : id);
@@ -23,8 +20,6 @@ export default function Thread() {
           isThreadsList={false}
           menuId={menuId}
           toggleDropdownMenu={toggleDropdownMenu}
-          setPostInput={setPostInput}
-          postInput={postInput}
           postEditable={postEditable}
           setPostEditable={setPostEditable}
           toggleEditMenu={toggleEditMenu}

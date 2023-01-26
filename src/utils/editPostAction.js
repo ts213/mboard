@@ -1,28 +1,24 @@
-export async function formAction({ request, params }) {
+export async function editPostAction({ request, params }) {
   const formData = await request.formData();
-  console.log('action data called')
 
   try {
     return await submitForm(formData, request, params);
   } catch (e) {
-    return e;  // stopping here if error, error is available in useActionData()
+    return e;
   }
-  // return redirect('');
 }
 
 async function submitForm(formData, request) {
-  // const url = `/api/testurl/${params.postId}/`;
-  // const url = `/api/posting/`;
   const url = '/api' + new URL(request.url).pathname;
-  const body = request.method === 'DELETE' ? undefined : formData;
   // console.log(body)
   const r = await fetch(url, {
     method: request.method,
-    body: body,
+    body: formData,
   });
 
   if (r.status >= 300) {
     throw { errors: 'response error', status: 422 };  // ?? 422
   }
-  return r.json();
+  // return r;
+  return {edited: 'ok'}
 }

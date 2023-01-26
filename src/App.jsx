@@ -3,6 +3,7 @@ import RootLayout from './components/RootLayout.jsx';
 import { lazy, Suspense } from 'react';
 import { formAction } from './utils/formAction'
 import ErrorCpmnt from './components/ErrorCpmnt.jsx';
+import { editPostAction } from './utils/editPostAction.js';
 
 const BoardsList = lazy(() => import('./components/BoardsList'));
 const ThreadsList = lazy(() => import('./components/ThreadsList'));
@@ -50,7 +51,7 @@ export default function App() {
 
         <Route path='posting/' action={formAction} />
         <Route path='delete/:postId/' action={formAction} />
-        <Route path='edit/:postId/' action={formAction} />
+        <Route path='edit/:postId/' action={editPostAction} />
 
       </Route>
     )

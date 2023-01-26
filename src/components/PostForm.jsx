@@ -8,13 +8,13 @@ export function PostForm() {
   return (
     <fetcher.Form action='/posting/' method='POST' className='mb-20' encType='multipart/form-data'>
       <div className='text-center text-red-500 text-lg'>
-        {fetcher.data && <p>{fetcher.data.errMsg}</p>}
+        {fetcher.data && <p>{fetcher.data.errors}</p>}
       </div>
       <div className='m-auto w-3/6 flex'>
         <input type='text' name='poster' className='grow border dark:border-gray-600 bg-slate-800 text-white'/>
         <SubmitButton submitting={fetcher.state === 'submitting'}/>
       </div>
-      <textarea name='text' rows='7'
+      <textarea name='text' rows='7' required
                 className='m-auto resize block border dark:border-gray-600 w-3/6 bg-slate-800 text-white'>
       </textarea>
       <input type='file' name='file' className='m-auto block'/>
