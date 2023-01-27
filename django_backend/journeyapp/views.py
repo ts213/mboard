@@ -74,11 +74,10 @@ class DeletePostAPIView(APIView):
 
 
 class PatchPostAPIView(APIView):
-    import time
     http_method_names = ['patch']
 
     def patch(self, request, pk):
-        time.sleep(3)
+        time.sleep(2)
         post = get_object_or_404(Post, pk=pk)
         post.text = self.request.data['text']
         print(self.request.data['text'])

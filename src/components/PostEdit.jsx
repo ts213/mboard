@@ -1,7 +1,7 @@
 import { useFetcher } from 'react-router-dom';
 import { useEffect } from 'react';
 
-export function PostEdit({ setPostEditable, testRef, post }) {
+export function PostEdit({ setPostEditable, postTextElmnt, postId, postTextBeforeEdit }) {
   const fetcher = useFetcher();
 
   useEffect(() => {
@@ -13,7 +13,7 @@ export function PostEdit({ setPostEditable, testRef, post }) {
   return (
     <>
       <div className={'float-right'}>
-        <button type='button' className={'mr-4'} onClick={() => setPostEditable(0)}>
+        <button type='button' className={'mr-4'} onClick={cancelEdit}>
           Cancel
         </button>
         <button type='button'
@@ -30,8 +30,15 @@ export function PostEdit({ setPostEditable, testRef, post }) {
 
   function testSubm() {
     fetcher.submit(
-      { text: testRef.current.innerHTML.trim() },
-      { method: 'patch', action: `/edit/${post.id}/` });
+      { text: postTextElmnt.current.innerHTML.trim() },
+      { method: 'patch', action: `/edit/${postId}/` });
+  }
+
+  function cancelEdit() {
+    postTextElmnt.current.innerHTML = postTextBeforeEdit;
+    // postTextElmnt.current.style.width = '100%';  bug: if picture attached, it changes position
+    postTextElmnt.current.style.height = '100%';
+    setPostEditable(0);
   }
 
 }

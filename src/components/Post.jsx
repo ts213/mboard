@@ -1,31 +1,33 @@
-import { Link, useFetcher } from 'react-router-dom';
-import { useRef } from 'react';
-import { PostMenuButton } from './PostMenuButton.jsx';
+import { Link, useOutletContext } from 'react-router-dom';
+import { useRef, useState } from 'react';
+import { PostToggleMenu } from './PostToggleMenu.jsx';
 import { PostEdit } from './PostEdit.jsx';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-export function Post({
-                       post, isThreadsList, menuId, toggleDropdownMenu, postEditable,
-                       setPostEditable, toggleEditMenu
-                     }) {
-  const opPostBg = post.thread ? 'bg-slate-800' : '';
+export function Post({ post, isThreadsList }) {
+  const notOPpost = post.thread ? 'bg-slate-800 border dark:border-gray-600' : '';
+
+  const { postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu } = useOutletContext();
+
   const editable = postEditable === post.id;
   const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>В тред</Link>;
+  const postTextElmnt = useRef();
 
-  const testRef = useRef();
+  const [postTextBeforeEdit, setpostTextBeforeEdit] = useState(undefined);
 
   return (
     <article key={post.id}
-             className={`${opPostBg} p-2 m-2 whitespace-pre-wrap clear-both`}>
+             className={`${notOPpost} p-2 m-2 whitespace-pre-wrap clear-both`}>
       <header className='thread-header'>
         <span className='poster'>{post.poster === '' ? 'Анон' : post.poster}</span>
         <span className='date ml-2'>{post.date}</span>
         <span className='post-id ml-2'>{post.id}</span>
-        <PostMenuButton post={post}  // change to post.id ???
+        <PostToggleMenu post={post}  // change to post.id ???
                         menuId={menuId}
                         toggleDropdownMenu={toggleDropdownMenu}
                         toggleEditMenu={toggleEditMenu}
+                        setPostTextBeforeEdit={setpostTextBeforeEdit}
         />
         {isThreadsList && linkIntoThread}
       </header>
@@ -33,7 +35,7 @@ export function Post({
         <a className='float-left' href={post.thumb}>
           <img className=' mr-4 float-left' src={post.thumb} alt='' />
         </a>
-        <blockquote ref={testRef}
+        <blockquote ref={postTextElmnt}
                     onKeyDown={(e) => pzdc(e)}
                     className={`m-2 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
                     contentEditable={editable}
@@ -42,8 +44,9 @@ export function Post({
       {
         editable && <PostEdit
           setPostEditable={setPostEditable}
-          testRef={testRef}
-          post={post}
+          postTextElmnt={postTextElmnt}
+          postId={post.id}
+          postTextBeforeEdit={postTextBeforeEdit}
         />
       }
     </article>
