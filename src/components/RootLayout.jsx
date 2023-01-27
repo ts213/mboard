@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { NavBar } from './NavBar.jsx';
 import { useEffect, useState } from 'react';
 
-export default function RootLayout() {
+export function RootLayout() {
 
   const [postEditable, setPostEditable] = useState(0);
   const toggleEditMenu = id => setPostEditable.call(null, postEditable === id ? 0 : id);
@@ -29,7 +29,7 @@ export default function RootLayout() {
 
     document.addEventListener('click', clickOutsideHandler);
     return () => document.removeEventListener('mousedown', clickOutsideHandler);
-  }, []); //If don’t specify dependencies, your Effect will run after every component re-render
+  }, []); //not specifying dependencies, Effect will run after every component re-render
 
   return (
     <>

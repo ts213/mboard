@@ -1,9 +1,10 @@
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, defer, } from 'react-router-dom';
-import RootLayout from './components/RootLayout.jsx';
 import { lazy, Suspense } from 'react';
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, defer, } from 'react-router-dom';
+import { RootLayout } from './components/RootLayout.jsx';
 import { formAction } from './utils/formAction'
-import ErrorCpmnt from './components/ErrorCpmnt.jsx';
+import { ErrorCpmnt } from './components/ErrorCpmnt.jsx';
 import { editPostAction } from './utils/editPostAction.js';
+import { Test } from './components/Test';
 
 const BoardsList = lazy(() => import('./components/BoardsList'));
 const ThreadsList = lazy(() => import('./components/ThreadsList'));
@@ -52,6 +53,7 @@ export default function App() {
         <Route path='posting/' action={formAction} />
         <Route path='delete/:postId/' action={formAction} />
         <Route path='edit/:postId/' action={editPostAction} />
+        <Route path='test/' element={<Test />} />
 
       </Route>
     )

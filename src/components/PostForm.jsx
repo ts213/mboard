@@ -12,7 +12,7 @@ export function PostForm() {
       </div>
       <div className='m-auto w-3/6 flex'>
         <input type='text' name='poster' className='grow border dark:border-gray-600 bg-slate-800 text-white'/>
-        <SubmitButton submitting={fetcher.state === 'submitting'}/>
+        <SubmitButton submitting={fetcher.state === 'submitting'} buttonType='submit'/>
       </div>
       <textarea name='text' rows='7' required
                 className='m-auto resize block border dark:border-gray-600 w-3/6 bg-slate-800 text-white'>
@@ -23,5 +23,3 @@ export function PostForm() {
     </fetcher.Form>
   )
 }
-
-

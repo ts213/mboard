@@ -1,5 +1,6 @@
 import { useFetcher } from 'react-router-dom';
 import { useEffect } from 'react';
+import { SubmitButton } from './SubmitButton';
 
 export function PostEdit({ setPostEditable, postTextElmnt, postId, postTextBeforeEdit }) {
   const fetcher = useFetcher();
@@ -13,14 +14,17 @@ export function PostEdit({ setPostEditable, postTextElmnt, postId, postTextBefor
   return (
     <>
       <div className={'float-right'}>
-        <button type='button' className={'mr-4'} onClick={cancelEdit}>
-          Cancel
-        </button>
-        <button type='button'
-                disabled={fetcher.state !== 'idle'}
-                onClick={testSubm}>
-          {`${fetcher.state === 'submitting' ? 'Saving...' : 'Update'}`}
-        </button>
+        <SubmitButton type='button'
+                      value='Cancel'
+                      clickHandler={cancelEdit}
+                      extraStyle='mr-4 '
+        />
+        <SubmitButton type='button'
+                      value='Update'
+                      disabled={fetcher.state !== 'idle'}
+                      clickHandler={testSubm}
+                      submitting={fetcher.state === 'submitting'}
+        />
       </div>
       <div className='text-center text-red-500 text-lg float-right'>
         {fetcher.data && fetcher.data.errors}

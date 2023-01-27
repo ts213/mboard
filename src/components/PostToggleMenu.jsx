@@ -10,6 +10,7 @@ export function PostToggleMenu({
                                }) {
 
   const fetcher = useFetcher();
+
   return (
     <div className='ml-2 relative inline-block'>
       <button type='button'
