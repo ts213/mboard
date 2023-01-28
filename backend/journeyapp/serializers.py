@@ -91,7 +91,7 @@ def wrap_quoted_text_in_tag(post_text: str):
 def add_link(post_text: str):
     def callback(match_obj):
         print(match_obj.group(0))
-        span = '<a class="quote-link" href="#pid-{link}">{repl}</a>'
+        span = '<a class="quote-link" href="#{link}/">{repl}</a>'
         return span.format(repl=match_obj.group(0).strip(),
                            link=match_obj.group(0).strip('gt;&gt;'))
     post_text = re.sub('^\\s*&gt;&gt;[0-9]+(?m)', callback, post_text)

@@ -1,62 +1,37 @@
-import { useEffect } from 'react';
-import { computePosition, flip, shift, offset } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.1.0/+esm';
+import { offset, shift, useFloating, useFocus, useHover, FloatingPortal } from '@floating-ui/react';
+import { flip } from '@floating-ui/react-dom';
+import { useState } from 'react';
 
 export function Test() {
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-
-    const button = document.querySelector('#button');
-    const tooltip = document.querySelector('#tooltip');
-
-    function update() {
-      computePosition(button, tooltip, {
-        placement: 'top',
-        middleware: [flip(), shift()], // offset(5) offset should be before most others to modify their coordinates
-      }).then(({ x, y }) => {
-        Object.assign(tooltip.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-        });
-      });
+  const { x, y, strategy, context, elements, refs } = useFloating({
+      open: isOpen,
+      onOpenChange: setIsOpen,
+      placement: 'top',
+      middleware: [offset(10), flip(), shift()],
     }
-
-    function showTooltip() {
-      tooltip.style.display = 'block';
-      update();
-    }
-
-    function hideTooltip() {
-      tooltip.style.display = '';
-    }
-
-    [
-      ['mouseenter', showTooltip],
-      ['mouseleave', hideTooltip],
-    ].forEach(([event, listener]) => {
-      button.addEventListener(event, listener);
-    });
-
-  }, [])
+  );
+  const hover = useHover(context);
 
   return (
     <>
-      <div className='flex h-screen justify-center items-center'>
-
-        <button id='button'
-                className='block m-auto flex flex-col  '
-                aria-describedby='tooltip'
-                style={{ background: '#222', color: 'white', fontWeight: 'bold' }}
-        >
-          My button
-        </button>
-
-        <div id='tooltip'
-             className='font-bold bg-red-600 absolute top-0 left-0 hidden'
-             role='tooltip'>My tooltip
-        </div>
-
-      </div>
-
+      {/*<button onClick={() => console.log('')} ref={refs.setReference}>Button</button>*/}
+      <FloatingPortal>
+        {!isOpen && (
+          <div onClick={() => console.log(refs)}
+            ref={refs.setFloating}
+            style={{
+              position: strategy,
+              top: y ?? 0,
+              left: x ?? 0,
+              width: 'max-content',
+            }}
+          >
+            Tooltip
+          </div>
+        )}
+      </FloatingPortal>
     </>
-  )
+  );
 }

@@ -8,17 +8,26 @@ import { PostEdit } from './PostEdit.jsx';
 export function Post({ post, isThreadsList }) {
   const notOPpost = post.thread ? 'bg-slate-800 border dark:border-gray-600' : '';
 
-  const { postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu } = useOutletContext();
+  const { postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu } =
+    useOutletContext();
 
   const editable = postEditable === post.id;
-  const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>В тред</Link>;
+  const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>;
   const postTextElmnt = useRef();
 
   const [postTextBeforeEdit, setpostTextBeforeEdit] = useState(undefined);
 
   return (
     <article key={post.id}
+             id={post.id}
              className={`${notOPpost} p-2 m-2 whitespace-pre-wrap clear-both`}>
+
+      {/*{tooltip.current.style.display === 'block' &&*/}
+      {/*  <div className='font-bold bg-red-600 absolute top-0 left-0 hidden'*/}
+      {/*       id='tooltip' role='tooltip' ref={tooltip}>My tooltip*/}
+      {/*  </div>*/}
+      {/*}*/}
+
       <header className='thread-header'>
         <span className='poster'>{post.poster === '' ? 'Анон' : post.poster}</span>
         <span className='date ml-2'>{post.date}</span>
@@ -32,9 +41,15 @@ export function Post({ post, isThreadsList }) {
         {isThreadsList && linkIntoThread}
       </header>
       <div className='post-body'>
-        <a className='float-left' href={post.thumb}>
-          <img className=' mr-4 float-left' src={post.thumb} alt='' />
-        </a>
+        {/*<a className='float-left' href={post.thumb}>*/}
+        {post.thumb &&
+          <figure className='float-left'>
+            <figcaption>image</figcaption>
+            <a className='' href={post.thumb}>
+              <img className=' mr-4' src={post.thumb} alt='' />
+            </a>
+          </figure>
+        }
         <blockquote ref={postTextElmnt}
                     onKeyDown={(e) => pzdc(e)}
                     className={`m-2 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}

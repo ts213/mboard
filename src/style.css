@@ -5,3 +5,13 @@
 body {
     color: white;
 }
+
+.quote-link {
+    color: rgb(232, 170, 81);
+    font-size: small;
+}
+
+body {
+    background-color: #0f172a;
+    /*font-size: 13px;*/
+}

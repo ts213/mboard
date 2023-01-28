@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { NavBar } from './NavBar.jsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function RootLayout() {
 
@@ -10,10 +10,14 @@ export function RootLayout() {
   const [menuId, setMenuId] = useState(0);
   const toggleDropdownMenu = id => setMenuId.call(null, menuId === id ? 0 : id);
 
+  const tooltip = useRef();
+
   const context = {
     postEditable,
     setPostEditable,
     toggleEditMenu,
+
+    tooltip,
 
     menuId,
     setMenuId,
@@ -36,6 +40,10 @@ export function RootLayout() {
       <NavBar />
       <main>
         <Outlet context={context} />
+      <div className='absolute hidden'
+           ref={tooltip}
+           role='tooltip'>My tooltip
+      </div>
       </main>
     </>
   )

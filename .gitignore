@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-django_backend/media
+backend/media
 media
 dist
 dist-ssr
