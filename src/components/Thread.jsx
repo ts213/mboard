@@ -24,13 +24,3 @@ export default function Thread() {
   );
 }
 
-// export async function threadLoader({ params }) {
-//   // const r = await fetch(`${import.meta.env.VITE_API}/${params.board}/thread/${params.threadId}/`);
-//   const r = await fetch(`/api/${params.board}/thread/${params.threadId}/`);
-//   if (!r.ok) {
-//     throw new Response('threadLoader err', { status: r.status })
-//   }
-//   return r.json();
-// }
-//
-

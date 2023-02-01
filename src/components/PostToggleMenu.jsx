@@ -12,7 +12,8 @@ export function PostToggleMenu({
   const fetcher = useFetcher();
 
   return (
-    <div className='ml-2 relative inline-block'>
+    // <div className='ml-2 relative inline-block'>
+    <div className='ml-2 inline-block'>
       <button type='button'
               onClick={() => toggleDropdownMenu(post.id)}
               className='dropdown cursor-pointer font-serif'>
