@@ -15,3 +15,61 @@ body {
     background-color: #0f172a;
     /*font-size: 13px;*/
 }
+
+/*.react-tooltip {*/
+/*  !*visibility: hidden;*!*/
+/*  !*width: max-content;*!*/
+/*  width: auto;*/
+/*  position: absolute;*/
+/*  top: 0;*/
+/*  !*left: 0;*!*/
+/*  !*padding: 8px 16px;*!*/
+/*  !*border-radius: 3px;*!*/
+/*  font-size: 90%;*/
+/*  !*pointer-events: none;*!*/
+/*  !*opacity: 0;*!*/
+/*  transition: opacity 0.3s ease-out;*/
+/*  will-change: opacity, visibility;*/
+/*}*/
+
+
+.styles-module_tooltip__mnnfp {
+  visibility: hidden;
+  /*width: max-content;*/
+  width: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  /*padding: 8px 16px;*/
+  /*border-radius: 3px;*/
+  /*font-size: 90%;*/
+  /*pointer-events: none;*/
+  /*opacity: 0;*/
+  transition: opacity 0.3s ease-out;
+  will-change: opacity, visibility;
+}
+
+.styles-module_fixed__7ciUi {
+  position: fixed;
+}
+
+.styles-module_arrow__K0L3T {
+  position: absolute;
+  background: inherit;
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+}
+
+.styles-module_no-arrow__KcFZN {
+  display: none;
+}
+
+.styles-module_clickable__Bv9o7 {
+  pointer-events: auto;
+}
+
+.styles-module_show__2NboJ {
+  visibility: visible;
+  opacity: var(--rt-opacity);
+}

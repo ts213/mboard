@@ -30,7 +30,6 @@ class ThreadsSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Board
         fields = '__all__'
@@ -84,16 +83,24 @@ def wrap_quoted_text_in_tag(post_text: str):
     def callback(match_obj):
         span = '<span style="color:red">{repl}</span>'
         return span.format(repl=match_obj.group(0).strip())
+
     post_text = re.sub('^\\s*::.+(?m)', callback, post_text)
     return post_text
 
 
 def add_link(post_text: str):
     def callback(match_obj):
-        print(match_obj.group(0))
-        span = '<a class="quote-link" href="#{link}/">{repl}</a>'
-        return span.format(repl=match_obj.group(0).strip(),
-                           link=match_obj.group(0).strip('gt;&gt;'))
+        found_quote = match_obj.group(0)
+        span = ('<a'
+                ' class="quote-link"'
+                ' data-quoted={}'
+                ' href="#{}/">'
+                '{}'
+                '</a>')
+        return span.format(found_quote.strip('gt;&gt;'),
+                           found_quote.strip('gt;&gt;'),
+                           found_quote.strip())
+
     post_text = re.sub('^\\s*&gt;&gt;[0-9]+(?m)', callback, post_text)
     return post_text
 
