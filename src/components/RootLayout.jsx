@@ -25,7 +25,6 @@ export function RootLayout() {
     <>
       <NavBar />
       <main>
-        {/*<div id='tooltip'>Tooltip</div>*/}
         <Outlet context={contextStore} />
       </main>
     </>
