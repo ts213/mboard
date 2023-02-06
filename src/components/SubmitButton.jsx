@@ -8,9 +8,9 @@ export function SubmitButton({
 
   return (
     <button type={buttonType}
-            disabled={submitting}
-            onClick={clickHandler}
-            className={`${extraStyle}py-2.5 px-5 text-sm text-gray-900 border hover:bg-gray-100 focus:ring-4 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700`}>
+      disabled={submitting}
+      onClick={clickHandler}
+      className={`${extraStyle}py-2.5 px-5 text-sm border hover:bg-gray-100 focus:ring-4 bg-gray-800 text-gray-400 border-gray-600 hover:text-white hover:bg-gray-700`}>
       {submitting ? 'Saving...' : value}
     </button>
   )

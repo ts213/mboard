@@ -2,11 +2,12 @@ import { Link, useOutletContext } from 'react-router-dom';
 import { useRef, useState } from 'react';
 import { PostToggleMenu } from './PostToggleMenu.jsx';
 import { PostEdit } from './PostEdit.jsx';
+import { PostImage } from './PostImage';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 export function Post({ post, isThreadsList }) {
-  const notOPpost = post.thread ? 'bg-slate-800 border dark:border-gray-600' : '';
+  const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
 
   const { postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu } =
     useOutletContext();
@@ -19,42 +20,30 @@ export function Post({ post, isThreadsList }) {
 
   return (
     <article key={post.id}
-             id={post.id}
-             className={`${notOPpost} p-2 m-2 whitespace-pre-wrap clear-both`}>
-
-      {/*{tooltip.current.style.display === 'block' &&*/}
-      {/*  <div className='font-bold bg-red-600 absolute top-0 left-0 hidden'*/}
-      {/*       id='tooltip' role='tooltip' ref={tooltip}>My tooltip*/}
-      {/*  </div>*/}
-      {/*}*/}
+      id={post.id}
+      className={`${notOPpost} text-white p-2 m-2 whitespace-pre-wrap clear-both`}>
 
       <header className='thread-header'>
         <span className='poster'>{post.poster === '' ? 'Анон' : post.poster}</span>
         <span className='date ml-2'>{post.date}</span>
         <span className='post-id ml-2'>{post.id}</span>
-        <PostToggleMenu post={post}  // change to post.id ???
-                        menuId={menuId}
-                        toggleDropdownMenu={toggleDropdownMenu}
-                        toggleEditMenu={toggleEditMenu}
-                        setPostTextBeforeEdit={setpostTextBeforeEdit}
+        <PostToggleMenu post={post}
+          menuId={menuId}
+          toggleDropdownMenu={toggleDropdownMenu}
+          toggleEditMenu={toggleEditMenu}
+          setPostTextBeforeEdit={setpostTextBeforeEdit}
+          postTextElmnt={postTextElmnt}
         />
         {isThreadsList && linkIntoThread}
       </header>
       <div className='post-body'>
-        {/*<a className='float-left' href={post.thumb}>*/}
-        {post.thumb &&
-          <figure className='float-left'>
-            <figcaption>image</figcaption>
-            <a className='' href={post.thumb}>
-              <img className=' mr-4' src={post.thumb} alt='' />
-            </a>
-          </figure>
-        }
+        {post.thumb && <PostImage thumb={post.thumb} />}
         <blockquote ref={postTextElmnt}
-                    onKeyDown={(e) => pzdc(e)}
-                    className={`m-2 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
-                    contentEditable={editable}
-                    dangerouslySetInnerHTML={{ __html: post.text }} />
+          onKeyDown={(e) => pzdc(e)}
+          className={`m-2 ml-0 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
+          contentEditable={editable}
+          dangerouslySetInnerHTML={{ __html: post.text }}
+        />
       </div>
       {
         editable && <PostEdit
@@ -64,6 +53,7 @@ export function Post({ post, isThreadsList }) {
           postTextBeforeEdit={postTextBeforeEdit}
         />
       }
+      <sub className='replies'></sub>
     </article>
   );
 
@@ -75,6 +65,4 @@ export function Post({ post, isThreadsList }) {
     }
   }
 
-
 }
-

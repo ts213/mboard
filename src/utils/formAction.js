@@ -11,11 +11,8 @@ export async function formAction({ request, params }) {
 }
 
 async function submitForm(formData, request) {
-  // const url = `/api/testurl/${params.postId}/`;
-  // const url = `/api/posting/`;
   const url = '/api' + new URL(request.url).pathname;
   const body = request.method === 'DELETE' ? undefined : formData;
-  // console.log(body)
   const r = await fetch(url, {
     method: request.method,
     body: body,

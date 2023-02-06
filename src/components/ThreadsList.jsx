@@ -9,26 +9,6 @@ import tippy from 'tippy.js';
 export default function ThreadsList() {
   const data = useLoaderData();
 
-  useEffect(() => {
-    document.addEventListener('mouseover', showTooltip);
-
-    function showTooltip(ev) {
-      if (ev.target.className === 'quote-link' && !Object.hasOwn(ev.target, '_tippy')) {
-        const href = ev.target.href;
-        const quotedPostId = /#\d+/.exec(href)[0].replace('#', '');   // at(0) => [0]
-        const quotedEl = document.getElementById(quotedPostId);
-
-        tippy(ev.target, {
-          content: quotedEl.cloneNode(true),
-          ...tippyProps,
-        });
-      }
-    }
-
-    return () => document.removeEventListener('mouseover', showTooltip);
-
-  }, []);
-
   const posts = data.threads.map(thread =>
     <React.Fragment key={thread.id}>
 
@@ -59,17 +39,3 @@ export default function ThreadsList() {
   )
 }
 
-const tippyProps = {
-  role: 'tooltip',
-  interactive: true,
-  allowHTML: true,
-  placement: 'top-end',
-  appendTo: document.body,
-  showOnCreate: true,
-  arrow: false,
-  delay: [200, 200],
-  maxWidth: 'none',
-  onHidden(instance) {
-    instance.destroy();
-  },
-};

@@ -7,12 +7,12 @@ export function PostToggleMenu({
                                  toggleDropdownMenu,
                                  toggleEditMenu,
                                  setPostTextBeforeEdit,
+                                 postTextElmnt,
                                }) {
 
   const fetcher = useFetcher();
 
   return (
-    // <div className='ml-2 relative inline-block'>
     <div className='ml-2 inline-block'>
       <button type='button'
               onClick={() => toggleDropdownMenu(post.id)}
@@ -36,6 +36,9 @@ export function PostToggleMenu({
     setPostTextBeforeEdit(post.text);
     toggleEditMenu(post.id);
     toggleDropdownMenu(0);
+    setTimeout(() => {
+      postTextElmnt.current.focus();
+    }, 100);
   }
 
   function del() {
