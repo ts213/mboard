@@ -66,7 +66,7 @@ export function PostForm() {
     }
   }
 
-  function changeHandler(e) {
+  function onChange(e) {
     if (e.target.name === 'file') {
       dispatch({ type: e.target.name + '_changed', payload: e.target.files })
     } else {
@@ -76,45 +76,40 @@ export function PostForm() {
     // const totalSize = files.reduce((accum, file) => accum + file.size, 0);
   }
 
-  function submitHandler(e) {
-    e.preventDefault();  // ТУТУТУТТУ
+  function onSubmit(e) {
+    // e.preventDefault();  // ТУТУТУТТУ
     dispatch({ type: 'form_submitted' })
   }
 
   return (
-    <fetcher.Form action='/posting/' method='POST' className='mb-20' encType='multipart/form-data'
-      onSubmit={submitHandler}>
+    <fetcher.Form action='/posting/' method='POST' encType='multipart/form-data'
+      className='w-1/4 m-auto min-w-min mb-20' // min-w-min bc input elmnt has fixed width !!
+      onSubmit={onSubmit}>
       {fetcher.data &&
-        <div className='error text-center text-red-500 text-lg'>
+        <output className='error text-center text-red-500 text-lg'>
           <p>{fetcher.data.errors}</p>
-        </div>
+        </output>
       }
-      <div className='m-auto w-2/6 flex'>
-        <input type='text' name='poster' onChange={changeHandler}
+      <div className='flex'>
+        <input type='text' name='poster' onChange={onChange}
           className='grow border border-gray-600 bg-slate-800 text-white' />
         <SubmitButton submitting={fetcher.state === 'submitting'} buttonType='submit' />
       </div>
-      <textarea name='text' rows='7' required onChange={changeHandler}
-        className='m-auto resize block border border-gray-600 w-2/6 bg-slate-800 text-white'
+      <textarea name='text' rows='7' required onChange={onChange}
+        className='min-w-[100%] border border-gray-600 bg-slate-800 text-white resize'
       />
 
       <label
-        className='py-3 m-auto w-2/6 flex bg-slate-800 border border-gray-600 tracking-wide cursor-pointer '>
-        <span className='m-auto text-gray-400'>SELECT A FILE</span>
+        className='py-3 flex [&_span]:hover:text-white border border-gray-600 tracking-widest cursor-pointer hover:bg-gray-700 bg-slate-800'>
+        <span className='m-auto text-gray-400 '>SELECT A FILE</span>
         <input
-          onChange={changeHandler}
+          onChange={onChange}
           multiple name='file' type='file' className='hidden'
         />
       </label>
 
-      {/*{state.errors.length > 0 &&*/}
-      {/*  state.errors.map(error =>*/}
-      {/*    <output key={error} className='block text-center text-red-400 mt-3'>*/}
-      {/*      {error}*/}
-      {/*    </output>)*/}
-      {/*}*/}
-
-      {state.filesList &&
+      {
+        state.filesList &&
         [...state.filesList].map(file =>  // destruct first, can't map FileList type right away
           <output key={file.name} className='block text-center text-gray-400 mt-1'>
             {file.name}
