@@ -16,45 +16,44 @@ export default function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path='/'
-             element={<RootLayout />}
-             errorElement={<ErrorCpmnt />}
+        element={<RootLayout />}
+        errorElement={<ErrorCpmnt />}
       >
 
         <Route index element={<HomePage />} />
 
         <Route path='boards'
-               loader={() => defer({ boards: customFetch('boards') })}
-               errorElement={<ErrorCpmnt />}
-               element={
-                 <Suspense fallback={<h1>boards loading..</h1>}>
-                   <BoardsList />
-                 </Suspense>
-               } />
+          loader={() => defer({ boards: customFetch('boards') })}
+          errorElement={<ErrorCpmnt />}
+          element={
+            <Suspense fallback={<h1>boards loading..</h1>}>
+              <BoardsList />
+            </Suspense>
+          } />
 
         <Route path=':board'
-               loader={({ params }) => customFetch(params.board)}
-               errorElement={<ErrorCpmnt />}
-               element={
-                 <Suspense fallback={<h1>boarD loading..</h1>}>
-                   <ThreadsList />
-                 </Suspense>
-               } />
+          loader={({ params }) => customFetch(params.board)}
+          errorElement={<ErrorCpmnt />}
+          element={
+            <Suspense fallback={<h1>boarD loading..</h1>}>
+              <ThreadsList />
+            </Suspense>
+          } />
 
         <Route path=':board/thread/:threadId'
-               loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}`)}
-               errorElement={<ErrorCpmnt />}
-               action={formAction}
-               element={
-                 <Suspense fallback={<h1>thread loading..</h1>}>
-                   <Thread />
-                 </Suspense>
-               } />
+          loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}`)}
+          errorElement={<ErrorCpmnt />}
+          action={formAction}
+          element={
+            <Suspense fallback={<h1>thread loading..</h1>}>
+              <Thread />
+            </Suspense>
+          } />
 
         <Route path='posting/' action={formAction} />
         <Route path='delete/:postId/' action={formAction} />
         <Route path='edit/:postId/' action={editPostAction} />
         {/*<Route path='test/' element={<Test />} />*/}
-
       </Route>
     )
   );

@@ -58,6 +58,8 @@ class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
 
     def perform_create(self, serializer):
+        # import time
+        # time.sleep(3)
         serializer.save(
             board=get_object_or_404(Board, link=self.request.data['board']),
             thread_id=self.request.data['threadId'])

@@ -1,9 +1,8 @@
 import { useLoaderData } from 'react-router-dom';
 import { Post } from './Post';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { PostsWrapper } from './PostsWrapper.jsx';
 import { PostForm } from './PostForm.jsx';
-import tippy from 'tippy.js';
 
 
 export default function ThreadsList() {
