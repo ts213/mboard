@@ -35,7 +35,6 @@ export function PostForm() {
   }
 
   function onChange(e) {
-    // errors.length = 0;  // emptying arr
     setFileList(Array.from(e.target.files)); // FileList => Arr, can't manipulate it otherwise
   }
 
@@ -44,13 +43,13 @@ export function PostForm() {
       action='/posting/' method='POST' encType='multipart/form-data'
       className='w-1/4 m-auto min-w-min mb-20' // min-w-min bc input elmnt has fixed default width
     >
-      {/*{JSON.stringify(errors, undefined, '\n')}*/}
+
       {(errors.fileSizeError || errors.fileTypeError) &&
         Object.values(errors).map((er, idx) =>
-        <output key={idx} className='block text-center text-red-500 text-lg mb-3'>
-          {er}
-        </output>
-      )}
+          <output key={idx} className='block text-center text-red-500 text-lg mb-3'>
+            {er}
+          </output>
+        )}
 
       {fetcher.data &&
         <output className='block text-center text-red-500 text-lg mb-3'>
@@ -79,13 +78,29 @@ export function PostForm() {
         />
       </label>
 
-      {attachedFiles()?.map((fileName, idx) =>
-        <output key={idx}
-          onClick={() => removeFileFromFileList(idx)}
-          className='block pointer-events-none text-center text-gray-400 mt-1 after:content-["[⨯]"] after:ml-2 after:pointer-events-auto'>
-          {fileName}
-        </output>
-      )}
+      <div className='min-w-max'>
+        {attachedFiles()?.map((file, idx) => {
+            let fileUrl = URL.createObjectURL(file);
+            return <picture key={idx}
+              // className='mr-8 after:content-["X"] after:font-extrabold after:text-red-500 after:-m-4'>
+              className='mr-8 relative overflow-visible w-fit inline-block'>
+              <img src={fileUrl} title={file.name} alt='img-preview'
+                onClick={() => removeFileFromFileList(idx)}
+                style={{ maxWidth: '100px', maxHeight: '100px', display: 'inline' }}
+              />
+              <span className='absolute right-2 pointer-events-none text-red-400 font-bold'>X</span>
+            </picture>;
+          }
+        )}
+      </div>
+
+      {/*{attachedFiles()?.map((fileName, idx) =>*/}
+      {/*  <output key={idx}*/}
+      {/*    onClick={() => removeFileFromFileList(idx)}*/}
+      {/*    className='block pointer-events-none text-center text-gray-400 mt-1 after:content-["[⨯]"] after:ml-2 after:pointer-events-auto'>*/}
+      {/*    {fileName}*/}
+      {/*  </output>*/}
+      {/*)}*/}
 
       <input hidden name='board' readOnly value={board} />
       <input hidden name='threadId' readOnly value={threadId} />
@@ -93,17 +108,26 @@ export function PostForm() {
   );
 
   function attachedFiles() {
+    // if (fileList.length > 0) {
+    //   const file = fileList[0];
+    //   thumbsRef.current.src = URL.createObjectURL(file);
+    // }
+
+    // return fileList.length < 1 ? null
+    //   : fileList.map(file => file.name);
     return fileList.length < 1 ? null
-      : fileList.map(file => file.name);
+      : fileList.map(file => file);
   }
 
   function removeFileFromFileList(idxToRemove) {
     const dt = new DataTransfer(); // workaround bc can't change input.files directly
     const nextFileList = fileList.filter((_, idx) => idx !== idxToRemove);  // need sync. value instead of async
-    setFileList(nextFileList);
     nextFileList.forEach(file => dt.items.add(file));
     inputRef.current.files = dt.files;
+
+    setFileList(nextFileList);
   }
+
 }
 
 
