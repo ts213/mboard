@@ -18,7 +18,7 @@ class ThreadsListAPIView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = serializers.ThreadsSerializer(queryset, many=True)
+        serializer = serializers.ThreadListSerializer(queryset, many=True)
         return Response({
             'threads': serializer.data,
             'board': self.kwargs['board']

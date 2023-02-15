@@ -3,13 +3,14 @@ import { useRef, useState } from 'react';
 import { PostToggleMenu } from './PostToggleMenu.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage';
+import { toRelativeTime } from '../utils/timeToRelative.js';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-export function Post({ post, isThreadsList }) {
+export function Post({ post, isThreadsList, dateNow }) {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
 
-  const { postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu } =
+  const { postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu} =
     useOutletContext();
 
   const editable = postEditable === post.id;
@@ -23,9 +24,9 @@ export function Post({ post, isThreadsList }) {
       id={post.id}
       className={`${notOPpost} text-white p-2 m-2 whitespace-pre-wrap clear-both`}>
 
-      <header className='thread-header'>
-        <span className='poster'>{post.poster === '' ? 'Анон' : post.poster}</span>
-        <span className='date ml-2'>{post.date}</span>
+      <header>
+        <span>{post.poster ? post.poster : 'Anon'}</span>
+        <span className='ml-2'>{toRelativeTime(post.date, dateNow)}</span>
         <span className='post-id ml-2'>{post.id}</span>
         <PostToggleMenu post={post}
           menuId={menuId}
@@ -36,7 +37,7 @@ export function Post({ post, isThreadsList }) {
         />
         {isThreadsList && linkIntoThread}
       </header>
-      <div className='post-body'>
+      <div>
         {post.thumb && <PostImage thumb={post.thumb} />}
         <blockquote ref={postTextElmnt}
           onKeyDown={(e) => pzdc(e)}

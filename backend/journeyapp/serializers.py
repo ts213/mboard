@@ -9,60 +9,50 @@ import re
 from PIL import Image
 
 
-class ThreadsSerializer(serializers.ModelSerializer):
+class SinglePostSerializer(serializers.ModelSerializer):
     board = serializers.ReadOnlyField(source='board.title')
-    replies = serializers.SerializerMethodField()  # stackoverflow.com/questions/64867785
+    date = serializers.SerializerMethodField(method_name='get_date_timestamp')
+    bump = serializers.SerializerMethodField(method_name='get_bump_timestamp')
 
-    def get_replies(self, obj):  # replies field -> get_replies method
-        posts = obj.post_set.order_by('-date')[:4][::-1]
-        return self.PostSerializer(posts, many=True).data
+    @staticmethod
+    def get_date_timestamp(thread: Post):
+        return thread.date.timestamp()
+
+    @staticmethod
+    def get_bump_timestamp(thread: Post):
+        return thread.bump.timestamp()
 
     class Meta:
         model = Post
-        fields = '__all__'
-
-    class PostSerializer(serializers.ModelSerializer):
-        board = serializers.ReadOnlyField(source='board.title')
-
-        class Meta:
-            model = Post
-            fields = '__all__'
+        fields = ('id', 'board', 'text', 'poster', 'file', 'thumb', 'thread', 'date', 'bump')
 
 
-class BoardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Board
-        fields = '__all__'
+class ThreadListSerializer(SinglePostSerializer):
+    replies = serializers.SerializerMethodField()  # stackoverflow.com/questions/64867785
+
+    @staticmethod
+    def get_replies(post: Post):
+        posts = post.post_set.order_by('-date')[:4][::-1]
+        return SinglePostSerializer(posts, many=True).data
+
+    class Meta(SinglePostSerializer.Meta):
+        fields = SinglePostSerializer.Meta.fields + ('replies',)
 
 
-class ThreadSerialier(serializers.ModelSerializer):
-    board = serializers.ReadOnlyField(source='board.title')
+class ThreadSerialier(SinglePostSerializer):
     posts = serializers.SerializerMethodField(method_name='get_posts')
-    threadId = serializers.IntegerField(source='pk')
+    # threadId = serializers.IntegerField(source='pk')
 
-    def get_posts(self, thread: Post):
+    @staticmethod
+    def get_posts(thread: Post):
         posts = Post.objects.filter(
             Q(pk=thread.pk) |
             Q(thread__pk=thread.pk)
         )
-        return self.PostsSerializer(posts, many=True).data
+        return SinglePostSerializer(posts, many=True).data
 
-    class PostsSerializer(serializers.ModelSerializer):
-        board = serializers.ReadOnlyField(source='board.title')
-
-        class Meta:
-            model = Post
-            fields = '__all__'
-
-    @staticmethod
-    def validate_file(obj):
-        if obj.size > 1_000_000:  # 1 mb
-            raise ValidationError('file too large')
-        return obj
-
-    class Meta:
-        model = Post
-        fields = ('threadId', 'board', 'date', 'bump', 'posts')
+    class Meta(SinglePostSerializer.Meta):
+        fields = ('id', 'board', 'posts')
 
 
 class NewPostSerializer(serializers.ModelSerializer):
@@ -74,9 +64,21 @@ class NewPostSerializer(serializers.ModelSerializer):
             validated_data['thumb'] = make_thumbnail(validated_data['file'])
         return Post.objects.create(**validated_data)
 
+    @staticmethod
+    def validate_file(obj):
+        if obj.size > 1_000_000:  # 1 MB
+            raise ValidationError('file too large')
+        return obj
+
     class Meta:
         model = Post
         exclude = ['board']
+
+
+class BoardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Board
+        fields = '__all__'
 
 
 def wrap_quoted_text_in_tag(post_text: str):
@@ -106,6 +108,7 @@ def add_link(post_text: str):
 
 
 def make_thumbnail(inmemory_image):
+    print(type(inmemory_image))
     image = Image.open(inmemory_image)
     image.thumbnail(size=(200, 220))
     output = BytesIO()

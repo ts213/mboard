@@ -3,6 +3,7 @@ import { NavBar } from './NavBar.jsx';
 import { useEffect, useState } from 'react';
 
 export function RootLayout() {
+  console.log('root l')
   const [postEditable, setPostEditable] = useState(0);
   const toggleEditMenu = id => setPostEditable.call(null, postEditable === id ? 0 : id);
 

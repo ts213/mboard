@@ -7,6 +7,8 @@ import { PostForm } from './PostForm.jsx';
 
 export default function ThreadsList() {
   const data = useLoaderData();
+  const dateNow = new Date();
+  console.log('thread list jsx');
 
   const posts = data.threads.map(thread =>
     <React.Fragment key={thread.id}>
@@ -15,12 +17,13 @@ export default function ThreadsList() {
         <Post
           post={thread}
           isThreadsList={true}
+          dateNow={dateNow}
         />
         {thread.replies.map(reply =>
-          <Post
-            key={reply.id}
+          <Post key={reply.id}
             post={reply}
             isThreadsList={false}
+            dateNow={dateNow}
           />
         )}
       </section>

@@ -3,7 +3,7 @@ import { SubmitButton } from './SubmitButton';
 import { useRef, useState } from 'react';
 
 export function PostForm() {
-  const { threadId, board } = useLoaderData();
+  const { id, board } = useLoaderData();
   const fetcher = useFetcher();
   const inputRef = useRef();
 
@@ -25,7 +25,7 @@ export function PostForm() {
   function fileTooLarge() {
     if (fileList.length < 1) return null;
     const totalSize = fileList.reduce((sum, v) => sum + v.size, 0);
-    return totalSize > 5 * 1024 * 1024 ? 'file too large' : null;
+    return totalSize > 1_000_000 ? 'file too large' : null;
   }
 
   function checkFileType() {
@@ -35,7 +35,14 @@ export function PostForm() {
   }
 
   function onChange(e) {
-    setFileList(Array.from(e.target.files)); // FileList => Arr, can't manipulate it otherwise
+    if (e.target.files.length > 4) {
+      e.preventDefault();
+      e.target.value = '';  // resetting input files
+      setFileList(Array.from(e.target.files));  // reset too bc files might be left from previous input
+      alert('Язь слишком ЗДОРОВЕННЫЙ');
+    } else {
+      setFileList(Array.from(e.target.files)); // FileList => Arr, can't manipulate it otherwise
+    }
   }
 
   return (
@@ -57,8 +64,8 @@ export function PostForm() {
         </output>}
 
       <div className='flex'>
-        <input type='text' name='poster'
-          className='grow border border-gray-600 bg-slate-800 text-white' />
+        <input type='text' name='poster' maxLength='35' placeholder='Anon'
+          className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50' />
         <SubmitButton
           fileError={(errors.fileSizeError || errors.fileTypeError) !== null}
           submitting={fetcher.state === 'submitting'}
@@ -100,7 +107,7 @@ export function PostForm() {
       </div>
 
       <input type='hidden' name='board' readOnly value={board} />
-      <input type='hidden' name='threadId' readOnly value={threadId} />
+      <input type='hidden' name='threadId' readOnly value={id} />
     </fetcher.Form>
   );
 
