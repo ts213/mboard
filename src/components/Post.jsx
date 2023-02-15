@@ -65,5 +65,4 @@ export function Post({ post, isThreadsList, dateNow }) {
       e.preventDefault();
     }
   }
-
 }
