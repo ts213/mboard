@@ -87,6 +87,5 @@ class PatchPostAPIView(APIView):
         time.sleep(2)
         post = get_object_or_404(Post, pk=pk)
         post.text = self.request.data['text']
-        print(self.request.data['text'])
         post.save()
         return Response(status=status.HTTP_200_OK)

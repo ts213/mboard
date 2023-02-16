@@ -111,7 +111,6 @@ def add_link(post_text: str):
 
 
 def make_thumbnail(inmemory_image):
-    print(type(inmemory_image))
     image = Image.open(inmemory_image)
     image.thumbnail(size=(200, 220))
     output = BytesIO()
