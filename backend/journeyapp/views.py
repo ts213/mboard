@@ -11,8 +11,6 @@ from django.shortcuts import get_object_or_404
 
 
 class ThreadsListAPIView(generics.ListAPIView):
-    renderer_classes = [renderers.JSONRenderer]
-
     # queryset = Post.objects.filter(thread__isnull=True)
     # serializer_class = serializers.ThreadsSerializer
 
@@ -37,7 +35,6 @@ class ThreadsListAPIView(generics.ListAPIView):
 
 
 class BoardsAPIView(generics.ListAPIView):
-    renderer_classes = [renderers.JSONRenderer]
     queryset = Board.objects.all()
     serializer_class = serializers.BoardSerializer
 
@@ -58,16 +55,15 @@ class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
 
     def post(self, request, *args, **kwargs):
-        self.thread_id = self.request.data.get('threadId')  # value comes as str
+        self.thread_id = self.request.data.get('threadId')  # noqa, value comes in as str noqa
         if not self.thread_id.isdigit():  # isn't empty and convertible to int
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
-            self.board = get_object_or_404(Board, link=self.request.data['board'])
-            assert (self.thread_id == '0' or  # 'or' order matters
+            self.board = get_object_or_404(Board, link=self.request.data['board'])  # noqa
+            assert (self.thread_id == '0' or  # order of 'or' matters
                     get_object_or_404(Post, pk=self.thread_id).is_thread())
-        except (AssertionError, Exception) as e:
-            print(e)
+        except (Board.DoesNotExist, AssertionError, Exception):
             return Response(status=status.HTTP_404_NOT_FOUND)
         return self.create(request, *args, **kwargs)
 
@@ -79,7 +75,6 @@ class DeletePostAPIView(APIView):
     http_method_names = ['delete']
 
     def delete(self, request, pk):
-        print('delettt!!')
         post = get_object_or_404(Post, pk=pk)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
