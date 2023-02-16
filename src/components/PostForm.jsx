@@ -107,7 +107,7 @@ export function PostForm() {
       </div>
 
       <input type='hidden' name='board' readOnly value={board} />
-      <input type='hidden' name='threadId' readOnly value={id} />
+      <input type='hidden' name='threadId' readOnly value={id ?? 0} />
     </fetcher.Form>
   );
 

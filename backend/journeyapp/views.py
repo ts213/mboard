@@ -57,12 +57,22 @@ class SingleThreadAPIView(generics.RetrieveAPIView):
 class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
 
+    def post(self, request, *args, **kwargs):
+        self.thread_id = self.request.data.get('threadId')  # value comes as str
+        if not self.thread_id.isdigit():  # isn't empty and convertible to int
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            self.board = get_object_or_404(Board, link=self.request.data['board'])
+            assert (self.thread_id == '0' or  # 'or' order matters
+                    get_object_or_404(Post, pk=self.thread_id).is_thread())
+        except (AssertionError, Exception) as e:
+            print(e)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return self.create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
-        # import time
-        # time.sleep(3)
-        serializer.save(
-            board=get_object_or_404(Board, link=self.request.data['board']),
-            thread_id=self.request.data['threadId'])
+        serializer.save(board=self.board, thread_id=self.thread_id)
 
 
 class DeletePostAPIView(APIView):

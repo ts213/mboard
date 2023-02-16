@@ -57,6 +57,9 @@ class ThreadSerialier(SinglePostSerializer):
 
 class NewPostSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
+        if validated_data.get('thread_id') == '0':  # 0 == new thread, new threads' thread_id is empty
+            validated_data.pop('thread_id')
+
         validated_data['text'] = escape(validated_data['text'])
         validated_data['text'] = wrap_quoted_text_in_tag(validated_data['text'])
         validated_data['text'] = add_link(validated_data['text'])
