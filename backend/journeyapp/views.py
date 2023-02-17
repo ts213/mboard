@@ -55,6 +55,9 @@ class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
 
     def post(self, request, *args, **kwargs):
+        for file in self.request.data['file']:
+            print(file)
+
         self.thread_id = self.request.data.get('threadId')  # noqa, value comes in as str noqa
         if not self.thread_id.isdigit():  # isn't empty and convertible to int
             return Response(status=status.HTTP_404_NOT_FOUND)

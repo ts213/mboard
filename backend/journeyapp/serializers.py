@@ -24,7 +24,8 @@ class SinglePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'board', 'text', 'poster', 'file', 'thumb', 'thread', 'date', 'bump')
+        # fields = ('id', 'board', 'text', 'poster', 'file', 'thumb', 'thread', 'date', 'bump')
+        fields = ('id', 'board', 'text', 'poster', 'thread', 'date', 'bump')
 
 
 class ThreadListSerializer(SinglePostSerializer):
@@ -57,8 +58,10 @@ class ThreadSerialier(SinglePostSerializer):
 
 class NewPostSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
-        if validated_data.get('thread_id') == '0':  # 0 == new thread, new threads' thread_id is empty
+        if validated_data.get('thread_id') == '0':  # 0 == new thread, saving new thread's thread_id as None
             validated_data.pop('thread_id')
+
+        # print(validated_data)
 
         validated_data['text'] = escape(validated_data['text'])
         validated_data['text'] = wrap_quoted_text_in_tag(validated_data['text'])
