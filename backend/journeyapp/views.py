@@ -5,7 +5,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Board, Post
+from .models import Board, Post, Image
 from . import serializers
 from django.shortcuts import get_object_or_404
 
@@ -54,10 +54,13 @@ class SingleThreadAPIView(generics.RetrieveAPIView):
 class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
 
-    def post(self, request, *args, **kwargs):
-        for file in self.request.data['file']:
-            print(file)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        file = self.request.data.pop('file')
+        context['file'] = file
+        return context
 
+    def post(self, request, *args, **kwargs):
         self.thread_id = self.request.data.get('threadId')  # noqa, value comes in as str noqa
         if not self.thread_id.isdigit():  # isn't empty and convertible to int
             return Response(status=status.HTTP_404_NOT_FOUND)

@@ -3,10 +3,10 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from rest_framework import serializers
-from .models import Post, Board
+from .models import Post, Board, Image
 from django.utils.html import escape
 import re
-from PIL import Image
+import PIL.Image
 
 
 class SinglePostSerializer(serializers.ModelSerializer):
@@ -61,14 +61,16 @@ class NewPostSerializer(serializers.ModelSerializer):
         if validated_data.get('thread_id') == '0':  # 0 == new thread, saving new thread's thread_id as None
             validated_data.pop('thread_id')
 
-        # print(validated_data)
-
         validated_data['text'] = escape(validated_data['text'])
         validated_data['text'] = wrap_quoted_text_in_tag(validated_data['text'])
         validated_data['text'] = add_link(validated_data['text'])
-        if 'file' in validated_data:
-            validated_data['thumb'] = make_thumbnail(validated_data['file'])
-        return Post.objects.create(**validated_data)
+
+        post = Post.objects.create(**validated_data)
+        if self.context.get('file', None):
+            images = [Image(post=post, image=image, thumb=make_thumb(image))
+                      for image in self.context['file']]
+            Image.objects.bulk_create(images)
+        return post
 
     @staticmethod
     def validate_file(obj):
@@ -113,8 +115,8 @@ def add_link(post_text: str):
     return post_text
 
 
-def make_thumbnail(inmemory_image):
-    image = Image.open(inmemory_image)
+def make_thumb(inmemory_image):
+    image = PIL.Image.open(inmemory_image)
     image.thumbnail(size=(200, 220))
     output = BytesIO()
     image.save(output, quality=85, format=image.format)
