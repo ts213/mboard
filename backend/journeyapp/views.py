@@ -54,14 +54,14 @@ class SingleThreadAPIView(generics.RetrieveAPIView):
 class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        if self.request.data.get('file', None):
-            context['file'] = self.request.data.pop('file', None)
-        return context
+    # def get_serializer_context(self):
+    #     context = super().get_serializer_context()
+    #     if self.request.data.get('file', None):
+    #         context['file'] = self.request.data.pop('file', None)
+    #     return context
 
     def post(self, request, *args, **kwargs):
-        self.thread_id = self.request.data.get('threadId')  # noqa, value comes in as str noqa
+        self.thread_id = self.request.data.get('thread')  # noqa, value comes in as str noqa
         if not self.thread_id.isdigit():  # isn't empty and convertible to int
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -71,10 +71,23 @@ class CreateNewPostAPIView(generics.CreateAPIView):
                     get_object_or_404(Post, pk=self.thread_id).is_thread())
         except (Board.DoesNotExist, AssertionError, Exception):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        return self.create(request, *args, **kwargs)
 
-    def perform_create(self, serializer):
-        serializer.save(board=self.board, thread_id=self.thread_id)
+        serializer = self.serializer_class(data=self.request.data,
+                                           context={'file': self.request.data['file']})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # return self.create(request, *args, **kwargs)
+
+    # def perform_create(self, serializer):
+    #     print(self.request.data)
+    #     serializer.save(board=self.board, thread_id=self.thread_id, image=self.request.data['image'][0])
+
+    # def post(self, request, *args, **kwargs):
+    #     serializer = self.serializer_class(data=self.request.data, context={'image': self.request.data['image']})
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class DeletePostAPIView(APIView):

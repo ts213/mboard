@@ -53,35 +53,56 @@ class ThreadSerialier(SinglePostSerializer):
         fields = ('id', 'board', 'posts')
 
 
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        exclude = ["post", 'thumb']
+
+
 class NewPostSerializer(serializers.ModelSerializer):
+    # board = serializers.ReadOnlyField(source='board.title')
+    board = serializers.SlugRelatedField(slug_field='link', queryset=Board.objects.all())
+
+    # image = ImageSerializer(many=True)
+
+    # def create(self, validated_data):
+    #     if validated_data.get('thread_id') == '0':  # 0 == new thread, saving new thread's thread_id as None
+    #         validated_data.pop('thread_id')
+    #
+    #     print(validated_data)
+    #
+    #     validated_data['text'] = process_post_text(validated_data['text'])
+    #
+    #     post = Post.objects.create(**validated_data)
+    #     print(self.context)
+    #
+    #     # if self.context.get('file', None):
+    #     #     images = [Image(post=post, image=image, thumb=make_thumb(image))
+    #     #               for image in self.context['file']]
+    #     #     Image.objects.bulk_create(images)
+    #     # image = self.context['file']
+    #
+    #     image = self.context['file'][0]
+    #     data = {
+    #         'post': post.pk,
+    #         'image': image,
+    #         'thumb': make_thumb(image)
+    #     }
+    #     s = ImageSerializer(data=data)
+    #     er = s.is_valid()
+    #
+    #     return post
+
     def create(self, validated_data):
-        if validated_data.get('thread_id') == '0':  # 0 == new thread, saving new thread's thread_id as None
-            validated_data.pop('thread_id')
-
-        validated_data['text'] = process_post_text(validated_data['text'])
-
-        post = Post.objects.create(**validated_data)
         print(self.context)
-
-        # if self.context.get('file', None):
-        #     images = [Image(post=post, image=image, thumb=make_thumb(image))
-        #               for image in self.context['file']]
-        #     Image.objects.bulk_create(images)
-        # image = self.context['file']
-
-        image = self.context['file'][0]
-        print(type(image))
-        # im = ImageFile(image)
-        # files = [file for file in self.context['file']]
-        # image.file.seek(0)
-        data = {
-            'post': post.pk,
-            'image': image,
-            'thumb': make_thumb(image)
-        }
-        s = ImageSerializer(data=data)
-        er = s.is_valid()
-
+        image_data = self.context["file"]
+        print(validated_data)
+        post = Post.objects.create(**validated_data)
+        Image.objects.create(post=post, image=image_data)
+        # multiple images processing
+        # for image_data in images_data:
+        #    Image.objects.create(post=post, **image_data)
+        # return super().create(validated_data)
         return post
 
     @staticmethod
@@ -92,13 +113,8 @@ class NewPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        exclude = ['board']
-
-
-class ImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Image
-        fields = ('post', 'image')
+        fields = '__all__'
+        # exclude = ['board']
 
 
 class BoardSerializer(serializers.ModelSerializer):
