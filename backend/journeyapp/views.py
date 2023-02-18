@@ -56,8 +56,8 @@ class CreateNewPostAPIView(generics.CreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        file = self.request.data.pop('file')
-        context['file'] = file
+        if self.request.data.get('file', None):
+            context['file'] = self.request.data.pop('file', None)
         return context
 
     def post(self, request, *args, **kwargs):

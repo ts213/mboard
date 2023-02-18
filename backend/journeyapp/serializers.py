@@ -1,12 +1,9 @@
-from io import BytesIO
 from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
 from django.db.models import Q
 from rest_framework import serializers
 from .models import Post, Board, Image
-from django.utils.html import escape
-import re
-import PIL.Image
+from .utils import make_thumb, process_post_text
+from django.core.files.images import ImageFile
 
 
 class SinglePostSerializer(serializers.ModelSerializer):
@@ -61,15 +58,30 @@ class NewPostSerializer(serializers.ModelSerializer):
         if validated_data.get('thread_id') == '0':  # 0 == new thread, saving new thread's thread_id as None
             validated_data.pop('thread_id')
 
-        validated_data['text'] = escape(validated_data['text'])
-        validated_data['text'] = wrap_quoted_text_in_tag(validated_data['text'])
-        validated_data['text'] = add_link(validated_data['text'])
+        validated_data['text'] = process_post_text(validated_data['text'])
 
         post = Post.objects.create(**validated_data)
-        if self.context.get('file', None):
-            images = [Image(post=post, image=image, thumb=make_thumb(image))
-                      for image in self.context['file']]
-            Image.objects.bulk_create(images)
+        print(self.context)
+
+        # if self.context.get('file', None):
+        #     images = [Image(post=post, image=image, thumb=make_thumb(image))
+        #               for image in self.context['file']]
+        #     Image.objects.bulk_create(images)
+        # image = self.context['file']
+
+        image = self.context['file'][0]
+        print(type(image))
+        # im = ImageFile(image)
+        # files = [file for file in self.context['file']]
+        # image.file.seek(0)
+        data = {
+            'post': post.pk,
+            'image': image,
+            'thumb': make_thumb(image)
+        }
+        s = ImageSerializer(data=data)
+        er = s.is_valid()
+
         return post
 
     @staticmethod
@@ -83,43 +95,13 @@ class NewPostSerializer(serializers.ModelSerializer):
         exclude = ['board']
 
 
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ('post', 'image')
+
+
 class BoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         fields = '__all__'
-
-
-def wrap_quoted_text_in_tag(post_text: str):
-    def callback(match_obj):
-        span = '<span style="color:red">{repl}</span>'
-        return span.format(repl=match_obj.group(0).strip())
-
-    post_text = re.sub('^\\s*::.+(?m)', callback, post_text)
-    return post_text
-
-
-def add_link(post_text: str):
-    def callback(match_obj):
-        found_quote = match_obj.group(0)
-        span = ('<a'
-                ' class="quote-link"'
-                ' data-quoted={}'
-                ' href="#{}/">'
-                '{}'
-                '</a>')
-        return span.format(found_quote.strip('gt;&gt;'),
-                           found_quote.strip('gt;&gt;'),
-                           found_quote.strip())
-
-    post_text = re.sub('^\\s*&gt;&gt;[0-9]+(?m)', callback, post_text)
-    return post_text
-
-
-def make_thumb(inmemory_image):
-    image = PIL.Image.open(inmemory_image)
-    image.thumbnail(size=(200, 220))
-    output = BytesIO()
-    image.save(output, quality=85, format=image.format)
-    output.seek(0)
-    thumb = ContentFile(output.read(), name='thumb_' + inmemory_image.name)
-    return thumb
