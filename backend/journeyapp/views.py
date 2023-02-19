@@ -73,8 +73,11 @@ class CreateNewPostAPIView(generics.CreateAPIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.serializer_class(data=self.request.data,
-                                           context={'file': self.request.data['file']})
-        serializer.is_valid(raise_exception=True)
+                                           context={'file': self.request.data['file']}
+                                           )
+
+        # serializer.is_valid(raise_exception=True)
+        serializer.is_valid()
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
         # return self.create(request, *args, **kwargs)
@@ -82,12 +85,6 @@ class CreateNewPostAPIView(generics.CreateAPIView):
     # def perform_create(self, serializer):
     #     print(self.request.data)
     #     serializer.save(board=self.board, thread_id=self.thread_id, image=self.request.data['image'][0])
-
-    # def post(self, request, *args, **kwargs):
-    #     serializer = self.serializer_class(data=self.request.data, context={'image': self.request.data['image']})
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class DeletePostAPIView(APIView):

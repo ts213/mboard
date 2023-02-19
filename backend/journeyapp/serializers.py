@@ -63,8 +63,6 @@ class NewPostSerializer(serializers.ModelSerializer):
     # board = serializers.ReadOnlyField(source='board.title')
     board = serializers.SlugRelatedField(slug_field='link', queryset=Board.objects.all())
 
-    # image = ImageSerializer(many=True)
-
     # def create(self, validated_data):
     #     if validated_data.get('thread_id') == '0':  # 0 == new thread, saving new thread's thread_id as None
     #         validated_data.pop('thread_id')
@@ -94,11 +92,14 @@ class NewPostSerializer(serializers.ModelSerializer):
     #     return post
 
     def create(self, validated_data):
-        print(self.context)
-        image_data = self.context["file"]
-        print(validated_data)
+        # image_data = self.context["file"]
+        if image := self.context.get('file', None):
+            i = ImageSerializer(data={'image': image}, required=True)
+            is_valid = i.is_valid()
+            print(i.validated_data)
+            # print(dir(i.validated_data))
         post = Post.objects.create(**validated_data)
-        Image.objects.create(post=post, image=image_data)
+        Image.objects.create(post=post, image=i.validated_data['image'])
         # multiple images processing
         # for image_data in images_data:
         #    Image.objects.create(post=post, **image_data)
