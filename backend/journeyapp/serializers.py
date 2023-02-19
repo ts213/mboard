@@ -6,10 +6,18 @@ from .utils import make_thumb, process_post_text
 from django.core.files.images import ImageFile
 
 
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ('image', 'thumb')
+
+
 class SinglePostSerializer(serializers.ModelSerializer):
     board = serializers.ReadOnlyField(source='board.title')
     date = serializers.SerializerMethodField(method_name='get_date_timestamp')
     bump = serializers.SerializerMethodField(method_name='get_bump_timestamp')
+
+    files = ImageSerializer(source='images', read_only=True, many=True)
 
     @staticmethod
     def get_date_timestamp(thread: Post):
@@ -22,7 +30,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         # fields = ('id', 'board', 'text', 'poster', 'file', 'thumb', 'thread', 'date', 'bump')
-        fields = ('id', 'board', 'text', 'poster', 'thread', 'date', 'bump')
+        fields = ('id', 'board', 'text', 'poster', 'thread', 'date', 'bump', 'files')
 
 
 class ThreadListSerializer(SinglePostSerializer):
@@ -47,70 +55,34 @@ class ThreadSerialier(SinglePostSerializer):
             Q(pk=thread.pk) |
             Q(thread__pk=thread.pk)
         )
-        return SinglePostSerializer(posts, many=True).data
+        s = SinglePostSerializer(posts, many=True).data
+        return s
 
     class Meta(SinglePostSerializer.Meta):
         fields = ('id', 'board', 'posts')
 
 
-class ImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Image
-        exclude = ["post", 'thumb']
-
-
 class NewPostSerializer(serializers.ModelSerializer):
     # board = serializers.ReadOnlyField(source='board.title')
     board = serializers.SlugRelatedField(slug_field='link', queryset=Board.objects.all())
-
-    # def create(self, validated_data):
-    #     if validated_data.get('thread_id') == '0':  # 0 == new thread, saving new thread's thread_id as None
-    #         validated_data.pop('thread_id')
-    #
-    #     print(validated_data)
-    #
-    #     validated_data['text'] = process_post_text(validated_data['text'])
-    #
-    #     post = Post.objects.create(**validated_data)
-    #     print(self.context)
-    #
-    #     # if self.context.get('file', None):
-    #     #     images = [Image(post=post, image=image, thumb=make_thumb(image))
-    #     #               for image in self.context['file']]
-    #     #     Image.objects.bulk_create(images)
-    #     # image = self.context['file']
-    #
-    #     image = self.context['file'][0]
-    #     data = {
-    #         'post': post.pk,
-    #         'image': image,
-    #         'thumb': make_thumb(image)
-    #     }
-    #     s = ImageSerializer(data=data)
-    #     er = s.is_valid()
-    #
-    #     return post
+    file = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
 
     def create(self, validated_data):
-        # image_data = self.context["file"]
-        if image := self.context.get('file', None):
-            i = ImageSerializer(data={'image': image}, required=True)
-            is_valid = i.is_valid()
-            print(i.validated_data)
-            # print(dir(i.validated_data))
+        files = validated_data.pop('file', None)
         post = Post.objects.create(**validated_data)
-        Image.objects.create(post=post, image=i.validated_data['image'])
-        # multiple images processing
-        # for image_data in images_data:
-        #    Image.objects.create(post=post, **image_data)
-        # return super().create(validated_data)
+        if files:
+            images = [Image(post=post,
+                            image=image, thumb=make_thumb(image))
+                      for image in files]
+            Image.objects.bulk_create(images)
+
         return post
 
-    @staticmethod
-    def validate_file(obj):
-        if obj.size > 1_000_000:  # 1 MB
-            raise ValidationError('file too large')
-        return obj
+    # @staticmethod
+    # def validate_file(obj):
+    #     if obj.size > 1_000_000:  # 1 MB
+    #         raise ValidationError('file too large')
+    #     return obj
 
     class Meta:
         model = Post

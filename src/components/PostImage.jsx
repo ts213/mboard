@@ -1,8 +1,8 @@
-export function PostImage({ thumb }) {
+export function PostImage({ thumb, image }) {
   return (
-    <figure className='float-left'>
-      <figcaption>image</figcaption>
-      <a className='' href={thumb}>
+    <figure>
+      {/*<figcaption>image</figcaption>*/}
+      <a className='' href={image}>
         <img className=' mr-4' src={thumb} alt='' />
       </a>
     </figure>

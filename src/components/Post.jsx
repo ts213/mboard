@@ -10,7 +10,7 @@ import { toRelativeTime } from '../utils/timeToRelative.js';
 export function Post({ post, isThreadsList, dateNow }) {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
 
-  const { postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu} =
+  const { postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu } =
     useOutletContext();
 
   const editable = postEditable === post.id;
@@ -37,15 +37,19 @@ export function Post({ post, isThreadsList, dateNow }) {
         />
         {isThreadsList && linkIntoThread}
       </header>
-      <div>
-        {post.thumb && <PostImage thumb={post.thumb} />}
-        <blockquote ref={postTextElmnt}
-          onKeyDown={(e) => pzdc(e)}
-          className={`m-2 ml-0 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
-          contentEditable={editable}
-          dangerouslySetInnerHTML={{ __html: post.text }}
-        />
-      </div>
+      {post.files.length > 0 &&
+        <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>{
+          post.files.map((file, idx) =>
+            <PostImage key={idx} thumb={file.thumb} image={file.image} />
+          )}
+        </div>
+      }
+      <blockquote ref={postTextElmnt}
+        onKeyDown={(e) => pzdc(e)}
+        className={`m-2 ml-0 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
+        contentEditable={editable}
+        dangerouslySetInnerHTML={{ __html: post.text }}
+      />
       {
         editable && <PostEdit
           setPostEditable={setPostEditable}

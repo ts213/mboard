@@ -42,7 +42,7 @@ def path_for_thumb(instance, filename):
 
 
 class Image(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(blank=False, null=False, upload_to=path_for_image)
     thumb = models.ImageField(blank=False, null=False, upload_to=path_for_thumb)
 
