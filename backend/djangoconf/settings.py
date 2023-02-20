@@ -11,7 +11,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.133', 'localhost']
 
 INTERNAL_IPS = [
-    # ...
     "127.0.0.1",
     "192.168.1.133",
 ]
@@ -43,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 3rd party
     'rest_framework',
-    "debug_toolbar",
+    # "debug_toolbar",
     # 'corsheaders',
     # local
     'journeyapp.apps.JourneyappConfig',
@@ -52,7 +51,7 @@ INSTALLED_APPS = [
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     # "corsheaders.middleware.CorsMiddleware",
     # 'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -83,9 +82,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'djangoconf.wsgi.application'
-
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
