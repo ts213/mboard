@@ -1,13 +1,16 @@
 import { useLoaderData, useFetcher } from 'react-router-dom';
 import { SubmitButton } from './SubmitButton';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 export function PostForm() {
   const { id, board } = useLoaderData();
   const fetcher = useFetcher();
-  const inputRef = useRef();
-
   const [fileList, setFileList] = useState([]);
+  const [inputFileRef, textAreaRef] = [useRef(), useRef()];
+
+  useEffect(() => {
+    textAreaRef.current.value = '';
+  }, [fetcher.data, textAreaRef]);
 
   const fileTypes = [
     'image/jpeg',
@@ -72,7 +75,7 @@ export function PostForm() {
           buttonType='submit' />
       </div>
 
-      <textarea required name='text' rows='7'
+      <textarea ref={textAreaRef} required name='text' rows='7'
         minLength='1' maxLength='10000'
         className='min-w-[100%] border border-gray-600 bg-slate-800 text-white resize'
       />
@@ -80,7 +83,7 @@ export function PostForm() {
       <label
         className='py-3 flex [&_span]:hover:text-white border border-gray-600 tracking-widest cursor-pointer hover:bg-gray-700 bg-slate-800'>
         <span className='m-auto text-gray-400 '>SELECT A FILE</span>
-        <input ref={inputRef} onChange={onChange}
+        <input ref={inputFileRef} onChange={onChange}
           multiple name='file' type='file' className='hidden' accept='image/*'
         />
       </label>
@@ -120,7 +123,7 @@ export function PostForm() {
     const dt = new DataTransfer(); // workaround bc can't change input.files directly
     const nextFileList = fileList.filter((_, idx) => idx !== idxToRemove);  // need sync. value instead of async
     nextFileList.forEach(file => dt.items.add(file));
-    inputRef.current.files = dt.files;
+    inputFileRef.current.files = dt.files;
 
     URL.revokeObjectURL(fileUrl);
     setFileList(nextFileList);

@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Post(models.Model):
-    thread = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    thread = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='posts')
     poster = models.CharField(max_length=35, blank=True)
     text = models.TextField(max_length=10000)
     date = models.DateTimeField(auto_now_add=True)
@@ -45,6 +45,9 @@ class Image(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(blank=False, null=False, upload_to=path_for_image)
     thumb = models.ImageField(blank=False, null=False, upload_to=path_for_thumb)
+
+    def __str__(self):
+        return self.image.name
 
 
 class Board(models.Model):

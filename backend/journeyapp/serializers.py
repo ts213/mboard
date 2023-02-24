@@ -15,7 +15,6 @@ class SinglePostSerializer(serializers.ModelSerializer):
     board = serializers.ReadOnlyField(source='board.link')
     date = serializers.SerializerMethodField(method_name='get_date_timestamp')
     bump = serializers.SerializerMethodField(method_name='get_bump_timestamp')
-
     files = ImageSerializer(source='images', read_only=True, many=True)
 
     @staticmethod
@@ -32,12 +31,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
 
 
 class ThreadListSerializer(SinglePostSerializer):
-    replies = serializers.SerializerMethodField()
-
-    @staticmethod
-    def get_replies(post: Post):
-        posts = post.post_set.order_by('-date')[:4][::-1]
-        return SinglePostSerializer(posts, many=True).data
+    replies = serializers.ListField(child=SinglePostSerializer())
 
     class Meta(SinglePostSerializer.Meta):
         fields = SinglePostSerializer.Meta.fields + ('replies',)
@@ -45,16 +39,16 @@ class ThreadListSerializer(SinglePostSerializer):
 
 class ThreadSerialier(SinglePostSerializer):
     posts = serializers.SerializerMethodField(method_name='get_posts')
-    # threadId = serializers.IntegerField(source='pk')
 
     @staticmethod
     def get_posts(thread: Post):
-        posts = Post.objects.filter(
-            Q(pk=thread.pk) |
-            Q(thread__pk=thread.pk)
-        )
-        s = SinglePostSerializer(posts, many=True).data
-        return s
+        posts = Post.objects \
+            .select_related('board') \
+            .prefetch_related('images').filter(
+                                        Q(pk=thread.pk) |
+                                        Q(thread__pk=thread.pk)) \
+                                       .order_by('date')
+        return SinglePostSerializer(posts, many=True).data
 
     class Meta(SinglePostSerializer.Meta):
         fields = ('id', 'board', 'posts')

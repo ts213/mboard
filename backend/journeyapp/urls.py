@@ -7,5 +7,5 @@ urlpatterns = [
     path('api/edit/<int:pk>/', PatchPostAPIView.as_view()),
     path('api/boards/', BoardsAPIView.as_view()),
     path('api/<str:board>/', ThreadsListAPIView.as_view()),
-    path('api/<str:board>/thread/<int:pk>/', SingleThreadAPIView.as_view()),
+    path('api/<str:board>/thread/<int:thread_id>/', SingleThreadAPIView.as_view()),
 ]

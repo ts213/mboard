@@ -37,6 +37,7 @@ export function Post({ post, isThreadsList, dateNow }) {
         />
         {isThreadsList && linkIntoThread}
       </header>
+
       {post.files.length > 0 &&
         <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>{
           post.files.map((file, idx) =>
@@ -44,6 +45,7 @@ export function Post({ post, isThreadsList, dateNow }) {
           )}
         </div>
       }
+
       <blockquote ref={postTextElmnt}
         onKeyDown={(e) => pzdc(e)}
         className={`m-2 ml-0 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}

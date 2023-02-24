@@ -1,19 +1,27 @@
 import time
-from rest_framework import generics, renderers, status
-from rest_framework.exceptions import NotFound
+from django.db.models import Prefetch
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Board, Post
 from . import serializers
 from django.shortcuts import get_object_or_404
+# from django.db import connection, reset_queries
 
 
 class ThreadsListAPIView(generics.ListAPIView):
     queryset = Post.objects.select_related('board').prefetch_related('images')
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(board__link=self.kwargs.get('board', None))
-        serializer = serializers.ThreadListSerializer(queryset, many=True)
+        threads = self.get_queryset().filter(
+            board__link=self.kwargs.get('board', None), thread__isnull=True
+        )
+        threads_w_replies = threads.prefetch_related(
+            Prefetch(lookup='posts',
+                     queryset=Post.objects.filter(thread__in=threads).prefetch_related('images').select_related('board'),  # query set to be used in the lookup (override Django query)
+                     to_attr='replies')
+        )
+        serializer = serializers.ThreadListSerializer(threads_w_replies, many=True)  # context={'request': request}
         return Response({
             'threads': serializer.data,
             'board': self.kwargs['board']
@@ -26,15 +34,9 @@ class BoardsAPIView(generics.ListAPIView):
 
 
 class SingleThreadAPIView(generics.RetrieveAPIView):
-    renderer_classes = [renderers.JSONRenderer]
     serializer_class = serializers.ThreadSerialier
-
-    def get_queryset(self):
-        board = get_object_or_404(Board, link=self.kwargs['board'])
-        thread_qset = board.post_set.filter(pk=self.kwargs['pk'])
-        if not thread_qset:
-            raise NotFound()
-        return thread_qset
+    queryset = Post.objects.all()
+    lookup_url_kwarg = 'thread_id'
 
 
 class CreateNewPostAPIView(generics.CreateAPIView):
@@ -49,14 +51,15 @@ class CreateNewPostAPIView(generics.CreateAPIView):
         serializer = self.serializer_class(data=self.request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED, data={'status': 1})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DeletePostAPIView(APIView):
     http_method_names = ['delete']
 
-    def delete(self, request, pk):
+    @staticmethod
+    def delete(request, pk):
         post = get_object_or_404(Post, pk=pk)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

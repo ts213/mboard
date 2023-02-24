@@ -13,7 +13,7 @@ def delete_attached_file(instance, **kwargs):
         also_delete_folder_if_its_empty(parent_dir_path)
 
 
-post_delete.connect(delete_attached_file, sender=Post)
+# post_delete.connect(delete_attached_file, sender=Post)
 
 
 def also_delete_folder_if_its_empty(parent_dir_path):

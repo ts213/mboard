@@ -5,14 +5,15 @@ import time
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['time_ago', 'id', 'text', 'thread', 'poster', 'board', 'images']
+    # list_display = ['time_ago', 'id', 'text', 'thread', 'poster', 'board', 'images']
+    list_display = ['time_ago', 'id', 'text', 'thread', 'poster', 'board']
 
     def time_ago(self, post):
         delta = time.time() - post.date.timestamp()
         return display_time(delta)
 
-    def images(self, post):
-        return post.image_set.count()
+    # def images(self, post):
+    #     return post.image_set.count()
 
 
 @admin.register(Board)
