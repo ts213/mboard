@@ -41,7 +41,8 @@ export function Post({ post, isThreadsList, dateNow }) {
       {post.files.length > 0 &&
         <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>{
           post.files.map((file, idx) =>
-            <PostImage key={idx} thumb={file.thumb} image={file.image} />
+            <PostImage key={idx} thumb={file.thumb} image={file.image} idx={idx}
+              width={file.width} height={file.height} />
           )}
         </div>
       }

@@ -9,8 +9,6 @@ class Post(models.Model):
     bump = models.DateTimeField(auto_now=True)
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
 
-    # test = models.ImageField(blank=False, null=False, upload_to='test')
-
     def __str__(self):
         return str(self.pk)
 

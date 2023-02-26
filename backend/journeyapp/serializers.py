@@ -6,9 +6,20 @@ from .utils import make_thumb, process_post_text
 
 
 class ImageSerializer(serializers.ModelSerializer):
+    width = serializers.SerializerMethodField(method_name='get_width')
+    height = serializers.SerializerMethodField(method_name='get_height')
+
+    @staticmethod
+    def get_width(inst):
+        return inst.image.width
+
+    @staticmethod
+    def get_height(inst):
+        return inst.image.height
+
     class Meta:
         model = Image
-        fields = ('image', 'thumb')
+        fields = ('image', 'thumb', 'width', 'height')
 
 
 class SinglePostSerializer(serializers.ModelSerializer):

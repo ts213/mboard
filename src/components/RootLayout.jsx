@@ -1,36 +1,26 @@
 import { Outlet } from 'react-router-dom';
 import { NavBar } from './NavBar.jsx';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export function RootLayout() {
-  console.log('root l')
+  console.log('root l');
   const [postEditable, setPostEditable] = useState(0);
   const toggleEditMenu = id => setPostEditable.call(null, postEditable === id ? 0 : id);
 
   const [menuId, setMenuId] = useState(0);
   const toggleDropdownMenu = id => setMenuId.call(null, menuId === id ? 0 : id);
 
+  const [imageExpanded, setImageExpanded] = useState(false);
+
   const contextStore = {
-    postEditable,
-    setPostEditable,
+    postEditable, setPostEditable,
     toggleEditMenu,
 
-    menuId,
-    setMenuId,
+    menuId, setMenuId,
     toggleDropdownMenu,
+
+    imageExpanded, setImageExpanded,
   };
-
-  useEffect(() => {
-    document.addEventListener('click', clickOutsideToCloseMenu);
-
-    return () => document.removeEventListener('mousedown', clickOutsideToCloseMenu);
-  }, []); //not specifying dependencies, Effect will run after every component re-render
-
-  function clickOutsideToCloseMenu(e) {
-    if (menuId !== 0 || !e.target.classList.contains('dropdown')) {
-      setMenuId(0);
-    }
-  }
 
   return (
     <>
@@ -38,6 +28,7 @@ export function RootLayout() {
       <main>
         <Outlet context={contextStore} />
       </main>
+      <div id='img-placeholder'></div>
     </>
   )
 }
