@@ -1,35 +1,105 @@
 import { Outlet } from 'react-router-dom';
 import { NavBar } from './NavBar.jsx';
-import { useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
+import { tooltipsOnHover } from '../utils/tooltipsOnHover.js';
 
 export function RootLayout() {
   console.log('root l');
-  const [postEditable, setPostEditable] = useState(0);
-  const toggleEditMenu = id => setPostEditable.call(null, postEditable === id ? 0 : id);
 
-  const [menuId, setMenuId] = useState(0);
-  const toggleDropdownMenu = id => setMenuId.call(null, menuId === id ? 0 : id);
+  const [imgObj, setImageObj] = useState({
+    expanded: false,
+    imageUrl: null,
+    dimensions: {
+      width: null,
+      height: null,
+    },
+  });
 
-  const [imageExpanded, setImageExpanded] = useState(false);
+  const test = useCallback((ev) => {
+    ev.preventDefault();
+    const imageClicked = ev.target.parentElement;
 
-  const contextStore = {
-    postEditable, setPostEditable,
-    toggleEditMenu,
+    setImageObj(prevState =>
+      imageClicked.href !== prevState.imageUrl ?
+        {
+          ...prevState,
+          expanded: true,
+          imageUrl: imageClicked.href,
+          dimensions: { ...resizeImg(imageClicked) }
+        }
+        : {
+          ...prevState,
+          expanded: false,
+          dimensions: { width: null, height: null },
+          imageUrl: null
+        }
+    );
+  }, []);
 
-    menuId, setMenuId,
-    toggleDropdownMenu,
+  function resizeImg(image) {
+    const [maxWidth, maxHeight] = [window.innerWidth, window.innerHeight];
+    const [width, height] = [image.dataset.width, image.dataset.height];
+    const ratio = Math.min(1, maxWidth / width, maxHeight / height);
+    const w = width * ratio + 'px';
+    const h = height * ratio + 'px';
+    return { width: w, height: h };
+  }
 
-    imageExpanded, setImageExpanded,
-  };
+  // const { menuId, setMenuId } = useContext(Context);
+
+  useEffect(() => {
+    addRepliesToPosts();
+    document.body.addEventListener('mouseover', tooltipsOnHover);
+    // document.body.addEventListener('click', clickOutsideToCloseMenu);
+    document.body.addEventListener('click', hideImage);
+
+    return () => {
+      document.body.removeEventListener('mouseover', tooltipsOnHover);
+      // document.body.removeEventListener('click', clickOutsideToCloseMenu);
+      document.body.removeEventListener('click', hideImage);
+    };
+
+  function hideImage(ev) {
+    // if (imgObj.expanded && !ev.target.classList.contains('img')) {
+    if (!ev.target.classList.contains('img')) {
+      setImageObj(prev => ({ ...prev, expanded: false, imageUrl: null, dimensions: { width: null, height: null } }))
+    }
+  }
+
+  }, []);
+
+  // const hideImage = useCallback(function (ev) {
+  //   // if (imgObj.expanded && !ev.target.classList.contains('img')) {
+  //   if (!ev.target.classList.contains('img')) {
+  //     setImageObj(prev => ({ ...prev, expanded: false, imageUrl: null, dimensions: { width: null, height: null } }))
+  //   }
+  // }, []);
+
+  // function clickOutsideToCloseMenu(ev) {
+  //   if (menuId !== 0 || !ev.target.classList.contains('dropdown')) {
+  //     setMenuId(0);
+  //   }
+  // }
 
   return (
     <>
       <NavBar />
+      <div className='fixed w-[100%] pointer-events-none text-right opacity-50 '>
+        {JSON.stringify(imgObj)}
+      </div>
       <main>
-        <Outlet context={contextStore} />
+        <Outlet context={[test]} />
       </main>
-      <div id='img-placeholder'></div>
+      {imgObj.expanded &&
+        <div style={{ ...imgObj.dimensions }} id='img-wrapper'>
+          <a href={imgObj.imageUrl}>
+            <img alt='image' className='img'
+              onClick={test}
+              src={imgObj.imageUrl} />
+          </a>
+        </div>
+      }
     </>
   )
 }
-

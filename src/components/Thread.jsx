@@ -1,4 +1,4 @@
-import { useFetcher, useLoaderData } from 'react-router-dom';
+import { useFetcher, useLoaderData, useOutletContext } from 'react-router-dom';
 import { PostForm } from './PostForm.jsx';
 import { Post } from './Post';
 import { PostsWrapper } from './PostsWrapper';
@@ -8,20 +8,24 @@ export default function Thread() {
   const fetcher = useFetcher();
   const dateNow = new Date();
   console.log('thread jsx ')
+  const [test]  = useOutletContext();
 
   const posts = postsJson.posts.map(post =>
     <Post key={post.id}
-          post={post}
-          isThreadsList={false}
-          dateNow={dateNow}
+      post={post}
+      isThreadsList={false}
+      // dateNow={dateNow}
+      lovilka={test}
+      // context={context}
     />
   );
 
   return (
     <>
       <fetcher.Form>
-        <PostsWrapper>{posts}</PostsWrapper>
-
+        <PostsWrapper>
+          {posts}
+        </PostsWrapper>
       </fetcher.Form>
       <PostForm />
     </>

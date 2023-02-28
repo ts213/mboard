@@ -1,6 +1,6 @@
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useOutletContext } from 'react-router-dom';
 import { Post } from './Post';
-import React from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { PostsWrapper } from './PostsWrapper.jsx';
 import { PostForm } from './PostForm.jsx';
 
@@ -10,24 +10,30 @@ export default function ThreadsList() {
   const dateNow = new Date();
   console.log('thread list jsx');
 
+  // const { imgObj, setImageObj, test } = useContext(Context);
+  const [test]  = useOutletContext();
+
   const posts = data.threads.map(thread =>
     <React.Fragment key={thread.id}>
-
-      <section className={'flex flex-col flex-wrap items-start '}>
+      <section className='flex flex-col flex-wrap items-start '>
         <Post
           post={thread}
           isThreadsList={true}
-          dateNow={dateNow}
+          // dateNow={dateNow}
+          // context={context}
+          lovilka={test}
         />
         {thread.replies.map(reply =>
           <Post key={reply.id}
             post={reply}
             isThreadsList={false}
-            dateNow={dateNow}
+            // dateNow={dateNow}
+            // context={context}
+            lovilka={test}
           />
         )}
       </section>
-      <hr className={'w-full border-t-gray-500'} />
+      <hr className='w-full border-t-gray-500' />
     </React.Fragment>
   );
 
@@ -35,9 +41,9 @@ export default function ThreadsList() {
     <>
       <PostsWrapper>
         {posts}
+        {/*{memo}*/}
       </PostsWrapper>
       <PostForm />
     </>
   )
 }
-
