@@ -21,3 +21,8 @@ body {
     padding: 8px 8px 8px;
     background-color: rgb(85, 85, 85);
 }
+
+#expanded-img {
+    max-width: 90vw;
+    max-height: 90vh;
+}

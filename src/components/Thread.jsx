@@ -8,14 +8,14 @@ export default function Thread() {
   const fetcher = useFetcher();
   const dateNow = new Date();
   console.log('thread jsx ')
-  const [test]  = useOutletContext();
+  const { imageOnClickHandler } = useOutletContext();
 
   const posts = postsJson.posts.map(post =>
     <Post key={post.id}
       post={post}
       isThreadsList={false}
       // dateNow={dateNow}
-      lovilka={test}
+      lovilka={imageOnClickHandler}
       // context={context}
     />
   );

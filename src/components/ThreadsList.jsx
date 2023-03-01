@@ -1,6 +1,6 @@
 import { useLoaderData, useOutletContext } from 'react-router-dom';
 import { Post } from './Post';
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React from 'react';
 import { PostsWrapper } from './PostsWrapper.jsx';
 import { PostForm } from './PostForm.jsx';
 
@@ -11,25 +11,30 @@ export default function ThreadsList() {
   console.log('thread list jsx');
 
   // const { imgObj, setImageObj, test } = useContext(Context);
-  const [test]  = useOutletContext();
+  const { imageOnClickHandler, toggleDropdownMenu } = useOutletContext();
+
 
   const posts = data.threads.map(thread =>
     <React.Fragment key={thread.id}>
-      <section className='flex flex-col flex-wrap items-start '>
+      <section className='flex flex-col flex-wrap items-start'>
         <Post
           post={thread}
           isThreadsList={true}
           // dateNow={dateNow}
           // context={context}
-          lovilka={test}
+          // menuId={menuId}
+          toggleDropdownMenu={toggleDropdownMenu}
+          lovilka={imageOnClickHandler}
         />
         {thread.replies.map(reply =>
           <Post key={reply.id}
             post={reply}
             isThreadsList={false}
+            // menuId={menuId}
+            toggleDropdownMenu={toggleDropdownMenu}
             // dateNow={dateNow}
             // context={context}
-            lovilka={test}
+            lovilka={imageOnClickHandler}
           />
         )}
       </section>

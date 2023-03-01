@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { memo, useContext, useRef, useState } from 'react';
 import { PostToggleMenu } from './PostToggleMenu.jsx';
 import { PostEdit } from './PostEdit.jsx';
@@ -7,8 +7,7 @@ import { toRelativeTime } from '../utils/timeToRelative.js';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-// export const Post = memo(({ post, isThreadsList, dateNow, lovilka }) => {
-export const Post = memo(({ post, isThreadsList, lovilka }) => {
+export const Post = memo(function PostMemo({ post, isThreadsList, lovilka, toggleDropdownMenu }) {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
   console.log('postjsx');
 
@@ -19,7 +18,9 @@ export const Post = memo(({ post, isThreadsList, lovilka }) => {
   const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>;
   const postTextElmnt = useRef();
 
-  const [postTextBeforeEdit, setpostTextBeforeEdit] = useState(undefined);
+  // const { menuId } = useOutletContext();
+
+  // const [postTextBeforeEdit, setpostTextBeforeEdit] = useState(undefined);
 
   return (
     <article key={post.id}
@@ -31,8 +32,8 @@ export const Post = memo(({ post, isThreadsList, lovilka }) => {
         {/*<span className='ml-2'>{toRelativeTime(post.date, dateNow)}</span>*/}
         <span className='post-id ml-2'>{post.id}</span>
         <PostToggleMenu post={post}
-          // menuId={context.menuId}
-          // toggleDropdownMenu={context.toggleDropdownMenu}
+          // menuId={menuId}
+          toggleDropdownMenu={toggleDropdownMenu}
           // toggleEditMenu={context.toggleEditMenu}
           // setPostTextBeforeEdit={setpostTextBeforeEdit}
           // postTextElmnt={postTextElmnt}
