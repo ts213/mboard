@@ -22,9 +22,6 @@ class Post(models.Model):
         #     kwargs.pop('force_insert', None)
         # super().save(*args, **kwargs)
 
-    def is_thread(self):
-        return self.thread is None
-
 
 def path_for_image(instance, filename):
     if instance.post.thread:

@@ -82,9 +82,16 @@ class NewPostSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_file(files):
-        if any(file.size > 1_000_000 for file in files):
-            raise ValidationError('file too large')
+        total_file_size = sum([file.size for file in files])
+        if total_file_size > 1_000_000:
+            raise ValidationError('Max files size exceeded')
         return files
+
+    @staticmethod
+    def validate_thread(thread):
+        if thread.thread:  # posts can't have other thread's posts as their thread
+            raise ValidationError('Thread does not exist')
+        return thread
 
     class Meta:
         model = Post

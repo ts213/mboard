@@ -44,11 +44,6 @@ class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
 
     def post(self, request, *args, **kwargs):
-        if thread_id := self.request.data.get('thread', None):
-            post_is_thread = get_object_or_404(Post, pk=thread_id).is_thread()
-            if not post_is_thread:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-
         serializer = self.serializer_class(data=self.request.data)
         if serializer.is_valid():
             serializer.save()
