@@ -7,8 +7,8 @@ import { editPostAction } from './utils/editPostAction.js';
 // import { Test } from './components/Test';
 
 const BoardsList = lazy(() => import('./components/BoardsList'));
-const ThreadsList = lazy(() => import('./components/ThreadsList'));
-const Thread = lazy(() => import('./components/Thread'));
+// const ThreadsList = lazy(() => import('./components/ThreadsList'));
+const Thread = lazy(() => import('./components/PostList.jsx'));
 // const ErrorCpmnt = lazy(() => import('./components/ErrorCpmnt'));
 // const formAction = lazy(() => import('./utils/formAction'));  // submit form not working with lazy
 
@@ -36,7 +36,7 @@ export default function App() {
           errorElement={<ErrorCpmnt />}
           element={
             <Suspense fallback={<h1>boarD loading..</h1>}>
-              <ThreadsList />
+              <Thread />
             </Suspense>
           } />
 
@@ -46,6 +46,7 @@ export default function App() {
           action={formAction}
           element={
             <Suspense fallback={<h1>thread loading..</h1>}>
+              {/*<PostList />*/}
               <Thread />
             </Suspense>
           } />

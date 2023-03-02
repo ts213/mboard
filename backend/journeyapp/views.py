@@ -18,7 +18,7 @@ class ThreadsListAPIView(generics.ListAPIView):
         )
         threads_w_replies = threads.prefetch_related(
             Prefetch(lookup='posts',
-                     queryset=Post.objects.filter(thread__in=threads)  # query set to be used in the lookup (override Django query)
+                     queryset=Post.objects.filter(thread__in=threads)  # queryset for lookup (override Django query)
                      .prefetch_related('images').select_related('board'),
                      to_attr='replies')
         )
@@ -36,8 +36,20 @@ class BoardsAPIView(generics.ListAPIView):
 
 class SingleThreadAPIView(generics.RetrieveAPIView):
     serializer_class = serializers.ThreadSerialier
-    queryset = Post.objects.all()
+    # queryset = Post.objects.all()
     lookup_url_kwarg = 'thread_id'
+
+    def get_queryset(self):
+        return Post.objects.filter(board__link=self.kwargs['board'])
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({
+            'threads': [serializer.data],
+            'board': self.kwargs['board'],
+            'id': self.kwargs['thread_id']
+        })
 
 
 class CreateNewPostAPIView(generics.CreateAPIView):

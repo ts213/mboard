@@ -10,12 +10,12 @@ class ImageSerializer(serializers.ModelSerializer):
     height = serializers.SerializerMethodField(method_name='get_height')
 
     @staticmethod
-    def get_width(inst):
-        return inst.image.width
+    def get_width(instance):
+        return instance.image.width
 
     @staticmethod
-    def get_height(inst):
-        return inst.image.height
+    def get_height(instance):
+        return instance.image.height
 
     class Meta:
         model = Image
@@ -49,20 +49,21 @@ class ThreadListSerializer(SinglePostSerializer):
 
 
 class ThreadSerialier(SinglePostSerializer):
-    posts = serializers.SerializerMethodField(method_name='get_posts')
+    replies = serializers.SerializerMethodField(method_name='get_posts')
 
     @staticmethod
     def get_posts(thread: Post):
         posts = Post.objects \
             .select_related('board') \
             .prefetch_related('images').filter(
-                                        Q(pk=thread.pk) |
+                                        # Q(pk=thread.pk) |
                                         Q(thread__pk=thread.pk)) \
                                        .order_by('date')
         return SinglePostSerializer(posts, many=True).data
 
-    class Meta(SinglePostSerializer.Meta):
-        fields = ('id', 'board', 'posts')
+    class Meta(ThreadListSerializer.Meta):
+        # fields = ('id', 'board', 'replies')
+        fields = ThreadListSerializer.Meta.fields
 
 
 class NewPostSerializer(serializers.ModelSerializer):
@@ -84,13 +85,13 @@ class NewPostSerializer(serializers.ModelSerializer):
     def validate_file(files):
         total_file_size = sum([file.size for file in files])
         if total_file_size > 1_000_000:
-            raise ValidationError('Max files size exceeded')
+            raise ValidationError('Max size of files exceeded')
         return files
 
     @staticmethod
     def validate_thread(thread):
         if thread.thread:  # posts can't have other thread's posts as their thread
-            raise ValidationError('Thread does not exist')
+            raise ValidationError('PostList does not exist')
         return thread
 
     class Meta:

@@ -1,20 +1,26 @@
 import { useLoaderData, useOutletContext } from 'react-router-dom';
-import { Post } from './Post';
-import React from 'react';
-import { PostsWrapper } from './PostsWrapper.jsx';
 import { PostForm } from './PostForm.jsx';
+import { Post } from './Post';
+import { PostsWrapper } from './PostsWrapper';
+import React from 'react';
 
+export default function PostList() {
+  const postsJson = useLoaderData();
+  // const fetcher = useFetcher();
+  // const dateNow = new Date();
+  console.log('post list jsx ')
+  const { imageOnClickHandler } = useOutletContext();
 
-export default function ThreadsList() {
-  const data = useLoaderData();
-  const dateNow = new Date();
-  console.log('thread list jsx');
-
-  // const { imgObj, setImageObj, test } = useContext(Context);
-  const { imageOnClickHandler, toggleDropdownMenu } = useOutletContext();
-
-
-  const posts = data.threads.map(thread =>
+  // const posts = postsJson.posts.map(post =>
+  //   <Post key={post.id}
+  //     post={post}
+  //     isThreadsList={false}
+  //     // dateNow={dateNow}
+  //     lovilka={imageOnClickHandler}
+  //     // context={context}
+  //   />
+  // );
+    const posts = postsJson.threads.map(thread =>
     <React.Fragment key={thread.id}>
       <section className='flex flex-col flex-wrap items-start'>
         <Post
@@ -23,7 +29,7 @@ export default function ThreadsList() {
           // dateNow={dateNow}
           // context={context}
           // menuId={menuId}
-          toggleDropdownMenu={toggleDropdownMenu}
+          // toggleDropdownMenu={toggleDropdownMenu}
           lovilka={imageOnClickHandler}
         />
         {thread.replies.map(reply =>
@@ -31,7 +37,7 @@ export default function ThreadsList() {
             post={reply}
             isThreadsList={false}
             // menuId={menuId}
-            toggleDropdownMenu={toggleDropdownMenu}
+            // toggleDropdownMenu={toggleDropdownMenu}
             // dateNow={dateNow}
             // context={context}
             lovilka={imageOnClickHandler}
@@ -44,11 +50,13 @@ export default function ThreadsList() {
 
   return (
     <>
-      <PostsWrapper>
-        {posts}
-        {/*{memo}*/}
-      </PostsWrapper>
+      {/*<fetcher.Form>*/}
+        <PostsWrapper>
+          {posts}
+        </PostsWrapper>
+      {/*</fetcher.Form>*/}
       <PostForm />
     </>
-  )
+  );
 }
+
