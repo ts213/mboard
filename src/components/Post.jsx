@@ -7,7 +7,7 @@ import { toRelativeTime } from '../utils/timeToRelative.js';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-export const Post = memo(function PostMemo({ post, isThreadsList, lovilka, toggleDropdownMenu }) {
+export const Post = ({ post, isThreadsList, toggleDropdownMenu, imageOnClickHandler }) => {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
   console.log('postjsx');
 
@@ -19,7 +19,6 @@ export const Post = memo(function PostMemo({ post, isThreadsList, lovilka, toggl
   const postTextElmnt = useRef();
 
   // const { menuId } = useOutletContext();
-
   // const [postTextBeforeEdit, setpostTextBeforeEdit] = useState(undefined);
 
   return (
@@ -45,7 +44,7 @@ export const Post = memo(function PostMemo({ post, isThreadsList, lovilka, toggl
         <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>{
           post.files.map((file, idx) =>
             <PostImage key={idx}
-              lovilka={lovilka}
+              imageOnClickHandler={imageOnClickHandler}
               image={file.image} thumb={file.thumb} width={file.width} height={file.height} />
           )}
         </div>
@@ -77,4 +76,4 @@ export const Post = memo(function PostMemo({ post, isThreadsList, lovilka, toggl
       e.preventDefault();
     }
   }
-})
+}

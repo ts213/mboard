@@ -43,7 +43,11 @@ export function RootLayout() {
 
     function hideImageOnClick(ev) {
       if (!ev.target.classList.contains('img')) {
-        setImageObj(prev => ({ ...prev, expanded: false, imageUrl: null }))
+        setImageObj(prev =>
+          prev.expanded ?
+            { ...prev, expanded: false, imageUrl: null }
+            : prev
+        )
       }
     }
   }, []);
