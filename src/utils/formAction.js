@@ -1,7 +1,7 @@
 export async function formAction({ request, params }) {
   const formData = await request.formData();
 
-  if (formData.get('file').size === 0) {  // not sending empty file field to server, validation error if sent
+  if (formData.get('file')?.size === 0) {  // not sending empty file field to server, validation error if sent
     formData.delete('file');  // better'd be not to include such a field... how todo
   }
   console.log('action data called');

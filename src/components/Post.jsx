@@ -7,7 +7,7 @@ import { toRelativeTime } from '../utils/timeToRelative.js';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-export const Post = ({ post, isThreadsList, toggleDropdownMenu, imageOnClickHandler }) => {
+export const Post = ({ post, isThreadsList, imageOnClickHandler, dateNow }) => {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
   console.log('postjsx');
 
@@ -18,7 +18,7 @@ export const Post = ({ post, isThreadsList, toggleDropdownMenu, imageOnClickHand
   const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>;
   const postTextElmnt = useRef();
 
-  // const { menuId } = useOutletContext();
+  // const { dateNow } = useOutletContext();
   // const [postTextBeforeEdit, setpostTextBeforeEdit] = useState(undefined);
 
   return (
@@ -28,12 +28,10 @@ export const Post = ({ post, isThreadsList, toggleDropdownMenu, imageOnClickHand
 
       <header>
         <span>{post.poster ? post.poster : 'Anon'}</span>
-        {/*<span className='ml-2'>{toRelativeTime(post.date, dateNow)}</span>*/}
+        <span className='ml-2'>{toRelativeTime(post.date, dateNow)}</span>
         <span className='post-id ml-2'>{post.id}</span>
-        <PostToggleMenu post={post}
-          // menuId={menuId}
-          toggleDropdownMenu={toggleDropdownMenu}
-          // toggleEditMenu={context.toggleEditMenu}
+        <PostToggleMenu
+          post={post}
           // setPostTextBeforeEdit={setpostTextBeforeEdit}
           // postTextElmnt={postTextElmnt}
         />
@@ -76,4 +74,4 @@ export const Post = ({ post, isThreadsList, toggleDropdownMenu, imageOnClickHand
       e.preventDefault();
     }
   }
-}
+};

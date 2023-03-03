@@ -16,10 +16,12 @@ class ThreadsListAPIView(generics.ListAPIView):
         threads = self.get_queryset().filter(
             board__link=self.kwargs.get('board', None), thread__isnull=True
         )
+        threads_replies = Post.objects.filter(thread__in=threads)[:4] \
+            .prefetch_related('images').select_related('board')
+
         threads_w_replies = threads.prefetch_related(
             Prefetch(lookup='posts',
-                     queryset=Post.objects.filter(thread__in=threads)  # queryset for lookup (override Django query)
-                     .prefetch_related('images').select_related('board'),
+                     queryset=threads_replies,  # queryset for lookup (override Django query)
                      to_attr='replies')
         )
         serializer = serializers.ThreadListSerializer(threads_w_replies, many=True)  # context={'request': request}

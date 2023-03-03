@@ -24,7 +24,6 @@ export default function App() {
 
         <Route path='boards'
           loader={() => defer({ boards: customFetch('boards') })}
-          errorElement={<ErrorCpmnt />}
           element={
             <Suspense fallback={<h1>boards loading..</h1>}>
               <BoardsList />
@@ -33,7 +32,6 @@ export default function App() {
 
         <Route path=':board'
           loader={({ params }) => customFetch(params.board)}
-          errorElement={<ErrorCpmnt />}
           element={
             <Suspense fallback={<h1>boarD loading..</h1>}>
               <Thread />
@@ -42,7 +40,6 @@ export default function App() {
 
         <Route path=':board/thread/:threadId'
           loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}`)}
-          errorElement={<ErrorCpmnt />}
           action={formAction}
           element={
             <Suspense fallback={<h1>thread loading..</h1>}>
@@ -61,7 +58,7 @@ export default function App() {
 
   return (
     // <ContextProvider>
-      <RouterProvider router={router} />
+    <RouterProvider router={router} />
     // </ContextProvider>
   );
 }

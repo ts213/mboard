@@ -2,35 +2,31 @@ import { useLoaderData, useOutletContext } from 'react-router-dom';
 import { PostForm } from './PostForm.jsx';
 import { Post } from './Post';
 import { PostsWrapper } from './PostsWrapper';
-import React, { memo, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
-const PostList = () => {
-  const postsJson = useLoaderData();
-// const dateNow = new Date();
-  console.log('post list jsx ');
+export default function PostList() {
+  const data = useLoaderData();
+  console.info('post list jsx ');
   const { imageOnClickHandler } = useOutletContext();
 
   const posts = useMemo(() => {
-    return postsJson.threads.map(thread =>
+    console.log('postsmemo');
+    const dateNow = new Date();
+
+    return data.threads.map(thread =>
       <React.Fragment key={thread.id}>
         <section className='flex flex-col flex-wrap items-start'>
           <Post
             post={thread}
             isThreadsList={true}
-            // dateNow={dateNow}
-            // context={context}
-            // menuId={menuId}
-            // toggleDropdownMenu={toggleDropdownMenu}
+            dateNow={dateNow}
             imageOnClickHandler={imageOnClickHandler}
           />
           {thread.replies.map(reply =>
             <Post key={reply.id}
               post={reply}
               isThreadsList={false}
-              // menuId={menuId}
-              // toggleDropdownMenu={toggleDropdownMenu}
-              // dateNow={dateNow}
-              // context={context}
+              dateNow={dateNow}
               imageOnClickHandler={imageOnClickHandler}
             />
           )}
@@ -38,19 +34,14 @@ const PostList = () => {
         <hr className='w-full border-t-gray-500' />
       </React.Fragment>
     );
-  }, [imageOnClickHandler, postsJson]);
+  }, [imageOnClickHandler, data]);
 
   return (
     <>
-      {/*<fetcher.Form>*/}
       <PostsWrapper>
         {posts}
       </PostsWrapper>
-      {/*</fetcher.Form>*/}
       <PostForm />
     </>
   );
-};
-
-export default PostList;
-
+}

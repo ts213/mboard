@@ -5,9 +5,9 @@ import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
 import { tooltipsOnHover } from '../utils/tooltipsOnHover.js';
 
 export function RootLayout() {
-  console.log('root l');
+  console.info('root l');
 
-  const [imageStateObject, setImageObj] = useState({
+  const [imageStateObject, setImageDisplayState] = useState({
     expanded: false,
     imageUrl: null,
   });
@@ -16,7 +16,7 @@ export function RootLayout() {
     ev.preventDefault();
     const imageClicked = ev.target.parentElement;
 
-    setImageObj(prevState =>
+    setImageDisplayState(prevState =>
       imageClicked.href !== prevState.imageUrl ?  // clicked img is a new one, displaying a new img
         {
           expanded: true,
@@ -32,24 +32,33 @@ export function RootLayout() {
   useEffect(() => {
     addRepliesToPosts();
     document.body.addEventListener('mouseover', tooltipsOnHover);
-    // document.body.addEventListener('click', clickOutsideToCloseMenu);
+    document.body.addEventListener('click', clickOutsideToCloseMenu);
     document.body.addEventListener('click', hideImageOnClick);
 
     return () => {
       document.body.removeEventListener('mouseover', tooltipsOnHover);
-      // document.body.removeEventListener('click', clickOutsideToCloseMenu);
+      document.body.removeEventListener('click', clickOutsideToCloseMenu);
       document.body.removeEventListener('click', hideImageOnClick);
     };
 
     function hideImageOnClick(ev) {
       if (!ev.target.classList.contains('img')) {
-        setImageObj(prev =>
+        setImageDisplayState(prev =>
           prev.expanded ?
             { ...prev, expanded: false, imageUrl: null }
             : prev
         )
       }
     }
+
+    function clickOutsideToCloseMenu(ev) {
+      if (!ev.target.classList.contains('dropdown')) {
+        setMenuId(prev =>
+          prev !== 0 ? 0 : prev
+        );
+      }
+    }
+
   }, []);
 
   // function clickOutsideToCloseMenu(ev) {
@@ -71,15 +80,12 @@ export function RootLayout() {
     menuId, setMenuId,
     toggleDropdownMenu,
 
-    imageOnClickHandler
+    imageOnClickHandler,
   };
 
   return (
     <>
       <NavBar />
-      <pre className='fixed w-[100%] pointer-events-none text-right opacity-50 '>
-        {JSON.stringify({ imageStateObject, menuId }, null, ' ')}
-      </pre>
       <main>
         <Outlet context={contextStore} />
       </main>

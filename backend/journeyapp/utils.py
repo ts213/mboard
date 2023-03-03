@@ -47,3 +47,26 @@ def make_thumb(inmemory_image):
     output.seek(0)
     thumb = ContentFile(output.read(), name='thumb_' + inmemory_image.name)
     return thumb
+
+
+def also_delete_folder_if_empty(thread_dir_path):
+    for folder in thread_dir_path.iterdir():
+        folder_not_empty = next(folder.iterdir(), False)
+        if folder_not_empty:
+            break
+        folder.rmdir()
+    else:
+        thread_dir_path.rmdir()
+
+
+def path_for_image(instance, filename):
+    if instance.post.thread:
+        return f'{instance.post.board}/{instance.post.thread.pk}/images/{filename}'
+    return f'{instance.post.board}/{instance.post.pk}/images/{filename}'
+
+
+def path_for_thumb(instance, filename):
+    post = instance.post
+    if post.thread:
+        return f'{post.board}/{post.thread.pk}/thumbs/{filename}'
+    return f'{post.board}/{post.pk}/thumbs/{filename}'

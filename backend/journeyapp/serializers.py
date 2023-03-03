@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from rest_framework import serializers
 from .models import Post, Board, Image
 from .utils import make_thumb, process_post_text
@@ -44,6 +43,11 @@ class SinglePostSerializer(serializers.ModelSerializer):
 class ThreadListSerializer(SinglePostSerializer):
     replies = serializers.ListField(child=SinglePostSerializer())
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['replies'] = ret['replies'][::-1]  # negative indexing not working in django, so doing it here
+        return ret
+
     class Meta(SinglePostSerializer.Meta):
         fields = SinglePostSerializer.Meta.fields + ('replies',)
 
@@ -55,9 +59,7 @@ class ThreadSerialier(SinglePostSerializer):
     def get_posts(thread: Post):
         posts = Post.objects \
             .select_related('board') \
-            .prefetch_related('images').filter(
-                                        # Q(pk=thread.pk) |
-                                        Q(thread__pk=thread.pk)) \
+            .prefetch_related('images').filter(thread__pk=thread.pk) \
                                        .order_by('date')
         return SinglePostSerializer(posts, many=True).data
 
