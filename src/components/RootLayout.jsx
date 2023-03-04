@@ -12,6 +12,12 @@ export function RootLayout() {
     imageUrl: null,
   });
 
+  const [postEditable, setPostEditable] = useState(0);
+  const toggleEditMenu = id => setPostEditable.call(null, postEditable === id ? 0 : id);
+
+  const [menuId, setMenuId] = useState(0);
+  const toggleDropdownMenu = useCallback((id) => setMenuId(prev => prev === id ? 0 : id), []);
+
   const imageOnClickHandler = useCallback((ev) => {
     ev.preventDefault();
     const imageClicked = ev.target.parentElement;
@@ -60,18 +66,6 @@ export function RootLayout() {
     }
 
   }, []);
-
-  // function clickOutsideToCloseMenu(ev) {
-  //   if (menuId !== 0 || !ev.target.classList.contains('dropdown')) {
-  //     setMenuId(0);
-  //   }
-  // }
-
-  const [postEditable, setPostEditable] = useState(0);
-  const toggleEditMenu = id => setPostEditable.call(null, postEditable === id ? 0 : id);
-
-  const [menuId, setMenuId] = useState(0);
-  const toggleDropdownMenu = useCallback((id) => setMenuId(prev => prev === id ? 0 : id), []);
 
   const contextStore = {
     postEditable, setPostEditable,

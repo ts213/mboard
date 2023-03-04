@@ -10,18 +10,20 @@ from django.shortcuts import get_object_or_404
 
 
 class ThreadsListAPIView(generics.ListAPIView):
-    queryset = Post.objects.select_related('board').prefetch_related('images')
-
     def list(self, request, *args, **kwargs):
-        threads = self.get_queryset().filter(
-            board__link=self.kwargs.get('board', None), thread__isnull=True
-        )
-        threads_replies = Post.objects.filter(thread__in=threads)[:4] \
-            .prefetch_related('images').select_related('board')
+        board = get_object_or_404(Board, link=self.kwargs.get('board', None))
+        threads_queryset = Post.objects \
+            .select_related('board').prefetch_related('images') \
+            .filter(board=board, thread__isnull=True)
 
-        threads_w_replies = threads.prefetch_related(
+        thread_replies = Post.objects \
+            .select_related('board').prefetch_related('images') \
+            .filter(thread__in=threads_queryset) \
+            [:4]
+
+        threads_w_replies = threads_queryset.prefetch_related(
             Prefetch(lookup='posts',
-                     queryset=threads_replies,  # queryset for lookup (override Django query)
+                     queryset=thread_replies,  # queryset for lookup (override Django query)
                      to_attr='replies')
         )
         serializer = serializers.ThreadListSerializer(threads_w_replies, many=True)  # context={'request': request}
@@ -38,11 +40,10 @@ class BoardsAPIView(generics.ListAPIView):
 
 class SingleThreadAPIView(generics.RetrieveAPIView):
     serializer_class = serializers.ThreadSerialier
-    # queryset = Post.objects.all()
     lookup_url_kwarg = 'thread_id'
 
     def get_queryset(self):
-        return Post.objects.filter(board__link=self.kwargs['board'])
+        return Post.objects.filter(board=self.kwargs['board'])
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

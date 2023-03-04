@@ -22,7 +22,6 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class SinglePostSerializer(serializers.ModelSerializer):
-    board = serializers.ReadOnlyField(source='board.link')
     date = serializers.SerializerMethodField(method_name='get_date_timestamp')
     bump = serializers.SerializerMethodField(method_name='get_bump_timestamp')
     files = ImageSerializer(source='images', read_only=True, many=True)
@@ -44,9 +43,9 @@ class ThreadListSerializer(SinglePostSerializer):
     replies = serializers.ListField(child=SinglePostSerializer())
 
     def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['replies'] = ret['replies'][::-1]  # negative indexing not working in django, so doing it here
-        return ret
+        with_replies_sorted = super().to_representation(instance)
+        with_replies_sorted['replies'] = with_replies_sorted['replies'][::-1]  # can't [::-1] in ORM, doing it here
+        return with_replies_sorted
 
     class Meta(SinglePostSerializer.Meta):
         fields = SinglePostSerializer.Meta.fields + ('replies',)
@@ -60,7 +59,7 @@ class ThreadSerialier(SinglePostSerializer):
         posts = Post.objects \
             .select_related('board') \
             .prefetch_related('images').filter(thread__pk=thread.pk) \
-                                       .order_by('date')
+            .order_by('date')
         return SinglePostSerializer(posts, many=True).data
 
     class Meta(ThreadListSerializer.Meta):
@@ -93,7 +92,7 @@ class NewPostSerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_thread(thread):
         if thread.thread:  # posts can't have other thread's posts as their thread
-            raise ValidationError('PostList does not exist')
+            raise ValidationError("Thread doesn't exist")
         return thread
 
     class Meta:

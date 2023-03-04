@@ -24,7 +24,7 @@ export default function BoardsList() {
 
 function mapEmAll(obj) {
   return obj.map(board =>
-    <div key={board.id} className='ml-12 mb-5 text-lg text-center'>
+    <div key={board.link} className='ml-12 mb-5 text-lg text-center'>
       <Link to={'../' + board.link + '/'}>{board.title}</Link>
       <hr className='h-px my-8 border-0 dark:bg-gray-700' />
     </div>
