@@ -82,6 +82,13 @@ class NewPostSerializer(serializers.ModelSerializer):
             Image.objects.bulk_create(images)
         return post
 
+    def validate(self, data):
+        files = data.get('file', None)
+        post_message_len = len(data['text'])
+        if post_message_len == 0 and not files:
+            raise serializers.ValidationError('Message or file is required')
+        return data
+
     @staticmethod
     def validate_file(files):
         total_file_size = sum([file.size for file in files])
@@ -91,7 +98,7 @@ class NewPostSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_thread(thread):
-        if thread.thread:  # posts can't have other thread's posts as their thread
+        if thread.thread:  # posts can't have other posts as their thread
             raise ValidationError("Thread doesn't exist")
         return thread
 

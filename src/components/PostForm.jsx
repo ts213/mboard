@@ -10,7 +10,9 @@ export function PostForm() {
 
   useEffect(() => {
     textAreaRef.current.value = '';
-  }, [fetcher.data, textAreaRef]);
+    inputFileRef.current.value = '';
+    setFileList([]);
+  }, [fetcher.data, textAreaRef, inputFileRef]);
 
   const fileTypes = [
     'image/jpeg',
@@ -75,7 +77,8 @@ export function PostForm() {
           buttonType='submit' />
       </div>
 
-      <textarea ref={textAreaRef} required name='text' rows='7'
+      <textarea ref={textAreaRef} name='text' rows='7'
+        required = {fileList.length < 1}
         minLength='1' maxLength='10000'
         className='min-w-[100%] border border-gray-600 bg-slate-800 text-white resize'
       />

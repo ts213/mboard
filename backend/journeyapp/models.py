@@ -7,7 +7,7 @@ from django.db import IntegrityError
 class Post(models.Model):
     thread = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='posts')
     poster = models.CharField(max_length=35, blank=True)
-    text = models.TextField(max_length=10000)
+    text = models.TextField(max_length=10000, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     bump = models.DateTimeField(auto_now=True)
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
@@ -19,7 +19,7 @@ class Post(models.Model):
         return str(self.pk)
 
     def save(self, *args, **kwargs):
-        if self.thread.thread:
+        if self.thread and self.thread.thread:
             raise IntegrityError('Post cannot have another post as its thread')
         return super().save(*args, **kwargs)
 

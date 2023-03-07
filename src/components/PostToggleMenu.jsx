@@ -1,5 +1,6 @@
 import { SubmitButton } from './SubmitButton.jsx';
-import { useFetcher, useOutletContext } from 'react-router-dom';
+import { useFetcher } from 'react-router-dom';
+import { useContextApi, useMenuIdApi } from '../ContextProvider.jsx';
 
 export function PostToggleMenu({
                                  post,
@@ -8,12 +9,13 @@ export function PostToggleMenu({
                                }) {
 
   const fetcher = useFetcher();
-  const { toggleDropdownMenu, menuId } = useOutletContext();
+  const { onPostMenuClick } = useContextApi();
+  const menuId  = useMenuIdApi();
 
   return (
     <div className='ml-2 inline-block'>
         <button type='button'
-          onClick={() => toggleDropdownMenu(post.id)}
+          onClick={() => onPostMenuClick(post.id)}
           className='dropdown cursor-pointer font-serif'>
           ▶
         </button>

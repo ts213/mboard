@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from .models import Board, Post
 from . import serializers
 from django.shortcuts import get_object_or_404
+
+
 # from django.db import connection, reset_queries
 
 
@@ -17,9 +19,9 @@ class ThreadsListAPIView(generics.ListAPIView):
             .filter(board=board, thread__isnull=True)
 
         thread_replies = Post.objects \
-            .select_related('board').prefetch_related('images') \
-            .filter(thread__in=threads_queryset) \
-            [:4]
+                             .select_related('board').prefetch_related('images') \
+                             .filter(thread__in=threads_queryset
+                                     )[:4]
 
         threads_w_replies = threads_queryset.prefetch_related(
             Prefetch(lookup='posts',
