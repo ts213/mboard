@@ -3,12 +3,12 @@ import { NavBar } from './NavBar.jsx';
 import { useEffect } from 'react';
 import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
 import { tooltipsOnHover } from '../utils/tooltipsOnHover.js';
-import { useContextApi, useImageOverlay } from '../ContextProvider';
+import { useContextApi } from '../ContextProvider';
+import { ImageOverlay } from './ImageOverlay';
 
 export function RootLayout() {
   console.info('root l');
-  const { onImageClick, onClick } = useContextApi();
-  const imageOverlay = useImageOverlay();
+  const { onClick } = useContextApi();
 
   useEffect(() => {
     addRepliesToPosts();
@@ -22,26 +22,13 @@ export function RootLayout() {
 
   }, [onClick]);
 
-
   return (
     <>
       <NavBar />
       <main>
         <Outlet />
       </main>
-      {imageOverlay.expanded && <ExpandedImage />}
+      <ImageOverlay />
     </>
   );
-
-  function ExpandedImage() {
-    return (
-      <div id='img-wrapper'>
-        <a href={imageOverlay.imageUrl} className=''>
-          <img id='expanded-img' className='img' alt='image'
-            onClick={onImageClick}
-            src={imageOverlay.imageUrl} />
-        </a>
-      </div>
-    );
-  }
 }
