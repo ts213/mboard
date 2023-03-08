@@ -1,6 +1,6 @@
 import { SubmitButton } from './SubmitButton.jsx';
 import { useFetcher } from 'react-router-dom';
-import { useContextApi, useMenuIdApi } from '../ContextProvider.jsx';
+import { useContextApi, useMenuId } from '../ContextProvider.jsx';
 
 export function PostToggleMenu({
                                  post,
@@ -10,7 +10,7 @@ export function PostToggleMenu({
 
   const fetcher = useFetcher();
   const { onPostMenuClick } = useContextApi();
-  const menuId  = useMenuIdApi();
+  const menuId  = useMenuId();
 
   return (
     <div className='ml-2 inline-block'>

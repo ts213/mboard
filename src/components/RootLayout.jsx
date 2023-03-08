@@ -1,48 +1,47 @@
 import { Outlet } from 'react-router-dom';
 import { NavBar } from './NavBar.jsx';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
 import { tooltipsOnHover } from '../utils/tooltipsOnHover.js';
-import { ContextProvider } from '../ContextProvider';
+import { useContextApi, useImageOverlay } from '../ContextProvider';
 
 export function RootLayout() {
   console.info('root l');
+  const { onImageClick, onClick } = useContextApi();
+  const imageOverlay = useImageOverlay();
 
   useEffect(() => {
     addRepliesToPosts();
     document.body.addEventListener('mouseover', tooltipsOnHover);
-    // document.body.addEventListener('click', clickOutsideToCloseMenu);
-    // document.body.addEventListener('click', hideImageOnClick);
+    document.body.addEventListener('click', onClick);
 
     return () => {
       document.body.removeEventListener('mouseover', tooltipsOnHover);
-      // document.body.removeEventListener('click', clickOutsideToCloseMenu);
-      // document.body.removeEventListener('click', hideImageOnClick);
+      document.body.removeEventListener('click', onClick);
     };
 
-  }, []);
+  }, [onClick]);
+
 
   return (
     <>
-      <ContextProvider>
-        <NavBar />
-        <main>
-          <Outlet />
-        </main>
-      </ContextProvider>
-      {/*{imageStateObject.expanded && <ExpandedImage />}*/}
+      <NavBar />
+      <main>
+        <Outlet />
+      </main>
+      {imageOverlay.expanded && <ExpandedImage />}
     </>
   );
-  //
-  // function ExpandedImage() {
-  //   return (
-  //     <div id='img-wrapper'>
-  //       <a href={imageStateObject.imageUrl} className=''>
-  //         <img id='expanded-img' className='img' alt='image'
-  //           onClick={imageOnClickHandler}
-  //           src={imageStateObject.imageUrl} />
-  //       </a>
-  //     </div>
-  //   );
-  // }
+
+  function ExpandedImage() {
+    return (
+      <div id='img-wrapper'>
+        <a href={imageOverlay.imageUrl} className=''>
+          <img id='expanded-img' className='img' alt='image'
+            onClick={onImageClick}
+            src={imageOverlay.imageUrl} />
+        </a>
+      </div>
+    );
+  }
 }

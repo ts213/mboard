@@ -4,7 +4,7 @@ import { RootLayout } from './components/RootLayout.jsx';
 import { formAction } from './utils/formAction'
 import { ErrorCpmnt } from './components/ErrorCpmnt.jsx';
 import { editPostAction } from './utils/editPostAction.js';
-// import { Test } from './components/Test';
+import { ContextProvider } from './ContextProvider.jsx';
 
 const BoardsList = lazy(() => import('./components/BoardsList'));
 // const ThreadsList = lazy(() => import('./components/ThreadsList'));
@@ -13,6 +13,7 @@ const Thread = lazy(() => import('./components/PostList.jsx'));
 // const formAction = lazy(() => import('./utils/formAction'));  // submit form not working with lazy
 
 export default function App() {
+  console.log('app');
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path='/'
@@ -57,9 +58,9 @@ export default function App() {
   );
 
   return (
-    // <ContextProvider>
-    <RouterProvider router={router} />
-    // </ContextProvider>
+    <ContextProvider>
+      <RouterProvider router={router} />
+    </ContextProvider>
   );
 }
 

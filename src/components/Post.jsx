@@ -1,5 +1,5 @@
-import { Link, useOutletContext } from 'react-router-dom';
-import { memo, useContext, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useRef } from 'react';
 import { PostToggleMenu } from './PostToggleMenu.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage';
@@ -7,18 +7,14 @@ import { toRelativeTime } from '../utils/timeToRelative.js';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-export const Post = ({ post, isThreadsList, imageOnClickHandler, dateNow }) => {
+export const Post = ({ post, isThreadsList, dateNow }) => {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
   console.log('postjsx');
-
-  // const {
-  //   postEditable, setPostEditable, menuId, toggleEditMenu, toggleDropdownMenu, test } = useContext(Context);
 
   // const editable = context.postEditable === post.id;
   const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>;
   const postTextElmnt = useRef();
 
-  // const { dateNow } = useOutletContext();
   // const [postTextBeforeEdit, setpostTextBeforeEdit] = useState(undefined);
 
   return (
@@ -42,8 +38,8 @@ export const Post = ({ post, isThreadsList, imageOnClickHandler, dateNow }) => {
         <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>{
           post.files.map((file, idx) =>
             <PostImage key={idx}
-              imageOnClickHandler={imageOnClickHandler}
-              image={file.image} thumb={file.thumb} width={file.width} height={file.height} />
+              image={file.image} thumb={file.thumb} width={file.width} height={file.height}
+            />
           )}
         </div>
       }

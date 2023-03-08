@@ -1,12 +1,13 @@
-// import { useOutletContext } from 'react-router-dom';
+import { useContextApi } from '../ContextProvider.jsx';
 
-export function PostImage({ thumb, image, width, height, imageOnClickHandler }) {
+export function PostImage({ thumb, image, width, height }) {
   console.log('post image');
+  const { onImageClick } = useContextApi();
   return (
     <figure className='mr-4'>
       <a href={image} data-width={width} data-height={height}>
         <img src={thumb}
-          onClick={imageOnClickHandler}
+          onClick={onImageClick}
           className='img' alt='image'
         />
       </a>
