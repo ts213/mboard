@@ -1,21 +1,24 @@
 import { Link } from 'react-router-dom';
-import { useRef } from 'react';
+import { memo, useRef, useState } from 'react';
 import { PostToggleMenu } from './PostToggleMenu.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage';
 import { toRelativeTime } from '../utils/timeToRelative.js';
+import { usePostBeingEdited } from '../ContextProvider.jsx';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-export const Post = ({ post, isThreadsList, dateNow }) => {
+function Post ({ post, dateNow, setDr, isDropdown}) {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
   console.log('postjsx');
 
-  // const editable = context.postEditable === post.id;
   const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>;
   const postTextElmnt = useRef();
 
-  // const [postTextBeforeEdit, setpostTextBeforeEdit] = useState(undefined);
+  // const [preEditedText, setPreEditedText] = useState(undefined);
+
+  // const postBeingEdited = usePostBeingEdited();
+  // const editable = postBeingEdited === post.id;
 
   return (
     <article key={post.id}
@@ -28,15 +31,16 @@ export const Post = ({ post, isThreadsList, dateNow }) => {
         <span className='post-id ml-2'>{post.id}</span>
         <PostToggleMenu
           post={post}
-          // setPostTextBeforeEdit={setpostTextBeforeEdit}
-          // postTextElmnt={postTextElmnt}
+          // setPreEditedText={setPreEditedText}
+          postTextElmnt={postTextElmnt}
+          setDr={setDr}
         />
-        {isThreadsList && linkIntoThread}
+        {!post.thread && linkIntoThread}
       </header>
 
       {post.files.length > 0 &&
-        <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>{
-          post.files.map((file, idx) =>
+        <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>
+          {post.files.map((file, idx) =>
             <PostImage key={idx}
               image={file.image} thumb={file.thumb} width={file.width} height={file.height}
             />
@@ -51,14 +55,14 @@ export const Post = ({ post, isThreadsList, dateNow }) => {
         // contentEditable={editable}
         dangerouslySetInnerHTML={{ __html: post.text }}
       />
-      {/*{*/}
-      {/*  editable && <PostEdit*/}
-      {/*    setPostEditable={context.setPostEditable}*/}
-      {/*    postTextElmnt={postTextElmnt}*/}
-      {/*    postId={post.id}*/}
-      {/*    postTextBeforeEdit={postTextBeforeEdit}*/}
-      {/*  />*/}
-      {/*}*/}
+      {
+        isDropdown && <PostEdit
+          // setPostEditable={context.setPostEditable}
+          postTextElmnt={postTextElmnt}
+          postId={post.id}
+          // postTextBeforeEdit={postTextBeforeEdit}
+        />
+      }
       <sub className='replies'></sub>
     </article>
   );
@@ -70,4 +74,6 @@ export const Post = ({ post, isThreadsList, dateNow }) => {
       e.preventDefault();
     }
   }
-};
+}
+const PostMemo = memo(Post);
+export { PostMemo as Post };

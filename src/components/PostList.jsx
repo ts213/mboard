@@ -1,43 +1,47 @@
 import { useLoaderData } from 'react-router-dom';
 import { PostForm } from './PostForm.jsx';
 import { Post } from './Post';
-import { PostsWrapper } from './PostsWrapper';
-import React, { useMemo } from 'react';
+import { memo, useEffect, useState } from 'react';
+
+const PostMemo = memo(Post);
 
 export default function PostList() {
-  const data = useLoaderData();
   console.info('post list jsx ');
+  const fetchedData = useLoaderData();
+  const { threads } = fetchedData;
+  const [t, setT] = useState(0);
 
-  const posts = useMemo(() => {
-    console.log('postsmemo');
-    const dateNow = new Date();
+  const [dateNow, setDate] = useState(new Date());
+  useEffect(() => {
+    setDate(new Date())
+  }, [fetchedData]);
 
-    return data.threads.map(thread =>
-      <React.Fragment key={thread.id}>
-        <section className='flex flex-col flex-wrap items-start'>
-          <Post
-            post={thread}
-            isThreadsList={true}
-            dateNow={dateNow}
-          />
-          {thread.replies.map(reply =>
-            <Post key={reply.id}
-              post={reply}
-              isThreadsList={false}
-              dateNow={dateNow}
-            />
-          )}
-        </section>
-        <hr className='w-full border-t-gray-500' />
-      </React.Fragment>
-    );
-  }, [data]);
+  const posts = threads.map(thread =>
+    <section key={thread.id} className='flex flex-col flex-wrap items-start'>
+      <PostMemo
+        post={thread}
+        dateNow={dateNow}
+        isDropdown={t === thread.id}
+        setDr={setT}
+      />
+
+      {thread.replies.map(reply =>
+        <PostMemo
+          key={reply.id}
+          post={reply}
+          dateNow={dateNow}
+          isDropdown={t === reply.id}
+          setDr={setT}
+        />
+      )}
+    </section>
+  );
 
   return (
     <>
-      <PostsWrapper>
+      <div className='posts-wrap m-12 '>
         {posts}
-      </PostsWrapper>
+      </div>
       <PostForm />
     </>
   );

@@ -9,14 +9,14 @@ export function ImageOverlay() {
     imageOverlay.expanded &&
     createPortal(
       <div id='img-wrapper'>
-        <a href={imageOverlay.imageUrl} className=''>
+        <a href={imageOverlay.imageUrl}>
           <img id='expanded-img' className='img' alt='image'
                onClick={onImageClick}
                src={imageOverlay.imageUrl}
           />
         </a>
-      </div>,
-      document.body
+      </div>
+      , document.body
     )
   );
 }

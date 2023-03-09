@@ -26,3 +26,11 @@ body {
     max-width: 90vw;
     max-height: 90vh;
 }
+
+section::after {
+    border-top: 1px solid gray;
+    width: 90vw;
+    clear: both;
+    display: block;
+    content: '';
+}

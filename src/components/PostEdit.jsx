@@ -2,7 +2,9 @@ import { useFetcher } from 'react-router-dom';
 import { useEffect } from 'react';
 import { SubmitButton } from './SubmitButton';
 
-export function PostEdit({ setPostEditable, postTextElmnt, postId, postTextBeforeEdit }) {
+export function PostEdit({ postTextElmnt, postId,
+                           postTextBeforeEdit, setPostEditable
+}) {
   const fetcher = useFetcher();
 
   useEffect(() => {

@@ -21,7 +21,12 @@ function reducer(state, action) {
           menuId: 0,
           imageState: { expanded: false, imageUrl: null }
         }
-        : state
+        : state;
+    case 'postEdited':
+      return {
+        ...state,
+        postBeingEdited: state.postBeingEdited === action.postId ? 0 : action.postId
+      };
   }
 }
 
@@ -30,12 +35,9 @@ const initialState = {
   imageState: {
     expanded: false,
     imageUrl: null,
-  }
+  },
+  postBeingEdited: 0,
 };
-
-const ApiContext = createContext(),
-  MenuIdContext = createContext(),
-  ImageOverlayContext = createContext();
 
 export function ContextProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -59,7 +61,11 @@ export function ContextProvider({ children }) {
       }
     }
 
-    return { onPostMenuClick, onImageClick, onClick }
+    function onPostEdit(postId) {
+      dispatch({ type: 'postEdited', postId })
+    }
+
+    return { onPostMenuClick, onImageClick, onClick, onPostEdit }
   }, []);
 
   // const [postEditable, setPostEditable] = useState(0);
@@ -69,13 +75,21 @@ export function ContextProvider({ children }) {
     <ApiContext.Provider value={api}>
       <MenuIdContext.Provider value={state.menuId}>
         <ImageOverlayContext.Provider value={state.imageState}>
-          {children}
+          <PostBeingEditedContext.Provider value={state.postBeingEdited}>
+            {children}
+          </PostBeingEditedContext.Provider>
         </ImageOverlayContext.Provider>
       </MenuIdContext.Provider>
     </ApiContext.Provider>
   )
 }
 
+const ApiContext = createContext();
+const MenuIdContext = createContext();
+const ImageOverlayContext = createContext();
+const PostBeingEditedContext = createContext();
+
 export const useContextApi = () => useContext(ApiContext);
 export const useMenuId = () => useContext(MenuIdContext);
 export const useImageOverlay = () => useContext(ImageOverlayContext);
+export const usePostBeingEdited = () => useContext(PostBeingEditedContext);
