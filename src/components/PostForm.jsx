@@ -1,5 +1,5 @@
 import { useLoaderData, useFetcher } from 'react-router-dom';
-import { SubmitButton } from './SubmitButton';
+import { Button } from './Button.jsx';
 import { useRef, useState, useEffect } from 'react';
 
 export function PostForm() {
@@ -71,7 +71,7 @@ export function PostForm() {
       <div className='flex'>
         <input type='text' name='poster' maxLength='35' placeholder='Anon'
           className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50' />
-        <SubmitButton
+        <Button
           fileError={(errors.fileSizeError || errors.fileTypeError) !== null}
           submitting={fetcher.state === 'submitting'}
           buttonType='submit' />

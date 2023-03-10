@@ -7,7 +7,7 @@ import { toRelativeTime } from '../utils/timeToRelative.js';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-function Post({ post, dateNow, isEditMenu, setEditMenu }) {
+function Post({ post, dateNow, isEditMenu, onEditMenuClick, isDropdown, onDropdownClick }) {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
   console.log('postjsx');
 
@@ -25,9 +25,10 @@ function Post({ post, dateNow, isEditMenu, setEditMenu }) {
         <span className='post-id ml-2'>{post.id}</span>
         <PostToggleMenu
           post={post}
-          // setPreEditedText={setPreEditedText}
           postTextElmnt={postTextElmnt}
-          setEditMenu={setEditMenu}
+          onEditMenuClick={onEditMenuClick}
+          isDropdown={isDropdown}
+          onDropdownClick={onDropdownClick}
         />
         {!post.thread && linkIntoThread}
       </header>
@@ -46,21 +47,23 @@ function Post({ post, dateNow, isEditMenu, setEditMenu }) {
         </div>
       }
 
-      <blockquote ref={postTextElmnt}
-                  onKeyDown={(e) => pzdc(e)}
-        // className={`m-2 ml-0 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
-                  className={`m-2 ml-0 overflow-auto`}
-        // contentEditable={editable}
-                  dangerouslySetInnerHTML={{ __html: post.text }}
-      />
       {
-        isEditMenu && <PostEdit
-          // setPostEditable={context.setPostEditable}
-          postTextElmnt={postTextElmnt}
-          postId={post.id}
-          // postTextBeforeEdit={postTextBeforeEdit}
-        />
+        !isEditMenu && <blockquote
+        ref={postTextElmnt}
+        onKeyDown={(e) => pzdc(e)}
+        // className={`m-2 ml-0 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
+        className={`m-2 ml-0 overflow-auto`}
+        dangerouslySetInnerHTML={{ __html: post.text }}
+      />
       }
+
+      {isEditMenu && <PostEdit
+          postId={post.id}
+          onEditMenuClick={onEditMenuClick}
+          postTextElmnt={postTextElmnt.current}
+        // postTextBeforeEdit={postTextBeforeEdit}
+        />}
+
       <sub className='replies'></sub>
     </article>
   );

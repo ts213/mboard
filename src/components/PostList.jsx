@@ -2,6 +2,7 @@ import { useLoaderData } from 'react-router-dom';
 import { PostForm } from './PostForm.jsx';
 import { Post } from './Post';
 import { memo, useEffect, useState } from 'react';
+import { useContextApi, usePostDropdown, useEdiMenutContext } from '../ContextProvider.jsx';
 
 const PostMemo = memo(Post);
 
@@ -10,12 +11,12 @@ export default function PostList() {
   const fetchedData = useLoaderData();
   const { threads } = fetchedData;
 
-  const [postEditMenu, setEditMenu] = useState(0);
+  const { onDropdownClick, onEditMenuClick } = useContextApi();
+  const dropdown = usePostDropdown();
+  const postEditMenu = useEdiMenutContext();
 
   const [dateNow, setDate] = useState(new Date());
-  useEffect(() => {
-    setDate(new Date())
-  }, [fetchedData]);
+  useEffect(() => setDate(new Date()), [fetchedData]);
 
   const posts = threads.map(thread =>
     <section key={thread.id} className='flex flex-col flex-wrap items-start'>
@@ -23,7 +24,9 @@ export default function PostList() {
         post={thread}
         dateNow={dateNow}
         isEditMenu={postEditMenu === thread.id}
-        setEditMenu={setEditMenu}
+        onEditMenuClick={onEditMenuClick}
+        isDropdown={dropdown === thread.id}
+        onDropdownClick={onDropdownClick}
       />
 
       {thread.replies.map(reply =>
@@ -32,7 +35,9 @@ export default function PostList() {
           post={reply}
           dateNow={dateNow}
           isEditMenu={postEditMenu === reply.id}
-          setEditMenu={setEditMenu}
+          onEditMenuClick={onEditMenuClick}
+          isDropdown={dropdown === reply.id}
+          onDropdownClick={onDropdownClick}
         />
       )}
     </section>

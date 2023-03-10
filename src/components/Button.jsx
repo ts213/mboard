@@ -1,4 +1,4 @@
-export function SubmitButton({
+export function Button({
                                submitting = false,
                                value = 'Submit',
                                clickHandler = undefined,

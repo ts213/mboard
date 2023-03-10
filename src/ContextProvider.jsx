@@ -3,7 +3,9 @@ import { createContext, useContext, useMemo, useReducer } from 'react';
 function reducer(state, action) {
   switch (action.type) {
     case 'displayMenu':  // 0 == closed
-      return { ...state, menuId: state.menuId === action.menuId ? 0 : action.menuId };
+      return { ...state, menuId: state.menuId === action.postId ? 0 : action.postId };
+    case 'editMenu':  // 0 == closed
+      return { ...state, editMenu: state.editMenu === action.postId ? 0 : action.postId };
     case 'expandImage':
       return action.imageUrl !== state.imageState.imageUrl ?
         { // new img clicked, displaying a new img
@@ -27,11 +29,11 @@ function reducer(state, action) {
 
 const initialState = {
   menuId: 0,
+  editMenu: 0,
   imageState: {
     expanded: false,
     imageUrl: null,
   },
-  postBeingEdited: 0,
 };
 
 export function ContextProvider({ children }) {
@@ -39,14 +41,18 @@ export function ContextProvider({ children }) {
 
   const api = useMemo(() => {
 
-    function onPostMenuClick(menuId) {
-      dispatch({ type: 'displayMenu', menuId });
+    function onDropdownClick(postId) {
+      dispatch({ type: 'displayMenu', postId });
     }
 
     function onImageClick(ev) {
       ev.preventDefault();
       const imageClicked = ev.target.parentElement;
       dispatch({ type: 'expandImage', imageUrl: imageClicked.href });
+    }
+
+    function onEditMenuClick(postId) {
+      dispatch({ type: 'editMenu', postId });
     }
 
     function onClick(ev) {
@@ -56,27 +62,28 @@ export function ContextProvider({ children }) {
       }
     }
 
-    return { onPostMenuClick, onImageClick, onClick }
+    return { onDropdownClick, onImageClick, onClick, onEditMenuClick }
   }, []);
-
-  // const [postEditable, setPostEditable] = useState(0);
-  // const toggleEditMenu = id => setPostEditable.call(null, postEditable === id ? 0 : id);
 
   return (
     <ApiContext.Provider value={api}>
-      <MenuIdContext.Provider value={state.menuId}>
+      <PostIdDropdown.Provider value={state.menuId}>
         <ImageOverlayContext.Provider value={state.imageState}>
-          {children}
+          <EdiMenutContext.Provider value={state.editMenu}>
+            {children}
+          </EdiMenutContext.Provider>
         </ImageOverlayContext.Provider>
-      </MenuIdContext.Provider>
+      </PostIdDropdown.Provider>
     </ApiContext.Provider>
   )
 }
 
 const ApiContext = createContext();
-const MenuIdContext = createContext();
+const PostIdDropdown = createContext();
 const ImageOverlayContext = createContext();
+const EdiMenutContext = createContext();
 
 export const useContextApi = () => useContext(ApiContext);
-export const useMenuId = () => useContext(MenuIdContext);
+export const usePostDropdown = () => useContext(PostIdDropdown);
 export const useImageOverlay = () => useContext(ImageOverlayContext);
+export const useEdiMenutContext = () => useContext(EdiMenutContext);
