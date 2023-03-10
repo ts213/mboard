@@ -4,26 +4,20 @@ import { PostToggleMenu } from './PostToggleMenu.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage';
 import { toRelativeTime } from '../utils/timeToRelative.js';
-import { usePostBeingEdited } from '../ContextProvider.jsx';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-function Post ({ post, dateNow, setDr, isDropdown}) {
+function Post({ post, dateNow, isEditMenu, setEditMenu }) {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
   console.log('postjsx');
 
   const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>;
   const postTextElmnt = useRef();
 
-  // const [preEditedText, setPreEditedText] = useState(undefined);
-
-  // const postBeingEdited = usePostBeingEdited();
-  // const editable = postBeingEdited === post.id;
-
   return (
     <article key={post.id}
-      id={post.id}
-      className={`${notOPpost} text-white p-2 m-2 whitespace-pre-wrap clear-both`}>
+             id={post.id}
+             className={`${notOPpost} text-white p-2 m-2 whitespace-pre-wrap clear-both`}>
 
       <header>
         <span>{post.poster ? post.poster : 'Anon'}</span>
@@ -33,7 +27,7 @@ function Post ({ post, dateNow, setDr, isDropdown}) {
           post={post}
           // setPreEditedText={setPreEditedText}
           postTextElmnt={postTextElmnt}
-          setDr={setDr}
+          setEditMenu={setEditMenu}
         />
         {!post.thread && linkIntoThread}
       </header>
@@ -41,22 +35,26 @@ function Post ({ post, dateNow, setDr, isDropdown}) {
       {post.files.length > 0 &&
         <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>
           {post.files.map((file, idx) =>
-            <PostImage key={idx}
-              image={file.image} thumb={file.thumb} width={file.width} height={file.height}
+            <PostImage
+              key={idx}
+              image={file.image}
+              thumb={file.thumb}
+              width={file.width}
+              height={file.height}
             />
           )}
         </div>
       }
 
       <blockquote ref={postTextElmnt}
-        onKeyDown={(e) => pzdc(e)}
+                  onKeyDown={(e) => pzdc(e)}
         // className={`m-2 ml-0 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
-        className={`m-2 ml-0 overflow-auto`}
+                  className={`m-2 ml-0 overflow-auto`}
         // contentEditable={editable}
-        dangerouslySetInnerHTML={{ __html: post.text }}
+                  dangerouslySetInnerHTML={{ __html: post.text }}
       />
       {
-        isDropdown && <PostEdit
+        isEditMenu && <PostEdit
           // setPostEditable={context.setPostEditable}
           postTextElmnt={postTextElmnt}
           postId={post.id}
@@ -75,5 +73,6 @@ function Post ({ post, dateNow, setDr, isDropdown}) {
     }
   }
 }
+
 const PostMemo = memo(Post);
 export { PostMemo as Post };

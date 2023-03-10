@@ -6,7 +6,7 @@ export function PostToggleMenu({
                                  post,
                                  // setPreEditedText,
                                  postTextElmnt,
-                                 setDr
+                                 setEditMenu
                                }) {
 
   const fetcher = useFetcher();
@@ -30,7 +30,7 @@ export function PostToggleMenu({
       <div className='absolute z-10'>
         <SubmitButton
           // clickHandler={editPost}
-          clickHandler={() => setDr(d => d === post.id ? 0 : post.id)}
+          clickHandler={() => setEditMenu(menuId => menuId === post.id ? 0 : post.id)}
           // clickHandler={() => onPostEdit(post.id)}
           value='Edit'
           extraStyle='w-full '

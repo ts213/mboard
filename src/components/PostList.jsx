@@ -9,7 +9,8 @@ export default function PostList() {
   console.info('post list jsx ');
   const fetchedData = useLoaderData();
   const { threads } = fetchedData;
-  const [t, setT] = useState(0);
+
+  const [postEditMenu, setEditMenu] = useState(0);
 
   const [dateNow, setDate] = useState(new Date());
   useEffect(() => {
@@ -21,8 +22,8 @@ export default function PostList() {
       <PostMemo
         post={thread}
         dateNow={dateNow}
-        isDropdown={t === thread.id}
-        setDr={setT}
+        isEditMenu={postEditMenu === thread.id}
+        setEditMenu={setEditMenu}
       />
 
       {thread.replies.map(reply =>
@@ -30,8 +31,8 @@ export default function PostList() {
           key={reply.id}
           post={reply}
           dateNow={dateNow}
-          isDropdown={t === reply.id}
-          setDr={setT}
+          isEditMenu={postEditMenu === reply.id}
+          setEditMenu={setEditMenu}
         />
       )}
     </section>
@@ -39,7 +40,7 @@ export default function PostList() {
 
   return (
     <>
-      <div className='posts-wrap m-12 '>
+      <div className='posts-wrap m-12'>
         {posts}
       </div>
       <PostForm />
