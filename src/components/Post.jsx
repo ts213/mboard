@@ -1,36 +1,41 @@
 import { Link } from 'react-router-dom';
-import { memo, useRef, useState } from 'react';
-import { PostToggleMenu } from './PostToggleMenu.jsx';
+import { useRef } from 'react';
+import { DropdownContext } from './PostToggleMenu.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage';
 import { toRelativeTime } from '../utils/timeToRelative.js';
+import { useContextApi } from '../ContextProvider.jsx';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-function Post({ post, dateNow, isEditMenu, onEditMenuClick, isDropdown, onDropdownClick }) {
+export function Post({ post, dateNow, isEditMenu, isDropdown }) {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
-  console.log('postjsx');
+  // console.log('postjsx');
 
-  const linkIntoThread = <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>;
   const postTextElmnt = useRef();
+  const { onDropdownClick, onEditMenuClick } = useContextApi();
 
   return (
-    <article key={post.id}
-             id={post.id}
-             className={`${notOPpost} text-white p-2 m-2 whitespace-pre-wrap clear-both`}>
+    <article
+      id={post.id}
+      className={`${notOPpost} text-white p-2 m-2 whitespace-pre-wrap clear-both ${isEditMenu && 'border-2 border-sky-500 border-dotted'}`}>
 
       <header>
         <span>{post.poster ? post.poster : 'Anon'}</span>
         <span className='ml-2'>{toRelativeTime(post.date, dateNow)}</span>
         <span className='post-id ml-2'>{post.id}</span>
-        <PostToggleMenu
-          post={post}
-          postTextElmnt={postTextElmnt}
-          onEditMenuClick={onEditMenuClick}
-          isDropdown={isDropdown}
-          onDropdownClick={onDropdownClick}
-        />
-        {!post.thread && linkIntoThread}
+
+        <div className='ml-2 inline-block'>
+          <button type='button'
+                  onClick={() => onDropdownClick(post.id)}
+                  className='dropdown cursor-pointer font-serif'>
+            ▶
+          </button>
+          {isDropdown && <DropdownContext postId={post.id} onEditMenuClick={onEditMenuClick} />}
+        </div>
+
+        {!document.location.pathname.includes('thread') &&
+          <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>}
       </header>
 
       {post.files.length > 0 &&
@@ -48,34 +53,22 @@ function Post({ post, dateNow, isEditMenu, onEditMenuClick, isDropdown, onDropdo
       }
 
       {
-        !isEditMenu && <blockquote
-        ref={postTextElmnt}
-        onKeyDown={(e) => pzdc(e)}
-        // className={`m-2 ml-0 overflow-auto${editable ? 'border-dotted border-2 border-sky-500 resize overflow-scroll' : ''}`}
-        className={`m-2 ml-0 overflow-auto`}
-        dangerouslySetInnerHTML={{ __html: post.text }}
-      />
-      }
-
-      {isEditMenu && <PostEdit
+        isEditMenu &&
+        <PostEdit
           postId={post.id}
           onEditMenuClick={onEditMenuClick}
           postTextElmnt={postTextElmnt.current}
-        // postTextBeforeEdit={postTextBeforeEdit}
-        />}
+          // postTextBeforeEdit={postTextBeforeEdit}
+        />
+      }
+
+      <blockquote
+        ref={postTextElmnt}
+        className={`m-2 ml-0 overflow-auto ${isEditMenu && 'invisible h-0'}`}
+        dangerouslySetInnerHTML={{ __html: post.text }}
+      />
 
       <sub className='replies'></sub>
     </article>
   );
-
-  function pzdc(e) {
-    if (e.keyCode === 13) {  // how'll work on mobile?
-      // document.execCommand('insertLineBreak');
-      document.execCommand('insertHTML', false, '\r\n');
-      e.preventDefault();
-    }
-  }
 }
-
-const PostMemo = memo(Post);
-export { PostMemo as Post };

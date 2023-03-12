@@ -1,24 +1,37 @@
 import { useFetcher } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Button } from './Button.jsx';
 
 export function PostEdit({
-                           postTextElmnt, postId,
+                           postId,
                            onEditMenuClick,
+                           postTextElmnt,
                            // postTextBeforeEdit
                          }) {
   const fetcher = useFetcher();
-  //
+  const textareaRef = useRef();
+
   // useEffect(() => {
   //   if (fetcher.state === 'idle' && fetcher.data?.edited) {
   //     setPostEditable(0);
   //   }
   // }, [fetcher, setPostEditable]);
+  useEffect(() => {
+    textareaRef.current.focus();
+    textareaRef.current.selectionStart = textareaRef.current.value.length;  // moving caret to end of text
+
+  }, []);
 
   return (
     <>
-      <blockquote>aaa</blockquote>
-      <div className={'float-right'}>
+      <textarea className='block outline-none resize overflow-scroll bg-slate-800 pb-10 w-[100%]'
+                defaultValue={postTextElmnt.innerText}
+                ref={textareaRef}
+      />
+      <div className='text-center text-red-500 text-lg float-right'>
+        {fetcher.data && fetcher.data.errors}
+      </div>
+      <div className={'float-right mt-5 clear-both'}>
         <Button type='button'
                 value='Cancel'
                 clickHandler={() => onEditMenuClick(0)}
@@ -31,21 +44,14 @@ export function PostEdit({
                 submitting={fetcher.state === 'submitting'}
         />
       </div>
-      <div className='text-center text-red-500 text-lg float-right'>
-        {fetcher.data && fetcher.data.errors}
-      </div>
     </>
   );
 
   function testSubm() {
     fetcher.submit(
-      { text: postTextElmnt.current.innerHTML.trim() },
-      { method: 'patch', action: `/edit/${postId}/` });
+      { text: textareaRef.current.value },
+      { method: 'patch', action: `/edit/${postId}/` }
+    );
+    // console.log(fetcher.formData)
   }
-
-  // function cancelEdit() {
-  //   postTextElmnt.current.innerHTML = postTextBeforeEdit;
-  //   // postTextElmnt.current.style.width = '100%';  bug: if picture attached, it changes position
-  //   postTextElmnt.current.style.height = '100%';
-  // }
 }

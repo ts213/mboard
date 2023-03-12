@@ -63,7 +63,6 @@ class ThreadSerialier(SinglePostSerializer):
         return SinglePostSerializer(posts, many=True).data
 
     class Meta(ThreadListSerializer.Meta):
-        # fields = ('id', 'board', 'replies')
         fields = ThreadListSerializer.Meta.fields
 
 

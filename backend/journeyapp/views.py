@@ -48,8 +48,8 @@ class SingleThreadAPIView(generics.RetrieveAPIView):
         return Post.objects.filter(board=self.kwargs['board'])
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        instance = self.get_object()  # lookup_field, defaults to 'pk'.
+        serializer = serializers.ThreadSerialier(instance)
         return Response({
             'threads': [serializer.data],
             'board': self.kwargs['board'],
@@ -82,8 +82,9 @@ class PatchPostAPIView(APIView):
     http_method_names = ['patch']
 
     def patch(self, request, pk):
-        time.sleep(2)
+        # time.sleep(2)
         post = get_object_or_404(Post, pk=pk)
         post.text = self.request.data['text']
         post.save()
         return Response(status=status.HTTP_200_OK)
+        # return Response(status=status.HTTP_400_BAD_REQUEST)

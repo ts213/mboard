@@ -2,16 +2,14 @@ import { useLoaderData } from 'react-router-dom';
 import { PostForm } from './PostForm.jsx';
 import { Post } from './Post';
 import { memo, useEffect, useState } from 'react';
-import { useContextApi, usePostDropdown, useEdiMenutContext } from '../ContextProvider.jsx';
+import { usePostDropdown, useEdiMenutContext } from '../ContextProvider.jsx';
 
 const PostMemo = memo(Post);
 
 export default function PostList() {
-  console.info('post list jsx ');
   const fetchedData = useLoaderData();
   const { threads } = fetchedData;
 
-  const { onDropdownClick, onEditMenuClick } = useContextApi();
   const dropdown = usePostDropdown();
   const postEditMenu = useEdiMenutContext();
 
@@ -24,9 +22,7 @@ export default function PostList() {
         post={thread}
         dateNow={dateNow}
         isEditMenu={postEditMenu === thread.id}
-        onEditMenuClick={onEditMenuClick}
         isDropdown={dropdown === thread.id}
-        onDropdownClick={onDropdownClick}
       />
 
       {thread.replies.map(reply =>
@@ -35,9 +31,7 @@ export default function PostList() {
           post={reply}
           dateNow={dateNow}
           isEditMenu={postEditMenu === reply.id}
-          onEditMenuClick={onEditMenuClick}
           isDropdown={dropdown === reply.id}
-          onDropdownClick={onDropdownClick}
         />
       )}
     </section>

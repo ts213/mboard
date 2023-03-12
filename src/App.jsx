@@ -13,49 +13,42 @@ const Thread = lazy(() => import('./components/PostList.jsx'));
 // const formAction = lazy(() => import('./utils/formAction'));  // submit form not working with lazy
 
 export default function App() {
-  console.log('app');
   const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route path='/'
-        element={<RootLayout />}
-        errorElement={<ErrorCpmnt />}
-      >
+      createRoutesFromElements(
+        <Route path='/'
+               element={
+                 <Suspense fallback={<h1>loading..</h1>}>
+                   <RootLayout />
+                 </Suspense>
+               }
+               errorElement={<ErrorCpmnt />}
+        >
 
-        <Route index element={<HomePage />} />
+          <Route index element={<HomePage />} />
 
-        <Route path='boards'
-          loader={() => defer({ boards: customFetch('boards') })}
-          element={
-            <Suspense fallback={<h1>boards loading..</h1>}>
-              <BoardsList />
-            </Suspense>
-          } />
+          <Route path='boards'
+                 loader={() => defer({ boards: customFetch('boards') })}
+                 element={<BoardsList />}
+          />
 
-        <Route path=':board'
-          loader={({ params }) => customFetch(params.board)}
-          element={
-            <Suspense fallback={<h1>boarD loading..</h1>}>
-              <Thread />
-            </Suspense>
-          } />
+          <Route path=':board'
+                 loader={({ params }) => customFetch(params.board)}
+                 element={<Thread />}
+          />
 
-        <Route path=':board/thread/:threadId'
-          loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}`)}
-          action={formAction}
-          element={
-            <Suspense fallback={<h1>thread loading..</h1>}>
-              {/*<PostList />*/}
-              <Thread />
-            </Suspense>
-          } />
+          <Route path=':board/thread/:threadId'
+                 loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}`)}
+                 action={formAction}
+                 element={<Thread />}
+          />
 
-        <Route path='posting/' action={formAction} />
-        <Route path='delete/:postId/' action={formAction} />
-        <Route path='edit/:postId/' action={editPostAction} />
-        {/*<Route path='test/' element={<Test />} />*/}
-      </Route>
+          <Route path='posting/' action={formAction} />
+          <Route path='delete/:postId/' action={formAction} />
+          <Route path='edit/:postId/' action={editPostAction} />
+        </Route>
+      )
     )
-  );
+  ;
 
   return (
     <ContextProvider>

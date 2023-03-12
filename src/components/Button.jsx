@@ -1,11 +1,11 @@
 export function Button({
-                               submitting = false,
-                               value = 'Submit',
-                               clickHandler = undefined,
-                               extraStyle = '',
-                               buttonType = 'button',
-                               fileError = false,
-                             }) {
+                         submitting = false,
+                         value = 'Submit',
+                         clickHandler = undefined,
+                         extraStyle = '',
+                         buttonType = 'button',
+                         fileError = false,
+                       }) {
 
   return (
     <button

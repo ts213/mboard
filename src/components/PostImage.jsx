@@ -1,7 +1,6 @@
 import { useContextApi } from '../ContextProvider.jsx';
 
 export function PostImage({ thumb, image, width, height }) {
-  console.log('post image');
   const { onImageClick } = useContextApi();
   
   return (

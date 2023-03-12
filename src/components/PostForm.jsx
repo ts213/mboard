@@ -70,7 +70,8 @@ export function PostForm() {
 
       <div className='flex'>
         <input type='text' name='poster' maxLength='35' placeholder='Anon'
-          className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50' />
+          className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50'
+        />
         <Button
           fileError={(errors.fileSizeError || errors.fileTypeError) !== null}
           submitting={fetcher.state === 'submitting'}
@@ -91,13 +92,13 @@ export function PostForm() {
         />
       </label>
 
-      <div className='min-w-max'>
+      <div className={`min-w-max`}>
         {attachedFiles()?.map((file, idx) => {
             let fileUrl = URL.createObjectURL(file);
             return (
               <picture key={idx}
                 onClick={() => removeFileFromFileList(idx, fileUrl)}
-                className='mr-2 relative w-fit inline-block'
+                className='relative w-fit inline-block'
               >
                 <source srcSet={fileUrl} type={file.type} title={file.name}
                   style={{ maxWidth: '100px', maxHeight: '100px', display: 'inline' }}

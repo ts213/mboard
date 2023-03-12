@@ -10,7 +10,6 @@ export async function editPostAction({ request, params }) {
 
 async function submitForm(formData, request) {
   const url = '/api' + new URL(request.url).pathname;
-  // console.log(body)
   const r = await fetch(url, {
     method: request.method,
     body: formData,
