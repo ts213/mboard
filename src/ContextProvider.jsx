@@ -56,7 +56,7 @@ export function ContextProvider({ children }) {
     }
 
     function onClick(ev) {
-      const classList = ['img', 'dropdown'];
+      const classList = ['img', 'dropdown', 'del-btn'];
       if (!classList.some(class_ => ev.target.classList.contains(class_))) {
         dispatch({ type: 'clicked' });
       }

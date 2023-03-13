@@ -14,17 +14,11 @@ export function PostForm() {
     setFileList([]);
   }, [fetcher.data, textAreaRef, inputFileRef]);
 
-  const fileTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/bmp',
-    'image/gif',
-    'image/webp',
-  ];
+  const fileTypes = ['image/jpeg', 'image/png', 'image/bmp', 'image/gif', 'image/webp',];
 
   const errors = {
-    fileSizeError: fileTooLarge(),
-    fileTypeError: checkFileType(),
+    fileSizeError: fileTooLarge(),  // todo
+    fileTypeError: checkFileType(), // todo
   };
 
   function fileTooLarge() {
@@ -70,25 +64,26 @@ export function PostForm() {
 
       <div className='flex'>
         <input type='text' name='poster' maxLength='35' placeholder='Anon'
-          className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50'
+               className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50 outline-none'
         />
         <Button
-          fileError={(errors.fileSizeError || errors.fileTypeError) !== null}
+          disabled={errors.fileSizeError || errors.fileTypeError || fetcher.state !== 'idle'}
           submitting={fetcher.state === 'submitting'}
-          buttonType='submit' />
+          buttonType='submit'
+        />
       </div>
 
       <textarea ref={textAreaRef} name='text' rows='7'
-        required = {fileList.length < 1}
-        minLength='1' maxLength='10000'
-        className='min-w-[100%] border border-gray-600 bg-slate-800 text-white resize'
+                required={fileList.length < 1}
+                minLength='1' maxLength='10000'
+                className='min-w-[100%] border border-gray-600 bg-slate-800 text-white resize outline-none'
       />
 
       <label
         className='py-3 flex [&_span]:hover:text-white border border-gray-600 tracking-widest cursor-pointer hover:bg-gray-700 bg-slate-800'>
         <span className='m-auto text-gray-400 '>SELECT A FILE</span>
         <input ref={inputFileRef} onChange={onChange}
-          multiple name='file' type='file' className='hidden' accept='image/*'
+               multiple name='file' type='file' className='hidden' accept='image/*'
         />
       </label>
 
@@ -97,14 +92,14 @@ export function PostForm() {
             let fileUrl = URL.createObjectURL(file);
             return (
               <picture key={idx}
-                onClick={() => removeFileFromFileList(idx, fileUrl)}
-                className='relative w-fit inline-block'
+                       onClick={() => removeFileFromFileList(idx, fileUrl)}
+                       className='relative w-fit inline-block'
               >
                 <source srcSet={fileUrl} type={file.type} title={file.name}
-                  style={{ maxWidth: '100px', maxHeight: '100px', display: 'inline' }}
+                        style={{ maxWidth: '100px', maxHeight: '100px', display: 'inline' }}
                 />
                 <img src='' title={file.name}  // without 'alt' so as to display an empty box
-                  style={{ width: '100px', height: '100px', display: 'inline' }}
+                     style={{ width: '100px', height: '100px', display: 'inline' }}
                 />
                 <span className='absolute right-2 pointer-events-none text-red-400 font-bold'>X</span>
               </picture>

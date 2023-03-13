@@ -35,13 +35,13 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt }) {
         <Button type='button'
                 value='Cancel'
                 clickHandler={() => onEditMenuClick(0)}
-                extraStyle='mr-4 '
+                extraClass='mr-4 '
         />
         <Button type='button'
                 value='Update'
                 clickHandler={testSubm}
-                disabled={fetcher.state !== 'idle'}
                 submitting={fetcher.state === 'submitting'}
+                disabled={fetcher.state !== 'idle'}
         />
       </div>
     </>

@@ -9,20 +9,21 @@ export function DropdownContext({ postId, onEditMenuClick }) {
       <Button
         clickHandler={() => onEditMenuClick(postId)}
         value='Edit'
-        extraStyle='w-full '
+        extraClass='w-full '
       />
       <Button
-        clickHandler={del}
+        clickHandler={deletePost}
         value={'Delete'}
-        extraStyle='w-full '
+        extraClass='del-btn w-full '
+        submitting={fetcher.data}
       />
     </div>
   );
 
-  function del() {
+  function deletePost() {
     fetcher.submit(
       null,
-      { method: 'delete', action: `/delete/${postId.id}/` }
+      { method: 'delete', action: `/delete/${postId}/` }
     );
   }
 }

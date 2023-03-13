@@ -1,29 +1,50 @@
-export async function formAction({ request, params }) {
+export async function createNewPostAction({ request }) {
   const formData = await request.formData();
 
   if (formData.get('file')?.size === 0) {  // not sending empty file field to server, validation error if sent
-    formData.delete('file');  // better'd be not to include such a field... how todo
+    formData.delete('file');  // better'd be not to even include it... todo
   }
-  console.log('action data called');
+
+  let userid = localStorage.getItem('userid');
+  if (userid) {
+    formData.set('userid', userid);
+  }
 
   try {
-    return await submitForm(formData, request, params);
+    const data = await submitForm(formData, request).then(r => r.json());
+    if (!userid && data.post?.userid) {
+      userid = data.post.userid;
+      localStorage.setItem('userid', userid);
+    }
+    return data;
   } catch (e) {
     return e;  // stopping here if error, error is available in useActionData()
   }
-  // return redirect('');
+}
+
+export async function editPostAction({ request }) {
+  const formData = await request.formData();
+  try {
+    return await submitForm(formData, request);
+  } catch (e) {
+    return e;
+  }
+}
+
+export async function deletePostAction({ request }) {
+  return await submitForm(null, request);
 }
 
 async function submitForm(formData, request) {
-  const url = '/api' + new URL(request.url).pathname;
-  const body = request.method === 'DELETE' ? undefined : formData;
-  const r = await fetch(url, {
+  const url = '/api' + new URL(request.url).pathname; // building backend url
+  const body = request.method === 'DELETE' ? null : formData;
+  const response = await fetch(url, {
     method: request.method,
     body: body,
   });
 
-  if (r.status >= 300) {
+  if (!response.ok || response.status >= 300) {
     throw { errors: 'response error', status: 422 };  // ?? 422
   }
-  return r.json();
+  return response;
 }

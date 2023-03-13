@@ -49,7 +49,7 @@ def make_thumb(inmemory_image):
     return thumb
 
 
-def also_delete_folder_if_empty(thread_dir_path):
+def delete_folder_if_empty(thread_dir_path):
     for folder in thread_dir_path.iterdir():
         folder_not_empty = next(folder.iterdir(), False)
         if folder_not_empty:

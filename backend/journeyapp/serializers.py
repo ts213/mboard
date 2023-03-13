@@ -1,5 +1,6 @@
-from django.core.exceptions import ValidationError
 from rest_framework import serializers
+import uuid
+from django.core.exceptions import ValidationError
 from .models import Post, Board, Image
 from .utils import make_thumb, process_post_text
 
@@ -36,7 +37,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'board', 'text', 'poster', 'thread', 'date', 'bump', 'files')
+        exclude = ['userid']
 
 
 class ThreadListSerializer(SinglePostSerializer):
@@ -48,7 +49,7 @@ class ThreadListSerializer(SinglePostSerializer):
         return with_replies_sorted
 
     class Meta(SinglePostSerializer.Meta):
-        fields = SinglePostSerializer.Meta.fields + ('replies',)
+        exclude = SinglePostSerializer.Meta.exclude
 
 
 class ThreadSerialier(SinglePostSerializer):
@@ -63,7 +64,7 @@ class ThreadSerialier(SinglePostSerializer):
         return SinglePostSerializer(posts, many=True).data
 
     class Meta(ThreadListSerializer.Meta):
-        fields = ThreadListSerializer.Meta.fields
+        exclude = SinglePostSerializer.Meta.exclude
 
 
 class NewPostSerializer(serializers.ModelSerializer):
@@ -71,6 +72,9 @@ class NewPostSerializer(serializers.ModelSerializer):
     file = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
 
     def create(self, validated_data):
+        if not validated_data.get('userid', None):
+            validated_data['userid'] = uuid.uuid4()
+
         files = validated_data.pop('file', None)
         validated_data['text'] = process_post_text(validated_data['text'])
         post = Post.objects.create(**validated_data)

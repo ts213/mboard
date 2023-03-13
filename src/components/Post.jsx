@@ -28,10 +28,13 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
         <div className='ml-2 inline-block'>
           <button type='button'
                   onClick={() => onDropdownClick(post.id)}
-                  className='dropdown cursor-pointer font-serif'>
+                  className='dropdown cursor-pointer font-serif'
+          >
             ▶
           </button>
-          {isDropdown && <DropdownContext postId={post.id} onEditMenuClick={onEditMenuClick} />}
+          {isDropdown &&
+            <DropdownContext postId={post.id} onEditMenuClick={onEditMenuClick} />
+          }
         </div>
 
         {(!document.location.pathname.includes('thread') && !post.thread) &&
@@ -52,8 +55,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
         </div>
       }
 
-      {
-        isEditMenu &&
+      {isEditMenu &&
         <PostEdit
           postId={post.id}
           onEditMenuClick={onEditMenuClick}

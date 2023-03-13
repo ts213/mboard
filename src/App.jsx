@@ -1,9 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, defer, } from 'react-router-dom';
 import { RootLayout } from './components/RootLayout.jsx';
-import { formAction } from './utils/formAction'
+import { createNewPostAction, editPostAction, deletePostAction } from './utils/formAction.js'
 import { ErrorCpmnt } from './components/ErrorCpmnt.jsx';
-import { editPostAction } from './utils/editPostAction.js';
 import { ContextProvider } from './ContextProvider.jsx';
 
 const BoardsList = lazy(() => import('./components/BoardsList'));
@@ -38,13 +37,13 @@ export default function App() {
 
           <Route path=':board/thread/:threadId'
                  loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}`)}
-                 action={formAction}
+                 action={createNewPostAction}
                  element={<Thread />}
           />
 
-          <Route path='posting/' action={formAction} />
-          <Route path='delete/:postId/' action={formAction} />
+          <Route path='posting/' action={createNewPostAction} />
           <Route path='edit/:postId/' action={editPostAction} />
+          <Route path='delete/:postId/' action={deletePostAction} />
         </Route>
       )
     )

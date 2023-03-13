@@ -1,7 +1,7 @@
 import pathlib
-from .utils import also_delete_folder_if_empty, path_for_image, path_for_thumb
 from django.db import models
 from django.db import IntegrityError
+from .utils import delete_folder_if_empty, path_for_image, path_for_thumb
 
 
 class Post(models.Model):
@@ -9,8 +9,10 @@ class Post(models.Model):
     poster = models.CharField(max_length=35, blank=True)
     text = models.TextField(max_length=10000, blank=True)
     date = models.DateTimeField(auto_now_add=True)
-    bump = models.DateTimeField(auto_now=True)
+    bump = models.DateTimeField(auto_now=True)  # todo
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
+    id = models.BigAutoField(primary_key=True)
+    userid = models.UUIDField(editable=True, blank=True, null=True)
 
     class Meta:
         ordering = ['-date']
@@ -29,7 +31,7 @@ class Post(models.Model):
             for image_model in images:
                 image_model.image.delete(save=None)
                 image_model.thumb.delete(save=None)
-            also_delete_folder_if_empty(thread_dir_path)
+            delete_folder_if_empty(thread_dir_path)
 
         return super().delete(*args, **kwargs)
 
