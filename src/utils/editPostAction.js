@@ -18,6 +18,5 @@ async function submitForm(formData, request) {
   if (r.status >= 300) {
     throw { errors: 'response error', status: 422 };  // ?? 422
   }
-  // return r;
-  return {edited: 'ok'}
+  return r.json();
 }

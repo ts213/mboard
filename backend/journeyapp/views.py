@@ -6,9 +6,7 @@ from rest_framework.views import APIView
 from .models import Board, Post
 from . import serializers
 from django.shortcuts import get_object_or_404
-
-
-# from django.db import connection, reset_queries
+from .utils import process_post_text
 
 
 class ThreadsListAPIView(generics.ListAPIView):
@@ -82,9 +80,11 @@ class PatchPostAPIView(APIView):
     http_method_names = ['patch']
 
     def patch(self, request, pk):
-        # time.sleep(2)
+        time.sleep(1)
         post = get_object_or_404(Post, pk=pk)
-        post.text = self.request.data['text']
+        text = self.request.data['text']
+        post.text = process_post_text(text)
         post.save()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK,
+                        data={'edited': post.text, 'id': post.pk})
         # return Response(status=status.HTTP_400_BAD_REQUEST)

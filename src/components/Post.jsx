@@ -34,7 +34,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
           {isDropdown && <DropdownContext postId={post.id} onEditMenuClick={onEditMenuClick} />}
         </div>
 
-        {!document.location.pathname.includes('thread') &&
+        {(!document.location.pathname.includes('thread') && !post.thread) &&
           <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>}
       </header>
 
@@ -58,7 +58,6 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
           postId={post.id}
           onEditMenuClick={onEditMenuClick}
           postTextElmnt={postTextElmnt.current}
-          // postTextBeforeEdit={postTextBeforeEdit}
         />
       }
 
