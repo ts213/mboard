@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useRef } from 'react';
-import { DropdownContext } from './PostToggleMenu.jsx';
+import { PostDropdown } from './PostDropdown.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage';
 import { toRelativeTime } from '../utils/timeToRelative.js';
@@ -33,7 +33,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
             ▶
           </button>
           {isDropdown &&
-            <DropdownContext postId={post.id} onEditMenuClick={onEditMenuClick} />
+            <PostDropdown postId={post.id} onEditMenuClick={onEditMenuClick} />
           }
         </div>
 

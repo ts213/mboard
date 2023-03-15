@@ -12,10 +12,12 @@ export async function createNewPostAction({ request }) {
 
   try {
     const data = await submitForm(formData, request).then(r => r.json());
-    if (!userid && data.post?.userid) {
+    if (!userid && data?.post?.userid) {
       userid = data.post.userid;
       localStorage.setItem('userid', userid);
     }
+
+    dispatchPostChangeEvent(data.post.id);
     return data;
   } catch (e) {
     return e;  // stopping here if error, error is available in useActionData()
@@ -31,7 +33,8 @@ export async function editPostAction({ request }) {
   }
 }
 
-export async function deletePostAction({ request }) {
+export async function deletePostAction({ request, params }) {
+  dispatchPostChangeEvent(params.postId);
   return await submitForm(null, request);
 }
 
@@ -47,4 +50,11 @@ async function submitForm(formData, request) {
     throw { errors: 'response error', status: 422 };  // ?? 422
   }
   return response;
+}
+
+function dispatchPostChangeEvent(postId) { // won't work in other open tabs
+  window.dispatchEvent(new CustomEvent(
+    'postChange',
+    { detail: { postId: postId } }
+  ));
 }

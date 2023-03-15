@@ -1,12 +1,12 @@
 import { useLoaderData, useFetcher } from 'react-router-dom';
 import { Button } from './Button.jsx';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 
 export function PostForm() {
   const { id, board } = useLoaderData();
   const fetcher = useFetcher();
   const [fileList, setFileList] = useState([]);
-  const [inputFileRef, textAreaRef] = [useRef(), useRef()];
+  const inputFileRef = useRef(), textAreaRef = useRef();
 
   useEffect(() => {
     textAreaRef.current.value = '';
@@ -14,33 +14,31 @@ export function PostForm() {
     setFileList([]);
   }, [fetcher.data, textAreaRef, inputFileRef]);
 
-  const fileTypes = ['image/jpeg', 'image/png', 'image/bmp', 'image/gif', 'image/webp',];
+  const hasErrors = useMemo(() => {
+      const fileTypes = ['image/jpeg', 'image/png', 'image/bmp', 'image/gif', 'image/webp',];
 
-  const errors = {
-    fileSizeError: fileTooLarge(),  // todo
-    fileTypeError: checkFileType(), // todo
-  };
+      function fileTooLarge() {
+        const totalSize = fileList.reduce((sum, v) => sum + v.size, 0);
+        return totalSize > 1_000_000 ? 'file too large' : null;
+      }
 
-  function fileTooLarge() {
-    if (fileList.length < 1) return null;
-    const totalSize = fileList.reduce((sum, v) => sum + v.size, 0);
-    return totalSize > 1_000_000 ? 'file too large' : null;
-  }
+      function checkFileType() {
+        const notAllowedType = fileList.some(file => !fileTypes.includes(file.type));
+        return notAllowedType ? 'not allowed file type' : null;
+      }
 
-  function checkFileType() {
-    if (fileList.length < 1) return null;
-    const notAllowedType = fileList.some(file => !fileTypes.includes(file.type));
-    return notAllowedType ? 'not allowed file type' : null;
-  }
+      return [fileTooLarge(), checkFileType()].filter(Boolean);
+    },
+    [fileList]);
 
   function onChange(e) {
     if (e.target.files.length > 4) {
       e.preventDefault();
-      e.target.value = '';  // resetting input files
-      setFileList(Array.from(e.target.files));  // reset too bc files might be left from previous input
-      alert('Язь слишком ЗДОРОВЕННЫЙ');
+      e.target.value = '';  // files might be left from previous input
+      setFileList(Array.from(e.target.files));  // resetting too
+      alert('>4');
     } else {
-      setFileList(Array.from(e.target.files)); // FileList => Arr, can't manipulate it otherwise
+      setFileList(Array.from(e.target.files)); // FileList => Arr
     }
   }
 
@@ -50,8 +48,8 @@ export function PostForm() {
       className='w-1/4 m-auto min-w-min mb-20' // min-w-min bc input elmnt has fixed default width
     >
 
-      {(errors.fileSizeError || errors.fileTypeError) &&
-        Object.values(errors).map((er, idx) =>
+      {hasErrors.length > 0 &&
+        hasErrors.map((er, idx) =>
           <output key={idx} className='block text-center text-red-500 text-lg mb-3'>
             {er}
           </output>
@@ -67,7 +65,7 @@ export function PostForm() {
                className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50 outline-none'
         />
         <Button
-          disabled={errors.fileSizeError || errors.fileTypeError || fetcher.state !== 'idle'}
+          disabled={hasErrors.length > 0 || fetcher.state !== 'idle'}
           submitting={fetcher.state === 'submitting'}
           buttonType='submit'
         />

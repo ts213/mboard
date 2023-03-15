@@ -5,22 +5,22 @@ import { createNewPostAction, editPostAction, deletePostAction } from './utils/f
 import { ErrorCpmnt } from './components/ErrorCpmnt.jsx';
 import { ContextProvider } from './ContextProvider.jsx';
 
-const BoardsList = lazy(() => import('./components/BoardsList'));
-// const ThreadsList = lazy(() => import('./components/ThreadsList'));
-const Thread = lazy(() => import('./components/PostList.jsx'));
+const BoardsList = lazy(() => import('./components/routes/BoardsList.jsx'));
+const PostList = lazy(() => import('./components/routes/PostList.jsx'));
 // const ErrorCpmnt = lazy(() => import('./components/ErrorCpmnt'));
 // const formAction = lazy(() => import('./utils/formAction'));  // submit form not working with lazy
 
 export default function App() {
   const router = createBrowserRouter(
       createRoutesFromElements(
-        <Route path='/'
-               element={
-                 <Suspense fallback={<h1>loading..</h1>}>
-                   <RootLayout />
-                 </Suspense>
-               }
-               errorElement={<ErrorCpmnt />}
+        <Route
+          path='/'
+          element={
+            <Suspense fallback={<h1>loading..</h1>}>
+              <RootLayout />
+            </Suspense>
+          }
+          errorElement={<ErrorCpmnt />}
         >
 
           <Route index element={<HomePage />} />
@@ -32,18 +32,19 @@ export default function App() {
 
           <Route path=':board'
                  loader={({ params }) => customFetch(params.board)}
-                 element={<Thread />}
+                 element={<PostList />}
           />
 
           <Route path=':board/thread/:threadId'
                  loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}`)}
                  action={createNewPostAction}
-                 element={<Thread />}
+                 element={<PostList />}
           />
 
           <Route path='posting/' action={createNewPostAction} />
           <Route path='edit/:postId/' action={editPostAction} />
           <Route path='delete/:postId/' action={deletePostAction} />
+
         </Route>
       )
     )

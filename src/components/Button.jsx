@@ -13,7 +13,7 @@ export function Button({
       type={buttonType}
       disabled={submitting || disabled}
       onClick={clickHandler}
-      className={extraClass + isErrorClass + `px-4 py-2.5 text-sm border bg-gray-800 text-gray-400 border-gray-600 tracking-wide`}
+      className={extraClass + isErrorClass + `min-w-[100px] block px-1 py-2 text-sm border bg-gray-800 text-gray-400 border-gray-600 tracking-wide`}
     >
       {submitting ? 'Saving...' : value}
     </button>

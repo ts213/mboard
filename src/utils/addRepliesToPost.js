@@ -19,4 +19,3 @@ function createAnchorElmnt(replyId) {
   a.className = 'quote-link mr-1';
   return a;
 }
-

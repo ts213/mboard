@@ -1,48 +1,13 @@
-import { createContext, useContext, useMemo, useReducer } from 'react';
-
-function reducer(state, action) {
-  switch (action.type) {
-    case 'displayMenu':  // 0 == closed
-      return { ...state, menuId: state.menuId === action.postId ? 0 : action.postId };
-    case 'editMenu':  // 0 == closed
-      return { ...state, editMenu: state.editMenu === action.postId ? 0 : action.postId };
-    case 'expandImage':
-      return action.imageUrl !== state.imageState.imageUrl ?
-        { // new img clicked, displaying a new img
-          ...state,
-          imageState: { expanded: true, imageUrl: action.imageUrl }
-        }
-        : { // same img clicked twice, collapsing it
-          ...state,
-          imageState: { expanded: false, imageUrl: null }
-        };
-    case 'clicked':
-      return state.imageState.expanded || state.menuId !== 0 ?
-        {  // if expanded, collapsing image or postMenu on some outside element click
-          ...state,
-          menuId: 0,
-          imageState: { expanded: false, imageUrl: null }
-        }
-        : state;
-  }
-}
-
-const initialState = {
-  menuId: 0,
-  editMenu: 0,
-  imageState: {
-    expanded: false,
-    imageUrl: null,
-  },
-};
+import { createContext, useContext, useMemo } from 'react';
+import { useReducerCustom } from './hooks.jsx';
 
 export function ContextProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducerCustom();
 
   const api = useMemo(() => {
 
     function onDropdownClick(postId) {
-      dispatch({ type: 'displayMenu', postId });
+      dispatch({ type: 'displayDropdown', postId });
     }
 
     function onImageClick(ev) {
@@ -52,29 +17,35 @@ export function ContextProvider({ children }) {
     }
 
     function onEditMenuClick(postId) {
-      dispatch({ type: 'editMenu', postId });
+      dispatch({ type: 'displayEditMenu', postId });
     }
 
     function onClick(ev) {
       const classList = ['img', 'dropdown', 'del-btn'];
       if (!classList.some(class_ => ev.target.classList.contains(class_))) {
-        dispatch({ type: 'clicked' });
+        dispatch({ type: 'unimportantClick' });
       }
     }
 
-    return { onDropdownClick, onImageClick, onClick, onEditMenuClick }
-  }, []);
+    function onPostCreateOrDelete(ev) {
+      dispatch({ type: 'postChange', postId: ev.detail.postId });
+    }
+
+    return { onDropdownClick, onImageClick, onClick, onEditMenuClick, onPostCreateOrDelete }
+  }, [dispatch]);
 
   return (
-    <ApiContext.Provider value={api}>
-      <PostIdDropdown.Provider value={state.menuId}>
-        <ImageOverlayContext.Provider value={state.imageState}>
-          <EdiMenutContext.Provider value={state.editMenu}>
-            {children}
-          </EdiMenutContext.Provider>
-        </ImageOverlayContext.Provider>
-      </PostIdDropdown.Provider>
-    </ApiContext.Provider>
+    <PostHistoryContext.Provider value={state.postIdList}>
+      <EdiMenutContext.Provider value={state.editMenu}>
+        <PostIdDropdown.Provider value={state.menuId}>
+          <ImageOverlayContext.Provider value={state.imageState}>
+            <ApiContext.Provider value={api}>
+              {children}
+            </ApiContext.Provider>
+          </ImageOverlayContext.Provider>
+        </PostIdDropdown.Provider>
+      </EdiMenutContext.Provider>
+    </PostHistoryContext.Provider>
   )
 }
 
@@ -82,8 +53,10 @@ const ApiContext = createContext();
 const PostIdDropdown = createContext();
 const ImageOverlayContext = createContext();
 const EdiMenutContext = createContext();
+const PostHistoryContext = createContext();
 
 export const useContextApi = () => useContext(ApiContext);
-export const usePostDropdown = () => useContext(PostIdDropdown);
-export const useImageOverlay = () => useContext(ImageOverlayContext);
+export const usePostDropdownContext = () => useContext(PostIdDropdown);
+export const useImageOverlayContext = () => useContext(ImageOverlayContext);
 export const useEdiMenutContext = () => useContext(EdiMenutContext);
+export const usePostHistoryContext = () => useContext(PostHistoryContext);
