@@ -42,7 +42,7 @@ export default function App() {
           />
 
           <Route path='posting/' action={createNewPostAction} />
-          <Route path='edit/:postId/' action={editPostAction} />
+          <Route path='edit/:board/:postId/' action={editPostAction} />
           <Route path='delete/:postId/' action={deletePostAction} />
 
         </Route>

@@ -8,11 +8,12 @@ class Post(models.Model):
     thread = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='posts')
     poster = models.CharField(max_length=35, blank=True)
     text = models.TextField(max_length=10000, blank=True)
-    date = models.DateTimeField(auto_now_add=True)
-    bump = models.DateTimeField(auto_now=True)  # todo
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
     id = models.BigAutoField(primary_key=True)
-    userid = models.UUIDField(editable=True, blank=True, null=True)
+    userid = models.UUIDField(editable=True, null=True, blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+    bump = models.DateTimeField(auto_now=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-date']

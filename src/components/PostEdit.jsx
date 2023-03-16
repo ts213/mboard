@@ -1,10 +1,12 @@
-import { useFetcher } from 'react-router-dom';
+import { useFetcher, useLoaderData } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { Button } from './Button.jsx';
 
 export function PostEdit({ postId, onEditMenuClick, postTextElmnt }) {
   const fetcher = useFetcher();
   const textareaRef = useRef();
+  const { board } = useLoaderData();
+
 
   useEffect(() => {
     textareaRef.current.focus();
@@ -50,7 +52,7 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt }) {
   async function testSubm() {
     fetcher.submit(
       { text: textareaRef.current.value },
-      { method: 'patch', action: `/edit/${postId}/` }
+      { method: 'patch', action: `/edit/${board}/${postId}/` }
     );
   }
 }

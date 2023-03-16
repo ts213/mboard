@@ -1,12 +1,11 @@
-import time
 from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Board, Post
 from . import serializers
-from django.shortcuts import get_object_or_404
-from .utils import process_post_text
 
 
 class ThreadsListAPIView(generics.ListAPIView):
@@ -72,6 +71,10 @@ class DeletePostAPIView(APIView):
     @staticmethod
     def delete(request, pk):
         post = get_object_or_404(Post, pk=pk)
+        validated = validate_user(request, post)
+        if not validated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -79,12 +82,30 @@ class DeletePostAPIView(APIView):
 class PatchPostAPIView(APIView):
     http_method_names = ['patch']
 
-    def patch(self, request, pk):
-        time.sleep(1)
+    @staticmethod
+    def patch(request, board, pk):
         post = get_object_or_404(Post, pk=pk)
-        text = self.request.data['text']
-        post.text = process_post_text(text)
-        post.save()
+        validated = validate_user(request, post, is_patch=True)
+        if not validated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data.copy()  # request.data immutable
+        data.update({'board': board, 'edited_at': timezone.now()})
+        serializer = serializers.NewPostSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.update(post, serializer.validated_data)
         return Response(status=status.HTTP_200_OK,
                         data={'edited': post.text, 'id': post.pk})
-        # return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+def validate_user(request, post: Post, is_patch=False):
+    user_id = request.headers.get('userid', None)
+    if not user_id or (user_id != str(post.userid)):
+        return False
+    if is_patch and post.edited_at is not None:  # already was edited
+        return False
+    return True
+    # diff: timezone.timedelta = timezone.now() - post.edited_at
+    # if is_patch and diff.seconds < 86_400:  # 1 day

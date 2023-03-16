@@ -38,16 +38,25 @@ export async function deletePostAction({ request, params }) {
   return await submitForm(null, request);
 }
 
-async function submitForm(formData, request) {
+async function submitForm(formData=undefined, request) {
   const url = '/api' + new URL(request.url).pathname; // building backend url
-  const body = request.method === 'DELETE' ? null : formData;
+  let headers = undefined;
+
+  if (request.method === 'DELETE' || request.method === 'PATCH') {
+    const userid = localStorage.getItem('userid');
+    if (userid) {
+      headers = { userid: userid };
+    }
+  }
+
   const response = await fetch(url, {
     method: request.method,
-    body: body,
+    body: formData,
+    headers: headers,
   });
 
-  if (!response.ok || response.status >= 300) {
-    throw { errors: 'response error', status: 422 };  // ?? 422
+  if (!response.ok) {
+    return new Error();
   }
   return response;
 }
