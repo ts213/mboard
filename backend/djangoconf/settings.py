@@ -25,6 +25,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],
+    'UNAUTHENTICATED_USER': None,  # if django.contrib.auth is disabled
 }
 
 # CORS_ALLOWED_ORIGINS = [
@@ -37,7 +38,7 @@ REST_FRAMEWORK = {
 
 INSTALLED_APPS = [
     # 'django.contrib.admin',
-    'django.contrib.auth',
+    # 'django.contrib.auth',
     'django.contrib.contenttypes',
     # 'django.contrib.sessions',
     # 'django.contrib.messages',
@@ -47,7 +48,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     # 'corsheaders',
 
-    'journeyapp.apps.JourneyappConfig',
+    'board.apps.BoardConfig',
 ]
 
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -71,15 +72,15 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                # 'django.contrib.auth.context_processors.auth',
-                # 'django.contrib.messages.context_processors.messages',
-                # "django.template.context_processors.request",
-            ],
-        },
+        # 'OPTIONS': {
+        #     # 'context_processors': [
+        #     #     'django.template.context_processors.debug',
+        #     #     'django.template.context_processors.request',
+        #     #     # 'django.contrib.auth.context_processors.auth',
+        #     #     # 'django.contrib.messages.context_processors.messages',
+        #     #     # "django.template.context_processors.request",
+        #     # ],
+        # },
     },
 ]
 
