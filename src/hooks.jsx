@@ -50,11 +50,30 @@ function reducer(state, action) {
         }
         : state;
 
-    case 'postChange': {
+    case 'postCreated': {
       const postId = Number(action.postId);
-      return state.postIdList.includes(postId)
-        ? { ...state, postIdList: state.postIdList.filter(id => id !== postId) }  // post deletion
-        : { ...state, postIdList: [...state.postIdList, postId] };  // creation
+      return {
+        ...state,
+        postIdList: [...state.postIdList, { id: postId, editable: 1, deletable: 1 }]
+      };
+    }
+
+    case 'postEdited': {
+      const postId = Number(action.postId);
+      return {
+        ...state,
+        postIdList: state.postIdList.map(post =>
+          post.id === postId ? { ...post, editable: 0 } : post
+        )
+      };
+    }
+
+    case 'postDeleted': {
+      const postId = Number(action.postId);
+      return {
+        ...state,
+        postIdList: state.postIdList.filter(post => post.id !== postId)
+      };
     }
   }
 }

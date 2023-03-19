@@ -4,7 +4,7 @@ import { usePostHistoryContext } from '../ContextProvider.jsx';
 
 export function PostDropdown({ postId, onEditMenuClick }) {
   const fetcher = useFetcher();
-  const userPostHistoryList = usePostHistoryContext();
+  const postIdList = usePostHistoryContext();
 
   return (
     <div className='absolute z-10'>
@@ -12,20 +12,23 @@ export function PostDropdown({ postId, onEditMenuClick }) {
         value={'Reply'}
       />
 
-      {userPostHistoryList.includes(postId) &&
-        <>
+      <>
+        {postIdList.some(post => post.id === postId && post.editable) &&
           <Button
             clickHandler={() => onEditMenuClick(postId)}
             value='Edit'
           />
+        }
+
+        {postIdList.some(post => post.id === postId && post.deletable) &&
           <Button
             clickHandler={deletePost}
             value={'Delete'}
             extraClass='del-btn '
             submitting={fetcher.data}
           />
-        </>
-      }
+        }
+      </>
 
     </div>
   );

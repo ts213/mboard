@@ -60,6 +60,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
           postId={post.id}
           onEditMenuClick={onEditMenuClick}
           postTextElmnt={postTextElmnt.current}
+          board={post.board}
         />
       }
 

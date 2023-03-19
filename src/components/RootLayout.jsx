@@ -8,7 +8,7 @@ import { ImageOverlay } from './ImageOverlay';
 
 export function RootLayout() {
   console.info('root l');
-  const { onClick, onPostCreateOrDelete } = useContextApi();
+  const { onClick, onPostChange } = useContextApi();
 
   useLayoutEffect(() => {
     window.document.title = window.location.pathname;
@@ -18,15 +18,15 @@ export function RootLayout() {
     addRepliesToPosts();  // remove in return??
     document.body.addEventListener('mouseover', tooltipsOnHover);
     document.body.addEventListener('click', onClick);
-    window.addEventListener('postChange', onPostCreateOrDelete);
+    window.addEventListener('postChange', onPostChange);
 
     return () => {
       document.body.removeEventListener('mouseover', tooltipsOnHover);
       document.body.removeEventListener('click', onClick);
-      window.removeEventListener('postChange', onPostCreateOrDelete)
+      window.removeEventListener('postChange', onPostChange)
     };
 
-  }, [onClick, onPostCreateOrDelete]);
+  }, [onClick, onPostChange]);
 
   return (
     <>

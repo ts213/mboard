@@ -27,11 +27,18 @@ export function ContextProvider({ children }) {
       }
     }
 
-    function onPostCreateOrDelete(ev) {
-      dispatch({ type: 'postChange', postId: ev.detail.postId });
+    function onPostChange(ev) {
+      switch (ev.detail.method) {
+        case 'POST':
+          return dispatch({ type: 'postCreated', postId: ev.detail.postId });
+        case 'PATCH':
+          return dispatch({ type: 'postEdited', postId: ev.detail.postId });
+        case 'DELETE':
+          return dispatch({ type: 'postDeleted', postId: ev.detail.postId });
+      }
     }
 
-    return { onDropdownClick, onImageClick, onClick, onEditMenuClick, onPostCreateOrDelete }
+    return { onDropdownClick, onImageClick, onClick, onEditMenuClick, onPostChange }
   }, [dispatch]);
 
   return (

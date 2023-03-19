@@ -1,11 +1,10 @@
-import { useFetcher, useLoaderData } from 'react-router-dom';
+import { useFetcher } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { Button } from './Button.jsx';
 
-export function PostEdit({ postId, onEditMenuClick, postTextElmnt }) {
+export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
   const fetcher = useFetcher();
   const textareaRef = useRef();
-  const { board } = useLoaderData();
 
 
   useEffect(() => {
@@ -41,7 +40,7 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt }) {
         />
         <Button type='button'
                 value='Update'
-                clickHandler={testSubm}
+                clickHandler={editPost}
                 submitting={fetcher.state === 'submitting'}
                 disabled={fetcher.state !== 'idle'}
         />
@@ -49,10 +48,14 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt }) {
     </>
   );
 
-  async function testSubm() {
+  async function editPost() {
     fetcher.submit(
-      { text: textareaRef.current.value },
-      { method: 'patch', action: `/edit/${board}/${postId}/` }
+      {
+        text: textareaRef.current.value,
+        id: postId,
+        board: board
+      },
+      { method: 'patch', action: `/edit/` }
     );
   }
 }

@@ -11,13 +11,13 @@ export async function createNewPostAction({ request }) {
   }
 
   try {
-    const data = await submitForm(formData, request).then(r => r.json());
-    if (!userid && data?.post?.userid) {
-      userid = data.post.userid;
-      localStorage.setItem('userid', userid);
-    }
+    const data = await submitForm(formData, request);
+    // if (!userid && data?.post?.userid) {
+    //   userid = data.post.userid;
+    //   localStorage.setItem('userid', userid);
+    // }
 
-    dispatchPostChangeEvent(data.post.id);
+    // dispatchPostChangeEvent(data.post.id);
     return data;
   } catch (e) {
     return e;  // stopping here if error, error is available in useActionData()
@@ -34,7 +34,7 @@ export async function editPostAction({ request }) {
 }
 
 export async function deletePostAction({ request, params }) {
-  dispatchPostChangeEvent(params.postId);
+  // dispatchPostChangeEvent(params.postId);
   return await submitForm(null, request);
 }
 
@@ -58,12 +58,21 @@ async function submitForm(formData=undefined, request) {
   if (!response.ok) {
     return new Error();
   }
-  return response;
+
+  const data = await response.json();
+
+  dispatchPostChangeEvent(data.post.id, request.method);   // response.ok means form was ok?????
+  // return await response.json().then(data => {
+  //   console.log(data)
+    // dispatchPostChangeEvent(data.post.id, request.method);   // response.ok means form was ok?????
+    // return data;
+  // });
+  return data;
 }
 
-function dispatchPostChangeEvent(postId) { // won't work in other open tabs
+function dispatchPostChangeEvent(postId, method) { // won't work in other open tabs
   window.dispatchEvent(new CustomEvent(
     'postChange',
-    { detail: { postId: postId } }
+    { detail: { postId: postId, method: method } }
   ));
 }
