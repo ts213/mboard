@@ -1,7 +1,7 @@
-import { useContextApi } from '../ContextProvider.jsx';
+import { useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
 
 export function PostImage({ thumb, image, width, height }) {
-  const { onImageClick } = useContextApi();
+  const { onImageClick } = useGlobalContextApi();
   
   return (
     <figure className='mr-4'>

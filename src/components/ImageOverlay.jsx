@@ -1,9 +1,9 @@
-import { useContextApi, useImageOverlayContext } from '../ContextProvider.jsx';
 import { createPortal } from 'react-dom';
+import { useGlobalContextApi, useImageOverlayContext } from '../ContextProviders/GlobalContext.jsx';
 
 export function ImageOverlay() {
   const imageOverlay = useImageOverlayContext();
-  const { onImageClick } = useContextApi();
+  const { onImageClick } = useGlobalContextApi();
 
   return (
     imageOverlay.expanded &&

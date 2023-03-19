@@ -58,12 +58,10 @@ class SingleThreadAPIView(generics.RetrieveAPIView):
 class CreateNewPostAPIView(generics.CreateAPIView):
     serializer_class = serializers.NewPostSerializer
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=self.request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED, data={'status': 1, 'post': serializer.data})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return Response(status=status.HTTP_201_CREATED,
+                        data={'status': 1, 'post': response.data})
 
 
 class DeletePostAPIView(APIView):
@@ -76,8 +74,7 @@ class DeletePostAPIView(APIView):
 
         post.delete()
         return Response(status=status.HTTP_200_OK,
-                        data={'post': {'id': pk},
-                              'status': 1})
+                        data={'post': {'id': pk}, 'status': 1})
 
 
 class EditPostAPIView(generics.UpdateAPIView):
@@ -96,4 +93,4 @@ class EditPostAPIView(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
-        return {'post': response, 'status': 1}
+        return Response({'post': response.data, 'status': 1})

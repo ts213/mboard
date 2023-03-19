@@ -1,14 +1,30 @@
 import { Outlet } from 'react-router-dom';
 import { NavBar } from './NavBar.jsx';
-import { useEffect, useLayoutEffect } from 'react';
+import { ImageOverlay } from './ImageOverlay';
+import { GlobalContext, useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
+import { usePostHistoryContextApi } from '../ContextProviders/PostHistoryContext.jsx';
 import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
 import { tooltipsOnHover } from '../utils/tooltipsOnHover.js';
-import { useContextApi } from '../ContextProvider';
-import { ImageOverlay } from './ImageOverlay';
+import { useEffect, useLayoutEffect } from 'react';
 
 export function RootLayout() {
-  console.info('root l');
-  const { onClick, onPostChange } = useContextApi();
+  return (
+    <>
+      <NavBar />
+      <GlobalContext>
+        <main>
+          <Outlet />
+        </main>
+        <ImageOverlay />
+        <EventListeners />
+      </GlobalContext>
+    </>
+  );
+}
+
+function EventListeners() {
+  const { onClick } = useGlobalContextApi();
+  const { onPostChange } = usePostHistoryContextApi();
 
   useLayoutEffect(() => {
     window.document.title = window.location.pathname;
@@ -27,14 +43,4 @@ export function RootLayout() {
     };
 
   }, [onClick, onPostChange]);
-
-  return (
-    <>
-      <NavBar />
-      <main>
-        <Outlet />
-      </main>
-      <ImageOverlay />
-    </>
-  );
 }

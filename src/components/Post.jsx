@@ -4,7 +4,7 @@ import { PostDropdown } from './PostDropdown.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage';
 import { toRelativeTime } from '../utils/timeToRelative.js';
-import { useContextApi } from '../ContextProvider.jsx';
+import { useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
 // import PropTypes from 'prop-types';
 // console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -13,7 +13,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
   // console.log('postjsx');
 
   const postTextElmnt = useRef();
-  const { onDropdownClick, onEditMenuClick } = useContextApi();
+  const { onDropdownClick, onEditMenuClick } = useGlobalContextApi();
 
   return (
     <article
@@ -27,13 +27,16 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
 
         <div className='ml-2 inline-block'>
           <button type='button'
-                  onClick={() => onDropdownClick(post.id)}
+            onClick={() => onDropdownClick(post.id)}
                   className='dropdown cursor-pointer font-serif'
           >
             ▶
           </button>
           {isDropdown &&
-            <PostDropdown postId={post.id} onEditMenuClick={onEditMenuClick} />
+            <PostDropdown
+              postId={post.id}
+              onEditMenuClick={onEditMenuClick}
+            />
           }
         </div>
 

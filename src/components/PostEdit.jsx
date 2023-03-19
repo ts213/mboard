@@ -6,18 +6,17 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
   const fetcher = useFetcher();
   const textareaRef = useRef();
 
-
   useEffect(() => {
     textareaRef.current.focus();
     textareaRef.current.selectionStart = textareaRef.current.value.length;  // moving caret to end of text
   }, []);
 
   useEffect(() => {
-    if (fetcher.data?.edited) {
+    if (fetcher.data?.status === 1) {
       onEditMenuClick(0);
-      postTextElmnt.innerHTML = fetcher.data.edited;
+      postTextElmnt.innerHTML = fetcher.data.post.text;
     }
-  }, [fetcher.data?.edited, onEditMenuClick, postTextElmnt]);
+  }, [fetcher.data, onEditMenuClick, postTextElmnt]);
 
   return (
     <>

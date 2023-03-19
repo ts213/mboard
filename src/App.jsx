@@ -3,7 +3,7 @@ import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, d
 import { RootLayout } from './components/RootLayout.jsx';
 import { createNewPostAction, editPostAction, deletePostAction } from './utils/formAction.js'
 import { ErrorCpmnt } from './components/ErrorCpmnt.jsx';
-import { ContextProvider } from './ContextProvider.jsx';
+import { PostHistoryContext } from './ContextProviders/PostHistoryContext.jsx';
 
 const BoardsList = lazy(() => import('./components/routes/BoardsList.jsx'));
 const PostList = lazy(() => import('./components/routes/PostList.jsx'));
@@ -51,9 +51,9 @@ export default function App() {
   ;
 
   return (
-    <ContextProvider>
+    <PostHistoryContext>
       <RouterProvider router={router} />
-    </ContextProvider>
+    </PostHistoryContext>
   );
 }
 

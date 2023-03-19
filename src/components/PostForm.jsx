@@ -1,6 +1,7 @@
 import { useLoaderData, useFetcher } from 'react-router-dom';
 import { Button } from './Button.jsx';
 import { useRef, useState, useEffect, useMemo } from 'react';
+import { FormAttachments } from './FormAttachments';
 
 export function PostForm() {
   const { id, board } = useLoaderData();
@@ -9,10 +10,12 @@ export function PostForm() {
   const inputFileRef = useRef(), textAreaRef = useRef();
 
   useEffect(() => {
-    textAreaRef.current.value = '';
-    inputFileRef.current.value = '';
-    setFileList([]);
-  }, [fetcher.data, textAreaRef, inputFileRef]);
+    if (fetcher.data?.status === 1) {
+      textAreaRef.current.value = '';
+      inputFileRef.current.value = '';
+      setFileList([]);
+    }
+  }, [textAreaRef, inputFileRef, fetcher.data]);
 
   const hasErrors = useMemo(() => {
       const fileTypes = ['image/jpeg', 'image/png', 'image/bmp', 'image/gif', 'image/webp',];
@@ -27,9 +30,14 @@ export function PostForm() {
         return notAllowedType ? 'not allowed file type' : null;
       }
 
-      return [fileTooLarge(), checkFileType()].filter(Boolean);
+      function errFromServer() {
+        const errors = fetcher.data?.errors;
+        return errors ? fetcher.data.errors : null;
+      }
+
+      return [fileTooLarge(), checkFileType(), errFromServer()].filter(Boolean);
     },
-    [fileList]);
+    [fileList, fetcher.data]);
 
   function onChange(e) {
     if (e.target.files.length > 4) {
@@ -55,11 +63,6 @@ export function PostForm() {
           </output>
         )}
 
-      {fetcher.data &&
-        <output className='block text-center text-red-500 text-lg mb-3'>
-          {fetcher.data.errors}
-        </output>}
-
       <div className='flex'>
         <input type='text' name='poster' maxLength='35' placeholder='Anon'
                className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50 outline-none'
@@ -71,52 +74,37 @@ export function PostForm() {
         />
       </div>
 
-      <textarea ref={textAreaRef} name='text' rows='7'
+      <textarea ref={textAreaRef} rows='7'
                 required={fileList.length < 1}
+                name='text'
                 minLength='1' maxLength='10000'
                 className='min-w-[100%] border border-gray-600 bg-slate-800 text-white resize outline-none'
       />
 
       <label
         className='py-3 flex [&_span]:hover:text-white border border-gray-600 tracking-widest cursor-pointer hover:bg-gray-700 bg-slate-800'>
-        <span className='m-auto text-gray-400 '>SELECT A FILE</span>
+        <span className='m-auto text-gray-400 '>
+          SELECT A FILE
+        </span>
         <input ref={inputFileRef} onChange={onChange}
                multiple name='file' type='file' className='hidden' accept='image/*'
         />
       </label>
 
-      <div className={`min-w-max`}>
-        {attachedFiles()?.map((file, idx) => {
-            let fileUrl = URL.createObjectURL(file);
-            return (
-              <picture key={idx}
-                       onClick={() => removeFileFromFileList(idx, fileUrl)}
-                       className='relative w-fit inline-block'
-              >
-                <source srcSet={fileUrl} type={file.type} title={file.name}
-                        style={{ maxWidth: '100px', maxHeight: '100px', display: 'inline' }}
-                />
-                <img src='' title={file.name}  // without 'alt' so as to display an empty box
-                     style={{ width: '100px', height: '100px', display: 'inline' }}
-                />
-                <span className='absolute right-2 pointer-events-none text-red-400 font-bold'>X</span>
-              </picture>
-            )
-          }
-        )}
-      </div>
+      {fileList.length > 0 &&
+        <FormAttachments
+          onFileRemove={onFileRemove}
+          fileList={fileList}
+        />
+      }
 
       <input type='hidden' name='board' readOnly value={board} />
       {id && <input type='hidden' name='thread' readOnly value={id} />}
     </fetcher.Form>
   );
 
-  function attachedFiles() {
-    return fileList.length < 1 ? null
-      : fileList.map(file => file);
-  }
-
-  function removeFileFromFileList(idxToRemove, fileUrl) {
+  function onFileRemove(idxToRemove, file) {
+    const fileUrl = URL.createObjectURL(file);
     const dt = new DataTransfer(); // workaround bc can't change input.files directly
     const nextFileList = fileList.filter((_, idx) => idx !== idxToRemove);  // need sync. value instead of async
     nextFileList.forEach(file => dt.items.add(file));
@@ -125,4 +113,5 @@ export function PostForm() {
     URL.revokeObjectURL(fileUrl);
     setFileList(nextFileList);
   }
+
 }

@@ -1,10 +1,10 @@
 import { Button } from './Button.jsx';
 import { useFetcher } from 'react-router-dom';
-import { usePostHistoryContext } from '../ContextProvider.jsx';
+import { usePostHistoryContextList } from '../ContextProviders/PostHistoryContext.jsx';
 
 export function PostDropdown({ postId, onEditMenuClick }) {
   const fetcher = useFetcher();
-  const postIdList = usePostHistoryContext();
+  const postIdList = usePostHistoryContextList();
 
   return (
     <div className='absolute z-10'>
@@ -13,14 +13,14 @@ export function PostDropdown({ postId, onEditMenuClick }) {
       />
 
       <>
-        {postIdList.some(post => post.id === postId && post.editable) &&
+        {postIdList.some(post => post.id === postId && post.ed) &&
           <Button
             clickHandler={() => onEditMenuClick(postId)}
             value='Edit'
           />
         }
 
-        {postIdList.some(post => post.id === postId && post.deletable) &&
+        {postIdList.some(post => post.id === postId && post.del) &&
           <Button
             clickHandler={deletePost}
             value={'Delete'}

@@ -34,7 +34,6 @@ export async function editPostAction({ request }) {
 }
 
 export async function deletePostAction({ request, params }) {
-  // dispatchPostChangeEvent(params.postId);
   return await submitForm(null, request);
 }
 
@@ -56,23 +55,18 @@ async function submitForm(formData=undefined, request) {
   });
 
   if (!response.ok) {
-    return new Error();
+    throw { errors: 'response error', status: 422 };  // ?? 422
   }
 
   const data = await response.json();
 
   dispatchPostChangeEvent(data.post.id, request.method);   // response.ok means form was ok?????
-  // return await response.json().then(data => {
-  //   console.log(data)
-    // dispatchPostChangeEvent(data.post.id, request.method);   // response.ok means form was ok?????
-    // return data;
-  // });
   return data;
 }
 
 function dispatchPostChangeEvent(postId, method) { // won't work in other open tabs
   window.dispatchEvent(new CustomEvent(
     'postChange',
-    { detail: { postId: postId, method: method } }
+    { detail: { postId: Number(postId), method: method } }
   ));
 }

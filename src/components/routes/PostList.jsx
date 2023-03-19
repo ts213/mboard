@@ -2,7 +2,7 @@ import { useLoaderData } from 'react-router-dom';
 import { PostForm } from '../PostForm.jsx';
 import { Post } from '../Post.jsx';
 import { memo, useEffect, useState } from 'react';
-import { usePostDropdownContext, useEdiMenutContext } from '../../ContextProvider.jsx';
+import { usePostDropdownContext, useEdiMenuContext } from '../../ContextProviders/GlobalContext.jsx';
 
 const PostMemo = memo(Post);
 
@@ -12,7 +12,7 @@ export default function PostList() {
   const { threads } = fetchedData;
 
   const dropdown = usePostDropdownContext();
-  const postEditMenu = useEdiMenutContext();
+  const postEditMenu = useEdiMenuContext();
 
   const [dateNow, setDate] = useState(new Date());
   useEffect(() => setDate(new Date()), [fetchedData]);
