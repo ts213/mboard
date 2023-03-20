@@ -24,7 +24,7 @@ export function RootLayout() {
 
 function EventListeners() {
   const { onClick } = useGlobalContextApi();
-  const { onPostChange } = usePostHistoryContextApi();
+  const onPostChange = usePostHistoryContextApi();
 
   useLayoutEffect(() => {
     window.document.title = window.location.pathname;

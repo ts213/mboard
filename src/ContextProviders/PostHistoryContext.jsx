@@ -1,29 +1,29 @@
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
+import { createContext, useCallback, useContext, useEffect, useReducer } from 'react';
 
 export function PostHistoryContext({ children }) {
   const [state, dispatch] = useReducer(reducer, null, loadPostHistoryFromStorage);
 
   useEffect(() => {
+    if (state.postIdList.length > 100) {
+      state.postIdList.shift();
+    }
+    
     localStorage.setItem('posts', JSON.stringify(state.postIdList));
   }, [state.postIdList]);
 
-  const api = useMemo(() => {
-    function onPostChange(ev) {
-      switch (ev.detail.method) {
-        case 'POST':
-          return dispatch({ type: 'postCreated', postId: ev.detail.postId });
-        case 'PATCH':
-          return dispatch({ type: 'postEdited', postId: ev.detail.postId });
-        case 'DELETE':
-          return dispatch({ type: 'postDeleted', postId: ev.detail.postId });
-      }
+  const onPostChange = useCallback((ev) => {
+    switch (ev.detail.method) {
+      case 'POST':
+        return dispatch({ type: 'postCreated', postId: ev.detail.postId });
+      case 'PATCH':
+        return dispatch({ type: 'postEdited', postId: ev.detail.postId });
+      case 'DELETE':
+        return dispatch({ type: 'postDeleted', postId: ev.detail.postId });
     }
-
-    return { onPostChange }
-  }, [dispatch]);
+  }, []);
 
   return (
-    <PostHistoryContextApi.Provider value={api}>
+    <PostHistoryContextApi.Provider value={onPostChange}>
       <PostHistoryContextList.Provider value={state.postIdList}>
         {children}
       </PostHistoryContextList.Provider>

@@ -26,15 +26,18 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
         <span className='post-id ml-2'>{post.id}</span>
 
         <div className='ml-2 inline-block'>
-          <button type='button'
+          <button
+            type='button'
             onClick={() => onDropdownClick(post.id)}
-                  className='dropdown cursor-pointer font-serif'
+            className='dropdown cursor-pointer font-serif'
           >
             ▶
           </button>
+
           {isDropdown &&
             <PostDropdown
               postId={post.id}
+              postDateSecs={post.date}
               onEditMenuClick={onEditMenuClick}
             />
           }

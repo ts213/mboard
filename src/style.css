@@ -27,7 +27,7 @@ body {
     max-height: 90vh;
 }
 
-section::after {
+section:not(:last-child)::after {
     border-top: 1px solid gray;
     width: 90vw;
     clear: both;

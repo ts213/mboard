@@ -11,7 +11,7 @@ const initialState = {
 
 export function GlobalContext({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  // console.dir(state)
   const api = useMemo(() => {
 
     function onClick(ev) {

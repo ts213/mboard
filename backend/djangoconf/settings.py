@@ -70,7 +70,7 @@ ROOT_URLCONF = 'djangoconf.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # 'DIRS': ['dist'],
         'APP_DIRS': True,
         # 'OPTIONS': {
         #     # 'context_processors': [
@@ -133,7 +133,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-MEDIA_ROOT = MEDIA_DIR / 'media'
+# STATICFILES_DIRS = [
+#     BASE_DIR.parent / 'dist/assets',
+# ]
+#
+MEDIA_ROOT = MEDIA_DIR / 'media/'
 MEDIA_URL = '/media/'
 
 # UPLOADED_FILES_USE_URL = False
