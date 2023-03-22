@@ -26,17 +26,17 @@ export default function App() {
           <Route index element={<HomePage />} />
 
           <Route path='boards'
-                 loader={() => defer({ boards: customFetch('boards') })}
+                 loader={({ request, params }) => defer({ boards: customFetch(request, params) })}
                  element={<BoardsList />}
           />
 
           <Route path=':board'
-                 loader={({ params }) => customFetch(params.board)}
+                 loader={({ request, params }) => customFetch(request, params)}
                  element={<PostList />}
           />
 
           <Route path=':board/thread/:threadId'
-                 loader={({ params }) => customFetch(`${params.board}/thread/${params.threadId}`)}
+                 loader={({ request, params }) => customFetch(request, params)}
                  action={createNewPostAction}
                  element={<PostList />}
           />
@@ -63,8 +63,11 @@ function HomePage() {
   )
 }
 
-async function customFetch(addr) {
-  const r = await fetch(`/api/${addr}/`);
+async function customFetch(request, params) {
+  let url = '/api' + new URL(request.url).pathname;
+  const page = new URL(request.url).searchParams.get('page');
+  page ? url += `?page=${page}` : '';
+  const r = await fetch(url);
   if (!r.ok) {
     throw new Response('loader error', { status: r.status });
   }

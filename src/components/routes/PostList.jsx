@@ -9,7 +9,7 @@ const PostMemo = memo(Post);
 export default function PostList() {
   const fetchedData = useLoaderData();
 
-  const { threads } = fetchedData;
+  const { results } = fetchedData;
 
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
@@ -17,7 +17,7 @@ export default function PostList() {
   const [dateNow, setDate] = useState(new Date());
   useEffect(() => setDate(new Date()), [fetchedData]);
 
-  const posts = threads.map(thread =>
+  const posts = results.map(thread =>
     <section key={thread.id} className='flex flex-col flex-wrap items-start'>
       <PostMemo
         post={thread}
