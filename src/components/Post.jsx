@@ -10,7 +10,7 @@ import { useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
 
 export function Post({ post, dateNow, isEditMenu, isDropdown }) {
   const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
-  // console.log('postjsx');
+  // console.log('postjsx', post.id);
 
   const postTextElmnt = useRef();
   const { onDropdownClick, onEditMenuClick } = useGlobalContextApi();

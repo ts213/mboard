@@ -6,7 +6,7 @@ export function PostDropdown({ postId, onEditMenuClick, postDateSecs }) {
   const fetcher = useFetcher();
   const postIdList = usePostHistoryContextList();
   const timeDiff = new Date().getTime() - postDateSecs * 1000;
-  const allowed_interval = timeDiff / 1000 / 60 / 60 / 24 < 24;
+  const allowed_interval = timeDiff / 1000 / 60 / 60 / 24 <= 1;
 
   return (
     <div className='absolute z-10'>

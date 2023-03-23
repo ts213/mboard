@@ -1,21 +1,16 @@
-import { useLoaderData } from 'react-router-dom';
-import { PostForm } from '../PostForm.jsx';
-import { Post } from '../Post.jsx';
+import { useEdiMenuContext, usePostDropdownContext } from '../../ContextProviders/GlobalContext.jsx';
 import { memo, useEffect, useState } from 'react';
-import { usePostDropdownContext, useEdiMenuContext } from '../../ContextProviders/GlobalContext.jsx';
+import { Post } from '../Post.jsx';
 
 const PostMemo = memo(Post);
 
-export default function PostList() {
-  const fetchedData = useLoaderData();
-
-  const { results } = fetchedData;
+export function usePostList(results) {
 
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
 
   const [dateNow, setDate] = useState(new Date());
-  useEffect(() => setDate(new Date()), [fetchedData]);
+  useEffect(() => setDate(new Date()), [results]);
 
   const posts = results.map(thread =>
     <section key={thread.id} className='flex flex-col flex-wrap items-start'>
@@ -39,11 +34,8 @@ export default function PostList() {
   );
 
   return (
-    <>
-      <div className='posts-wrap m-12'>
-        {posts}
-      </div>
-      <PostForm />
-    </>
+    <div className='posts-wrap m-12'>
+      {posts}
+    </div>
   );
 }

@@ -1,18 +1,21 @@
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets, pagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
 from .models import Board
 from . import serializers
 from .permissions import *
 from django.db import connection
 
 
+class CustomPagination(pagination.PageNumberPagination):
+    page_size = 7
+
+
 class ThreadsListAPIView(generics.ListAPIView):
     serializer_class = serializers.ThreadListSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         self.board = get_object_or_404(Board, link=self.kwargs.get('board', None))  # noqa

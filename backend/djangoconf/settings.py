@@ -23,7 +23,7 @@ REST_FRAMEWORK = {
     # 'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     #
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # per view
-    'PAGE_SIZE': 3,
+    # 'PAGE_SIZE': 5,
     #
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],

@@ -4,9 +4,10 @@ import { RootLayout } from './components/RootLayout.jsx';
 import { createNewPostAction, editPostAction, deletePostAction } from './utils/formAction.js'
 import { ErrorCpmnt } from './components/ErrorCpmnt.jsx';
 import { PostHistoryContext } from './ContextProviders/PostHistoryContext.jsx';
+import { Thread } from './components/routes/Thread';
 
 const BoardsList = lazy(() => import('./components/routes/BoardsList.jsx'));
-const PostList = lazy(() => import('./components/routes/PostList.jsx'));
+const PostList = lazy(() => import('./components/routes/ThreadList.jsx'));
 // const ErrorCpmnt = lazy(() => import('./components/ErrorCpmnt'));
 // const formAction = lazy(() => import('./utils/formAction'));  // submit form not working with lazy
 
@@ -26,19 +27,20 @@ export default function App() {
           <Route index element={<HomePage />} />
 
           <Route path='boards'
-                 loader={({ request, params }) => defer({ boards: customFetch(request, params) })}
+                 loader={({ request, params }) => defer({ boards: routeLoader(request) })}
                  element={<BoardsList />}
+                 shouldRevalidate={() => false}
           />
 
           <Route path=':board'
-                 loader={({ request, params }) => customFetch(request, params)}
                  element={<PostList />}
           />
 
+
           <Route path=':board/thread/:threadId'
-                 loader={({ request, params }) => customFetch(request, params)}
+                 loader={({ request, params }) => routeLoader(request)}
                  action={createNewPostAction}
-                 element={<PostList />}
+                 element={<Thread />}
           />
 
           <Route path='posting/' action={createNewPostAction} />
@@ -63,7 +65,7 @@ function HomePage() {
   )
 }
 
-async function customFetch(request, params) {
+export async function routeLoader(request) {
   let url = '/api' + new URL(request.url).pathname;
   const page = new URL(request.url).searchParams.get('page');
   page ? url += `?page=${page}` : '';
