@@ -1,10 +1,10 @@
-import { useLoaderData, useFetcher } from 'react-router-dom';
+import { useFetcher, useParams } from 'react-router-dom';
 import { Button } from './Button.jsx';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { FormAttachments } from './FormAttachments';
 
 export function PostForm() {
-  const { id, board } = useLoaderData();
+  const { threadId, board } = useParams();
   const fetcher = useFetcher();
   const [fileList, setFileList] = useState([]);
   const inputFileRef = useRef(), textAreaRef = useRef();
@@ -99,7 +99,7 @@ export function PostForm() {
       }
 
       <input type='hidden' name='board' readOnly value={board} />
-      {id && <input type='hidden' name='thread' readOnly value={id} />}
+      {threadId && <input type='hidden' name='thread' readOnly value={threadId} />}
     </fetcher.Form>
   );
 

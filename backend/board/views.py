@@ -49,6 +49,10 @@ class ThreadsListAPIView(generics.ListAPIView):
         data.move_to_end('results')  # just to satisfy OCD
         return Response(data)
 
+    def get_serializer_context(self):
+        return {'request': None,  # for relative urls
+                'format': self.format_kwarg, 'view': self}
+
 
 class BoardsAPIView(generics.ListAPIView):
     queryset = Board.objects.all()

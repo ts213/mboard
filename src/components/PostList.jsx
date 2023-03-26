@@ -1,18 +1,18 @@
-import { useEdiMenuContext, usePostDropdownContext } from '../../ContextProviders/GlobalContext.jsx';
+import { useEdiMenuContext, usePostDropdownContext } from '../ContextProviders/GlobalContext.jsx';
 import { memo, useEffect, useState } from 'react';
-import { Post } from '../Post.jsx';
+import { Post } from './Post.jsx';
 
 const PostMemo = memo(Post);
 
-export function usePostList(results) {
+export function PostList({ postList }) {
 
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
 
   const [dateNow, setDate] = useState(new Date());
-  useEffect(() => setDate(new Date()), [results]);
+  useEffect(() => setDate(new Date()), [postList]);
 
-  const posts = results.map(thread =>
+  const posts = postList.map(thread =>
     <section key={thread.id} className='flex flex-col flex-wrap items-start'>
       <PostMemo
         post={thread}
