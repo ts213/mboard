@@ -15,15 +15,11 @@ INTERNAL_IPS = [
     "192.168.1.133",
 ]
 
-# DEBUG_TOOLBAR_CONFIG = {
-#     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
-# }
-
 REST_FRAMEWORK = {
     # 'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     #
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # per view
-    # 'PAGE_SIZE': 5,
+    # 'PAGE_SIZE': 5,  # per view
     #
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],

@@ -5,11 +5,11 @@ import { PostForm } from '../PostForm.jsx';
 
 export function Thread() {
   const fetchedData = useLoaderData();
-  const { results } = fetchedData;
+  const { threads } = fetchedData;
 
   return (
     <>
-      <PostList postList={results} />
+      <PostList postList={threads} />
       <PostForm />
     </>
   );

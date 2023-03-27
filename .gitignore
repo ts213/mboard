@@ -26,3 +26,8 @@ db.sqlite3
 *.njsproj
 *.sln
 *.sw?
+/vite.svg
+backend/djangoconf/__pycache__
+backend/board/migrations/__pycache__
+backend/board/__pycache__
+backend/__pycache__

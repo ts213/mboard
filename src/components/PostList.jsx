@@ -20,6 +20,7 @@ export function PostList({ postList }) {
         isEditMenu={postEditMenu === thread.id}
         isDropdown={dropdown === thread.id}
       />
+      <div className='ml-2 text-center text-gray-500'>Пропущено постов: ... Загрузить?</div>
 
       {thread.replies.map(reply =>
         <PostMemo

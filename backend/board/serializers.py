@@ -37,7 +37,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        exclude = ['userid']
+        exclude = ('userid', 'edited_at',)
 
 
 class ThreadListSerializer(SinglePostSerializer):
@@ -49,21 +49,6 @@ class ThreadListSerializer(SinglePostSerializer):
         return with_replies_sorted
 
     class Meta(SinglePostSerializer.Meta):
-        exclude = SinglePostSerializer.Meta.exclude
-
-
-class ThreadSerialier(SinglePostSerializer):
-    replies = serializers.SerializerMethodField(method_name='get_posts')
-
-    @staticmethod
-    def get_posts(thread: Post):
-        posts = Post.objects \
-            .select_related('board') \
-            .prefetch_related('images').filter(thread__pk=thread.pk) \
-            .order_by('date')
-        return SinglePostSerializer(posts, many=True).data
-
-    class Meta(ThreadListSerializer.Meta):
         exclude = SinglePostSerializer.Meta.exclude
 
 

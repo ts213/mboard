@@ -2,13 +2,13 @@ import { lazy, Suspense } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, defer, } from 'react-router-dom';
 import { RootLayout } from './components/RootLayout.jsx';
 import { createNewPostAction, editPostAction, deletePostAction } from './utils/formAction.js'
-import { ErrorCpmnt } from './components/ErrorCpmnt.jsx';
+import { ErrorPage } from './components/routes/ErrorPage.jsx';
 import { PostHistoryContext } from './ContextProviders/PostHistoryContext.jsx';
 import { Thread } from './components/routes/Thread';
 
 const BoardsList = lazy(() => import('./components/routes/BoardsList.jsx'));
 const PostList = lazy(() => import('./components/routes/ThreadList.jsx'));
-// const ErrorCpmnt = lazy(() => import('./components/ErrorCpmnt'));
+// const ErrorPage = lazy(() => import('./components/ErrorPage'));
 // const formAction = lazy(() => import('./utils/formAction'));  // submit form not working with lazy
 
 export default function App() {
@@ -21,7 +21,7 @@ export default function App() {
               <RootLayout />
             </Suspense>
           }
-          errorElement={<ErrorCpmnt />}
+          errorElement={<ErrorPage />}
         >
 
           <Route index element={<HomePage />} />

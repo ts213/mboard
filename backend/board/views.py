@@ -1,24 +1,20 @@
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status, viewsets, pagination
-from rest_framework.response import Response
+from rest_framework import generics, status
 from rest_framework.views import APIView
 from .models import Board
 from . import serializers
 from .permissions import *
-from django.db import connection
+from .pagination import *
 
 
-class CustomPagination(pagination.PageNumberPagination):
-    page_size = 7
-
-
-class ThreadsListAPIView(generics.ListAPIView):
+class ThreadListAPIView(generics.ListAPIView):
     serializer_class = serializers.ThreadListSerializer
-    pagination_class = CustomPagination
+    pagination_class = ThreadListPagination
 
     def get_queryset(self):
         self.board = get_object_or_404(Board, link=self.kwargs.get('board', None))  # noqa
+        self.request.kwargs = self.kwargs  # for paginator
 
         threads_queryset = Post.objects \
             .select_related('board').prefetch_related('images') \
@@ -45,8 +41,42 @@ class ThreadsListAPIView(generics.ListAPIView):
         else:
             data = self.get_serializer(queryset, many=True).data
 
-        data['board'] = self.board.link
-        data.move_to_end('results')  # just to satisfy OCD
+        return Response(data)
+
+    def get_serializer_context(self):
+        return {'request': None,  # for relative urls
+                'format': self.format_kwarg, 'view': self}
+
+
+class SingleThreadAPIView(generics.ListAPIView):
+    serializer_class = serializers.SinglePostSerializer
+    pagination_class = SingleThreadPagination
+
+    def get_queryset(self):
+        pk = self.kwargs['thread_id']
+        board = self.kwargs['board']
+        self.thread = get_object_or_404(Post, board=board, pk=pk)  # noqa
+        self.request.kwargs = self.kwargs  # for paginator
+
+        thread_replies = Post.objects.filter(board=board, thread__pk=pk) \
+            .select_related('board').prefetch_related('images')
+        return thread_replies
+
+    def list(self, request, *args, **kwargs):
+        replies_queryset = self.get_queryset()
+        thread_serialized = serializers.SinglePostSerializer(self.thread).data
+
+        page = self.paginate_queryset(replies_queryset)
+        if page is not None:
+            replies_serialized = self.get_serializer(page, many=True).data
+            thread_serialized['replies'] = reversed(replies_serialized)
+            data = self.get_paginated_response(thread_serialized).data
+        else:
+            replies_serialized = self.get_serializer(replies_queryset, many=True).data
+            thread_serialized['replies'] = reversed(replies_serialized)
+            data = {'board': self.request.kwargs['board'],
+                    'threads': [thread_serialized]}
+
         return Response(data)
 
     def get_serializer_context(self):
@@ -57,23 +87,6 @@ class ThreadsListAPIView(generics.ListAPIView):
 class BoardsAPIView(generics.ListAPIView):
     queryset = Board.objects.all()
     serializer_class = serializers.BoardSerializer
-
-
-class SingleThreadAPIView(generics.RetrieveAPIView):
-    serializer_class = serializers.ThreadSerialier
-    lookup_url_kwarg = 'thread_id'
-
-    def get_queryset(self):
-        return Post.objects.filter(board=self.kwargs['board'])
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()  # lookup_field, defaults to 'pk'.
-        serializer = serializers.ThreadSerialier(instance)
-        return Response({
-            'results': [serializer.data],
-            'board': self.kwargs['board'],
-            'id': self.kwargs['thread_id']
-        })
 
 
 class CreateNewPostAPIView(generics.CreateAPIView):

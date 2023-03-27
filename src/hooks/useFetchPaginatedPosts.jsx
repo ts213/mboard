@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { routeLoader } from '../../App.jsx';
+import { routeLoader } from '../App.jsx';
 
 export function useFetchPaginatedPosts(intersectionRef, setPostList) {
   const currentPage = useRef(1);
@@ -9,8 +9,8 @@ export function useFetchPaginatedPosts(intersectionRef, setPostList) {
     const url = location.href + '?page=' + page;
     const response = await routeLoader({ url: url });
 
-    if (response?.results) {
-      setPostList(p => [...p, ...response.results]);
+    if (response?.threads) {
+      setPostList(p => [...p, ...response.threads]);
       if (response.next) return;
     }
     return currentPage.current = 0;  // no more pages to fetch

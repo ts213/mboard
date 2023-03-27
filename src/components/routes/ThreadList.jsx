@@ -1,6 +1,6 @@
 import { PostList } from '../PostList.jsx';
 import { useRef, useState } from 'react';
-import { useFetchPaginatedPosts } from '../hooks/useFetchPaginatedPosts.jsx';
+import { useFetchPaginatedPosts } from '../../hooks/useFetchPaginatedPosts.jsx';
 import { PostForm } from '../PostForm.jsx';
 
 export default function ThreadList() {
