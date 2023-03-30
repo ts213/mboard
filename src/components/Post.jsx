@@ -47,7 +47,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown }) {
           <Link to={'thread/' + post.id + '/'} className={'ml-2'}>Open</Link>}
       </header>
 
-      {post.files.length > 0 &&
+      {post.files?.length > 0 &&
         <div className={`flex ${post.files.length > 1 ? '' : 'float-left'}`}>
           {post.files.map((file, idx) =>
             <PostImage

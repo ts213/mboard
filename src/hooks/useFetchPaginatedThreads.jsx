@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { routeLoader } from '../App.jsx';
+import { threadListLoader } from '../components/routes/ThreadList.jsx';
 
-export function useFetchPaginatedPosts(intersectionRef, setPostList) {
+export function useFetchPaginatedThreads(intersectionRef, setPostList) {
   const currentPage = useRef(1);
   const prevY = useRef(0); // last intersection y position
 
   const fetchPosts = useCallback(async (page = 1) => {
     const url = location.href + '?page=' + page;
-    const response = await routeLoader({ url: url });
+    const response = await threadListLoader({ url: url });
 
     if (response?.threads) {
       setPostList(p => [...p, ...response.threads]);
-      if (response.next) return;
+      if (response.nextPage) return;
     }
     return currentPage.current = 0;  // no more pages to fetch
   }, [setPostList]);
 
-  useEffect(() => {
+  useEffect(() => {  // initial loading
     if (!fetchPosts.called) {  // prevent react strict mode messing it all up...
       void fetchPosts();
       fetchPosts.called = true;
@@ -24,7 +24,7 @@ export function useFetchPaginatedPosts(intersectionRef, setPostList) {
     return () => setPostList([]);
   }, [fetchPosts, setPostList]);
 
-  useEffect(() => {
+  useEffect(() => {  // when scrolled to page bottom
     const observer = new IntersectionObserver(observerHandler, { threshold: 1.0 });
     observer.observe(intersectionRef.current);
 

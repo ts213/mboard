@@ -1,7 +1,7 @@
 const formatter = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto', style: 'short' });
 
 const timeUnits = new Set([
-  { interval: 60, timeUnit: 'minutes' }, // start with mins insteads of secs, 1 min ago is better than 23 secs ago..
+  { interval: 60, timeUnit: 'minutes' },
   { interval: 24, timeUnit: 'hours' },
   { interval: 7, timeUnit: 'days' },
   { interval: 4.34524, timeUnit: 'weeks' },

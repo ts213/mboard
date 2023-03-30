@@ -1,19 +1,33 @@
 import { PostList } from '../PostList.jsx';
 import { useRef, useState } from 'react';
-import { useFetchPaginatedPosts } from '../../hooks/useFetchPaginatedPosts.jsx';
+import { useFetchPaginatedThreads } from '../../hooks/useFetchPaginatedThreads.jsx';
 import { PostForm } from '../PostForm.jsx';
 
 export default function ThreadList() {
-  const [postList, setPostList] = useState([]);
+  const [thread, setThread] = useState([]);
   const intersectionRef = useRef();
 
-  useFetchPaginatedPosts(intersectionRef, setPostList);
+  useFetchPaginatedThreads(intersectionRef, setThread);
 
   return (
     <>
-      <PostList postList={postList} />
+      <PostList thread={thread} />
       <var ref={intersectionRef}></var>
-      <PostForm />
+      {/*<PostForm />*/}
     </>
   );
+}
+
+export async function threadListLoader(request) {
+  let url = '/api' + new URL(request.url).pathname;
+  const page = new URL(request.url).searchParams.get('page');
+
+  if (page) {
+    url += `?page=${page}`;
+  }
+  const r = await fetch(url);
+  if (!r.ok) {
+    throw new Response('loader error', { status: r.status });
+  }
+  return r.json();
 }

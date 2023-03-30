@@ -1,43 +1,25 @@
-import { useFetcher, useParams } from 'react-router-dom';
 import { Button } from './Button.jsx';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { FormAttachments } from './FormAttachments';
+import { formErrorList } from '../utils/postFormErrors.js';
+import { useFetcher } from 'react-router-dom';
 
-export function PostForm() {
-  const { threadId, board } = useParams();
-  const fetcher = useFetcher();
+export function PostForm({ board, threadId = undefined }) {
   const [fileList, setFileList] = useState([]);
-  const inputFileRef = useRef(), textAreaRef = useRef();
+  const inputFileRef = useRef();
+  const textAreaRef = useRef();
+
+  const fetcher = useFetcher();
+  const errorList = useMemo(() => formErrorList(fileList, fetcher.data), [fetcher.data, fileList]);
 
   useEffect(() => {
     if (fetcher.data?.status === 1) {
       textAreaRef.current.value = '';
       inputFileRef.current.value = '';
       setFileList([]);
+      // updateThread();
     }
   }, [textAreaRef, inputFileRef, fetcher.data]);
-
-  const hasErrors = useMemo(() => {
-      const fileTypes = ['image/jpeg', 'image/png', 'image/bmp', 'image/gif', 'image/webp',];
-
-      function fileTooLarge() {
-        const totalSize = fileList.reduce((sum, v) => sum + v.size, 0);
-        return totalSize > 1_000_000 ? 'file too large' : null;
-      }
-
-      function checkFileType() {
-        const notAllowedType = fileList.some(file => !fileTypes.includes(file.type));
-        return notAllowedType ? 'not allowed file type' : null;
-      }
-
-      function errFromServer() {
-        const errors = fetcher.data?.errors;
-        return errors ? fetcher.data.errors : null;
-      }
-
-      return [fileTooLarge(), checkFileType(), errFromServer()].filter(Boolean);
-    },
-    [fileList, fetcher.data]);
 
   function onChange(e) {
     if (e.target.files.length > 4) {
@@ -52,12 +34,14 @@ export function PostForm() {
 
   return (
     <fetcher.Form
-      action='/posting/' method='POST' encType='multipart/form-data'
+      // action='/posting/'
+      // action={ttt}
+      // action={location.pathname + '?limit=' + (thr.replies.length + 1)}
+      method='POST' encType='multipart/form-data'
       className='w-1/4 m-auto min-w-min mb-20' // min-w-min bc input elmnt has fixed default width
     >
-
-      {hasErrors.length > 0 &&
-        hasErrors.map((er, idx) =>
+      {errorList.length > 0 &&
+        errorList.map((er, idx) =>
           <output key={idx} className='block text-center text-red-500 text-lg mb-3'>
             {er}
           </output>
@@ -68,7 +52,7 @@ export function PostForm() {
                className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50 outline-none'
         />
         <Button
-          disabled={hasErrors.length > 0 || fetcher.state !== 'idle'}
+          disabled={errorList.length > 0 || fetcher.state !== 'idle'}
           submitting={fetcher.state === 'submitting'}
           buttonType='submit'
         />

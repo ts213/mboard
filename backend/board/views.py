@@ -48,7 +48,7 @@ class ThreadListAPIView(generics.ListAPIView):
                 'format': self.format_kwarg, 'view': self}
 
 
-class SingleThreadAPIView(generics.ListAPIView):
+class SingleThreadAPIView(generics.ListCreateAPIView):
     serializer_class = serializers.SinglePostSerializer
     pagination_class = SingleThreadPagination
 
@@ -75,27 +75,28 @@ class SingleThreadAPIView(generics.ListAPIView):
             replies_serialized = self.get_serializer(replies_queryset, many=True).data
             thread_serialized['replies'] = reversed(replies_serialized)
             data = {'board': self.request.kwargs['board'],
-                    'threads': [thread_serialized]}
-
+                    'thread': thread_serialized}
         return Response(data)
 
     def get_serializer_context(self):
         return {'request': None,  # for relative urls
                 'format': self.format_kwarg, 'view': self}
 
-
-class BoardsAPIView(generics.ListAPIView):
-    queryset = Board.objects.all()
-    serializer_class = serializers.BoardSerializer
-
-
-class CreateNewPostAPIView(generics.CreateAPIView):
-    serializer_class = serializers.NewPostSerializer
+    def post(self, request, *args, **kwargs):
+        if request.data.get('images', None):
+            images_list = request.data.pop('images')
+            request.data.setlist('images_write', images_list)
+        return super().post(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         return Response(status=status.HTTP_201_CREATED,
                         data={'status': 1, 'post': response.data})
+
+
+class BoardsAPIView(generics.ListAPIView):
+    queryset = Board.objects.all()
+    serializer_class = serializers.BoardSerializer
 
 
 class DeletePostAPIView(APIView):
@@ -113,7 +114,7 @@ class DeletePostAPIView(APIView):
 
 class EditPostAPIView(generics.UpdateAPIView):
     queryset = Post.objects.all()
-    serializer_class = serializers.NewPostSerializer
+    serializer_class = serializers.SinglePostSerializer
     permission_classes = [EditPostPermission]
 
     def get_object(self):

@@ -1,4 +1,4 @@
-export async function createNewPostAction({ request }) {
+export async function createNewPostAction({ request, params }) {
   const formData = await request.formData();
 
   if (formData.get('file')?.size === 0) {  // not sending empty file field to server, validation error if sent
@@ -11,7 +11,7 @@ export async function createNewPostAction({ request }) {
   }
 
   try {
-    const data = await submitForm(formData, request);
+    const data = await submitForm(request, formData);
     // if (!userid && data?.post?.userid) {
     //   userid = data.post.userid;
     //   localStorage.setItem('userid', userid);
@@ -27,18 +27,21 @@ export async function createNewPostAction({ request }) {
 export async function editPostAction({ request }) {
   const formData = await request.formData();
   try {
-    return await submitForm(formData, request);
+    return await submitForm(request, formData);
   } catch (e) {
     return e;
   }
 }
 
 export async function deletePostAction({ request, params }) {
-  return await submitForm(null, request);
+  return await submitForm(request, null);
 }
 
-async function submitForm(formData=undefined, request) {
-  const url = '/api' + new URL(request.url).pathname; // building backend url
+async function submitForm(request, formData = undefined) {
+  let url = '/api' + new URL(request.url).pathname; // building backend url
+  url += url.endsWith('/') ? '' : '/';
+
+  // const url = '/api' + new URL(request.url).pathname + new URL(request.url).search; // building backend url
   let headers = undefined;
 
   if (request.method === 'DELETE' || request.method === 'PATCH') {
@@ -57,7 +60,6 @@ async function submitForm(formData=undefined, request) {
   if (!response.ok) {
     throw { errors: 'response error', status: 422 };  // ?? 422
   }
-
   const data = await response.json();
 
   dispatchPostChangeEvent(data.post.id, request.method);   // response.ok means form was ok?????

@@ -25,7 +25,47 @@ class ImageSerializer(serializers.ModelSerializer):
 class SinglePostSerializer(serializers.ModelSerializer):
     date = serializers.SerializerMethodField(method_name='get_date_timestamp')
     bump = serializers.SerializerMethodField(method_name='get_bump_timestamp')
-    files = ImageSerializer(source='images', read_only=True, many=True)
+    images = ImageSerializer(read_only=True, many=True)
+    images_write = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
+
+    def create(self, validated_data):
+        if not validated_data.get('userid', None):
+            validated_data['userid'] = uuid.uuid4()
+
+        images = validated_data.pop('images', None)
+        validated_data['text'] = process_post_text(validated_data['text'])
+        post = Post.objects.create(**validated_data)
+        if images:
+            images = [Image(post=post,
+                            image=image, thumb=make_thumb(image))
+                      for image in images]
+            Image.objects.bulk_create(images)
+        return post
+
+    def validate(self, data):
+        images = data.get('images', None)
+        text = data.setdefault('text', '')
+        post_message_length = len(text)
+
+        if post_message_length == 0 and not images:
+            raise serializers.ValidationError(
+                {'text': 'This field is required'},
+                {'files': 'This field is required'},
+            )
+        return data
+
+    @staticmethod
+    def validate_images(files):
+        total_file_size = sum([file.size for file in files])
+        if total_file_size > 1_000_000:
+            raise ValidationError('Max size of files exceeded')
+        return files
+
+    @staticmethod
+    def validate_thread(thread):
+        if thread.thread:  # posts can't have other posts as their thread
+            raise ValidationError("Thread doesn't exist")
+        return thread
 
     @staticmethod
     def get_date_timestamp(thread: Post):
@@ -37,7 +77,8 @@ class SinglePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        exclude = ('userid', 'edited_at',)
+        exclude = ('edited_at',)
+        extra_kwargs = {'userid': {'write_only': True}}
 
 
 class ThreadListSerializer(SinglePostSerializer):
@@ -50,49 +91,6 @@ class ThreadListSerializer(SinglePostSerializer):
 
     class Meta(SinglePostSerializer.Meta):
         exclude = SinglePostSerializer.Meta.exclude
-
-
-class NewPostSerializer(serializers.ModelSerializer):
-    board = serializers.SlugRelatedField(slug_field='link', queryset=Board.objects.all())
-    file = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
-
-    def create(self, validated_data):
-        if not validated_data.get('userid', None):
-            validated_data['userid'] = uuid.uuid4()
-
-        files = validated_data.pop('file', None)
-        validated_data['text'] = process_post_text(validated_data['text'])
-        post = Post.objects.create(**validated_data)
-        if files:
-            images = [Image(post=post,
-                            image=image, thumb=make_thumb(image))
-                      for image in files]
-            Image.objects.bulk_create(images)
-        return post
-
-    def validate(self, data):
-        files = data.get('file', None)
-        post_message_len = len(data['text'])
-        if post_message_len == 0 and not files:
-            raise serializers.ValidationError('Message or file is required')
-        return data
-
-    @staticmethod
-    def validate_file(files):
-        total_file_size = sum([file.size for file in files])
-        if total_file_size > 1_000_000:
-            raise ValidationError('Max size of files exceeded')
-        return files
-
-    @staticmethod
-    def validate_thread(thread):
-        if thread.thread:  # posts can't have other posts as their thread
-            raise ValidationError("Thread doesn't exist")
-        return thread
-
-    class Meta:
-        model = Post
-        fields = '__all__'
 
 
 class BoardSerializer(serializers.ModelSerializer):
