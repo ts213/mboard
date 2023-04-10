@@ -4,15 +4,15 @@ import { useFetchPaginatedThreads } from '../../hooks/useFetchPaginatedThreads.j
 import { PostForm } from '../PostForm.jsx';
 
 export default function ThreadList() {
-  const [thread, setThread] = useState([]);
+  const [threads, setThreads] = useState([]);
   const intersectionRef = useRef();
 
-  useFetchPaginatedThreads(intersectionRef, setThread);
+  useFetchPaginatedThreads(intersectionRef, setThreads);
 
   return (
     <>
-      <PostList thread={thread} />
-      <var ref={intersectionRef}></var>
+      <PostList threads={threads} />
+      <var ref={intersectionRef} />
       {/*<PostForm />*/}
     </>
   );

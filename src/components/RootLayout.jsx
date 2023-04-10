@@ -4,7 +4,6 @@ import { ImageOverlay } from './ImageOverlay';
 import { GlobalContext, useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
 import { usePostHistoryContextApi } from '../ContextProviders/PostHistoryContext.jsx';
 import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
-import { tooltipsOnHover } from '../utils/tooltipsOnHover.js';
 import { useEffect, useLayoutEffect } from 'react';
 
 export function RootLayout() {
@@ -32,12 +31,10 @@ function EventListeners() {
 
   useEffect(() => {
     addRepliesToPosts();  // remove in return??
-    document.body.addEventListener('mouseover', tooltipsOnHover);
     document.body.addEventListener('click', onClick);
     window.addEventListener('postChange', onPostChange);
 
     return () => {
-      document.body.removeEventListener('mouseover', tooltipsOnHover);
       document.body.removeEventListener('click', onClick);
       window.removeEventListener('postChange', onPostChange)
     };

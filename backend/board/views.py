@@ -8,7 +8,7 @@ from .permissions import *
 from .pagination import *
 
 
-class ThreadListAPIView(generics.ListAPIView):
+class ThreadListAPI(generics.ListAPIView):
     serializer_class = serializers.ThreadListSerializer
     pagination_class = ThreadListPagination
 
@@ -48,14 +48,14 @@ class ThreadListAPIView(generics.ListAPIView):
                 'format': self.format_kwarg, 'view': self}
 
 
-class SingleThreadAPIView(generics.ListCreateAPIView):
+class ThreadAPI(generics.ListCreateAPIView):
     serializer_class = serializers.SinglePostSerializer
     pagination_class = SingleThreadPagination
 
     def get_queryset(self):
         pk = self.kwargs['thread_id']
         board = self.kwargs['board']
-        self.thread = get_object_or_404(Post, board=board, pk=pk)  # noqa
+        self.thread = get_object_or_404(Post, board=board, pk=pk, thread__pk=None)  # noqa
         self.request.kwargs = self.kwargs  # for paginator
 
         thread_replies = Post.objects.filter(board=board, thread__pk=pk) \
@@ -94,7 +94,7 @@ class SingleThreadAPIView(generics.ListCreateAPIView):
                         data={'status': 1, 'post': response.data})
 
 
-class BoardsAPIView(generics.ListAPIView):
+class BoardsAPI(generics.ListAPIView):
     queryset = Board.objects.all()
     serializer_class = serializers.BoardSerializer
 
@@ -112,7 +112,7 @@ class DeletePostAPIView(APIView):
                         data={'post': {'id': pk}, 'status': 1})
 
 
-class EditPostAPIView(generics.UpdateAPIView):
+class EditPostAPI(generics.UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = serializers.SinglePostSerializer
     permission_classes = [EditPostPermission]
@@ -129,3 +129,10 @@ class EditPostAPIView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
         return Response({'post': response.data, 'status': 1})
+
+
+class PostAPI(generics.RetrieveAPIView):
+    queryset = Post.objects.all()
+    serializer_class = serializers.SinglePostSerializer
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'post_id'

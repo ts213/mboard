@@ -4,22 +4,17 @@ import { PostDropdown } from './PostDropdown.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage';
 import { toRelativeTime } from '../utils/timeToRelative.js';
-import { useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
 // import PropTypes from 'prop-types';
-// console.log(PropTypes) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-export function Post({ post, dateNow, isEditMenu, isDropdown }) {
-  const notOPpost = post.thread ? 'bg-slate-800 border border-gray-600' : '';
-  // console.log('postjsx', post.id);
+export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, onEditMenuClick }) {
 
   const postTextElmnt = useRef();
-  const { onDropdownClick, onEditMenuClick } = useGlobalContextApi();
-
   return (
-    <article
-      id={post.id}
-      className={`${notOPpost} text-white p-2 m-2 whitespace-pre-wrap clear-both ${isEditMenu && 'border-2 border-sky-500 border-dotted'}`}>
-
+    <article id={post.id}
+             className={`text-white p-2 m-2 whitespace-pre-wrap clear-both 
+             ${post.thread ? 'bg-slate-800 border border-gray-600' : ''}
+             ${isEditMenu ? 'border-2 border-sky-500 border-dotted' : ''}`}
+    >
       <header>
         <span>{post.poster ? post.poster : 'Anon'}</span>
         <span className='ml-2'>{toRelativeTime(post.date, dateNow)}</span>

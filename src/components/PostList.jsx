@@ -1,19 +1,26 @@
-import { useEdiMenuContext, usePostDropdownContext } from '../ContextProviders/GlobalContext.jsx';
+import { useEdiMenuContext, useGlobalContextApi, usePostDropdownContext } from '../ContextProviders/GlobalContext.jsx';
 import { memo, useEffect, useState } from 'react';
 import { Post } from './Post.jsx';
+import { routeLoader } from '../App.jsx';
+import tippy from 'tippy.js';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { LoadMorePostsBtn } from './LoadMorePostsBtn.jsx';
 
 const PostMemo = memo(Post);
 
-export function PostList({ thread, loadMoreProps = undefined }) {
+export function PostList({ threads, loadMoreProps = undefined }) {
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
+  const { onDropdownClick, onEditMenuClick } = useGlobalContextApi();
 
   const [dateNow, setDate] = useState(new Date());
-  useEffect(() => setDate(new Date()), [thread]);
+  useEffect(() => setDate(new Date()), [threads]);
 
   return (
-    <div className='m-12'>
-      {thread.map(thread =>
+    <div className='m-12'
+         onMouseOver={(ev) => showTooltip(ev, threads, dateNow)}
+    >
+      {threads.map(thread =>
         <section
           key={thread.id}
           className='flex flex-col flex-wrap items-start'>
@@ -23,6 +30,8 @@ export function PostList({ thread, loadMoreProps = undefined }) {
             dateNow={dateNow}
             isEditMenu={postEditMenu === thread.id}
             isDropdown={dropdown === thread.id}
+            onDropdownClick={onDropdownClick}
+            onEditMenuClick={onEditMenuClick}
           />
 
           {thread.replies.map(reply =>
@@ -32,6 +41,8 @@ export function PostList({ thread, loadMoreProps = undefined }) {
               dateNow={dateNow}
               isEditMenu={postEditMenu === reply.id}
               isDropdown={dropdown === reply.id}
+              onDropdownClick={onDropdownClick}
+              onEditMenuClick={onEditMenuClick}
             />
           )}
         </section>
@@ -40,22 +51,38 @@ export function PostList({ thread, loadMoreProps = undefined }) {
   );
 }
 
-function LoadMorePostsBtn(props) {
-  const { repliesLoadedCount, repliesCount, loadMorePosts } = props;
-  return (
-    <div
-      className='w-[100%] py-2 ml-2 text-center border-2 border-slate-800 text-white font-thin'
-    >
-      Posts loaded:
-      <span className='ml-1'>{repliesLoadedCount}/{repliesCount}</span>
-      <button name='loadMore' onClick={loadMorePosts}
-              className='ml-2 p-1 bg-slate-800'>
-        [Load More]
-      </button>
-      <button name='loadAll' onClick={loadMorePosts}
-              className='ml-2 p-1 bg-slate-800'>
-        [All]
-      </button>
-    </div>
-  )
+async function showTooltip(ev, threads, dateNow) {
+  if (ev.target.classList.contains('quote-link') && !Object.hasOwn(ev.target, '_tippy')) {
+    const regex = /#(\d+)/;
+    const quotedPostId = ev.target.href.match(regex)[1];  // [1] first matched group
+
+    let postObject = threads.concat(
+      threads.flatMap(thread => thread.replies)
+    ).find(post => post.id == quotedPostId);
+
+    if (!postObject) {
+      try {
+        const request = new Request(`/post/${quotedPostId}/`);
+        postObject = await routeLoader(request);
+      } catch {
+        tooltipProps.content = '';
+        tippy(ev.nativeEvent.target, tooltipProps);
+        return;
+      }
+    }
+    tooltipProps.content = renderToStaticMarkup(<Post post={postObject} dateNow={dateNow} />);
+    tippy(ev.nativeEvent.target, tooltipProps);
+  }
 }
+
+const tooltipProps = {
+  role: 'tooltip',
+  interactive: true,
+  allowHTML: true,
+  placement: 'top-end',
+  showOnCreate: true,
+  arrow: false,
+  delay: [150, 150],
+  maxWidth: 'none',
+  // onHidden: instance => instance.destroy(),
+};

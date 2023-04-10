@@ -2,10 +2,9 @@ import { useLoaderData, useParams, useRevalidator } from 'react-router-dom';
 import { PostList } from '../PostList.jsx';
 import { PostForm } from '../PostForm.jsx';
 import { useEffect } from 'react';
-import { useScrollToPost } from '../../hooks/hooks.jsx';
 
 const DEFAULT_LOAD_LIMIT = 10;
-let loadPostLimit = 0;
+let loadPostLimit = null;
 
 export function Thread() {
   const { threadId, board } = useParams();
@@ -13,9 +12,7 @@ export function Thread() {
   const revalidator = useRevalidator();
   // useScrollToPost(thread.replies[0]?.id);
 
-  useEffect(() => () => {
-    loadPostLimit = 0;
-  }, []);
+  useEffect(() => () => loadPostLimit = null, []);  // clean-up
 
   const loadMoreProps = {
     repliesLoadedCount: thread.replies.length,
@@ -26,7 +23,7 @@ export function Thread() {
   return (
     <>
       <PostList
-        thread={[thread]}
+        threads={[thread]}
         loadMoreProps={(repliesCount - thread.replies.length) > 0 // if not all posts loaded
           ? loadMoreProps
           : undefined}
