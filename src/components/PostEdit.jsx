@@ -20,22 +20,23 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
 
   return (
     <>
-      <textarea className=' outline-none resize overflow-scroll bg-slate-800 pb-10 w-[100%]'
+      <textarea className='edit-post-textarea'
                 defaultValue={postTextElmnt.innerText}
                 ref={textareaRef}
       />
 
       {fetcher.data?.errors &&
-        <div className='text-center text-red-500 text-lg float-right'>
+        <div className='edit-post-errors'>
           {fetcher.data.errors}
         </div>
       }
 
-      <div className='block mt-5 clear-both'>
+      {/*<div className='mt-5 clear-both'>*/}
+      <div style={{ clear: 'both', marginTop: '1.25rem' }}>
         <Button type='button'
                 value='Cancel'
                 clickHandler={() => onEditMenuClick(0)}
-                extraClass='mr-4 '
+                extraStyle={{ marginRight: '1rem' }}
         />
         <Button type='button'
                 value='Update'

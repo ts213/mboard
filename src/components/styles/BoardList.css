@@ -1,0 +1,15 @@
+.board-list {
+    margin-bottom: 1.25rem;
+    margin-left: 3rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    text-align: center;
+}
+
+.board-list-hr {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    height: 1px;
+    border-width: 0;
+    background-color: #374151;
+}

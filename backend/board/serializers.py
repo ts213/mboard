@@ -28,11 +28,17 @@ class SinglePostSerializer(serializers.ModelSerializer):
     images = ImageSerializer(read_only=True, many=True)
     images_write = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
 
+    class Meta:
+        model = Post
+        exclude = ('edited_at',)
+        extra_kwargs = {'userid': {'write_only': True}}
+
     def create(self, validated_data):
         if not validated_data.get('userid', None):
             validated_data['userid'] = uuid.uuid4()
+            self.fields['userid'].write_only = False
 
-        images = validated_data.pop('images', None)
+        images = validated_data.pop('images_write', None)
         validated_data['text'] = process_post_text(validated_data['text'])
         post = Post.objects.create(**validated_data)
         if images:
@@ -40,6 +46,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
                             image=image, thumb=make_thumb(image))
                       for image in images]
             Image.objects.bulk_create(images)
+
         return post
 
     def validate(self, data):
@@ -50,7 +57,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
         if post_message_length == 0 and not images:
             raise serializers.ValidationError(
                 {'text': 'This field is required'},
-                {'files': 'This field is required'},
+                {'images': 'This field is required'},
             )
         return data
 
@@ -74,11 +81,6 @@ class SinglePostSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_bump_timestamp(thread: Post):
         return thread.bump.timestamp()
-
-    class Meta:
-        model = Post
-        exclude = ('edited_at',)
-        extra_kwargs = {'userid': {'write_only': True}}
 
 
 class ThreadListSerializer(SinglePostSerializer):

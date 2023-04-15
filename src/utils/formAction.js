@@ -1,8 +1,18 @@
 export async function createNewPostAction({ request, params }) {
   const formData = await request.formData();
 
+  params.board && formData.set('board', params.board);
+
+  if (!params.threadId) {
+    let new_path = request.url; // request is immutable
+    new_path += new_path.endsWith('/') ? 'thread/0/' : '/thread/0/';  // thread/0/ == new thread
+    request = new Request(new_path, request);
+  } else {
+    formData.set('thread', params.threadId);
+  }
+
   if (formData.get('file')?.size === 0) {  // not sending empty file field to server, validation error if sent
-    formData.delete('file');  // better'd be not to even include it... todo
+    formData.delete('file');  // not to even include it? todo
   }
 
   let userid = localStorage.getItem('userid');
@@ -12,10 +22,10 @@ export async function createNewPostAction({ request, params }) {
 
   try {
     const data = await submitForm(request, formData);
-    // if (!userid && data?.post?.userid) {
-    //   userid = data.post.userid;
-    //   localStorage.setItem('userid', userid);
-    // }
+    if (!userid && data?.post?.userid) {
+      userid = data.post.userid;
+      localStorage.setItem('userid', userid);
+    }
 
     // dispatchPostChangeEvent(data.post.id);
     return data;
@@ -34,7 +44,11 @@ export async function editPostAction({ request }) {
 }
 
 export async function deletePostAction({ request, params }) {
-  return await submitForm(request, null);
+  try {
+    return await submitForm(request, null);
+  } catch (e) {
+    return e;
+  }
 }
 
 async function submitForm(request, formData = undefined) {

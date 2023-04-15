@@ -17,7 +17,6 @@ INTERNAL_IPS = [
 
 REST_FRAMEWORK = {
     # 'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
-    #
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # per view
     # 'PAGE_SIZE': 5,  # per view
     #
@@ -43,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 3rd party
     'rest_framework',
-    "debug_toolbar",
+    # "debug_toolbar",
     # 'corsheaders',
 
     'board.apps.BoardConfig',
@@ -52,7 +51,7 @@ INSTALLED_APPS = [
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     # "corsheaders.middleware.CorsMiddleware",
     # 'django.middleware.security.SecurityMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',

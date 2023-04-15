@@ -1,36 +1,33 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, ScrollRestoration } from 'react-router-dom';
 import { NavBar } from './NavBar.jsx';
 import { ImageOverlay } from './ImageOverlay';
-import { GlobalContext, useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
+import { useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
 import { usePostHistoryContextApi } from '../ContextProviders/PostHistoryContext.jsx';
 import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect } from 'react';
+import { useDocumentTitle } from '../hooks/UseDocumentTitle.jsx';
 
-export function RootLayout() {
+export function Root() {
+  useDocumentTitle();
+  useEventListeners();
   return (
     <>
+      <ScrollRestoration />
       <NavBar />
-      <GlobalContext>
-        <main>
-          <Outlet />
-        </main>
-        <ImageOverlay />
-        <EventListeners />
-      </GlobalContext>
+      <main>
+        <Outlet />
+      </main>
+      <ImageOverlay />
     </>
   );
 }
 
-function EventListeners() {
+function useEventListeners() {
   const { onClick } = useGlobalContextApi();
   const onPostChange = usePostHistoryContextApi();
 
-  useLayoutEffect(() => {
-    window.document.title = window.location.pathname;
-  }, []);
-
   useEffect(() => {
-    addRepliesToPosts();  // remove in return??
+    addRepliesToPosts();
     document.body.addEventListener('click', onClick);
     window.addEventListener('postChange', onPostChange);
 

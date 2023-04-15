@@ -1,0 +1,25 @@
+.load-more-wrap {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-left: 0.5rem;
+    color: #ffffff;
+    font-weight: 100;
+    text-align: center;
+    border: 2px solid rgb(30 41 59);
+    width: 100%;
+}
+
+.load-more-wrap button {
+    padding: 0.25rem;
+    margin-left: 0.5rem;
+    background: inherit;
+    color: inherit;
+    font-weight: inherit;
+    border: none;
+    cursor: pointer;
+    font-size: 100%;
+}
+
+.load-more-wrap button:hover {
+    background: #2f3943;
+}

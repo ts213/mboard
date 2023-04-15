@@ -1,0 +1,22 @@
+.button {
+    padding: 0.5rem 0.25rem;
+    background-color: #1F2937;
+    color: #9CA3AF;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    letter-spacing: 0.025em;
+    border-width: 1px;
+    border-color: #4B5563;
+    min-width: 100px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #374151;
+    color: #ffffff;
+}
+
+.button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}

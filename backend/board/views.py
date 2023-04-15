@@ -80,11 +80,12 @@ class ThreadAPI(generics.ListCreateAPIView):
 
     def get_serializer_context(self):
         return {'request': None,  # for relative urls
-                'format': self.format_kwarg, 'view': self}
+                'format': self.format_kwarg,
+                'view': self, }
 
     def post(self, request, *args, **kwargs):
-        if request.data.get('images', None):
-            images_list = request.data.pop('images')
+        if request.data.get('image', None):
+            images_list = request.data.pop('image')
             request.data.setlist('images_write', images_list)
         return super().post(request, *args, **kwargs)
 
@@ -109,7 +110,7 @@ class DeletePostAPIView(APIView):
 
         post.delete()
         return Response(status=status.HTTP_200_OK,
-                        data={'post': {'id': pk}, 'status': 1})
+                        data={'post': {'id': pk}, 'deleted': 1})
 
 
 class EditPostAPI(generics.UpdateAPIView):
@@ -136,3 +137,17 @@ class PostAPI(generics.RetrieveAPIView):
     serializer_class = serializers.SinglePostSerializer
     lookup_field = 'pk'
     lookup_url_kwarg = 'post_id'
+
+
+class FeedAPI(APIView):
+    def get(self, request):
+        if userid := self.request.headers.get('userid'):
+            queryset = self.get_queryset(userid)
+            serializer = serializers.SinglePostSerializer(queryset, many=True)
+            return Response(serializer.data)
+
+        return Response()
+
+    @staticmethod
+    def get_queryset(userid):
+        return Post.objects.filter(userid=userid)

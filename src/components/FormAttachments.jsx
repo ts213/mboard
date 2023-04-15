@@ -1,9 +1,8 @@
 export function FormAttachments({ fileList, onFileRemove }) {
-
   const attachments = fileList.map((file, idx) =>
     <picture key={idx}
              onClick={() => onFileRemove(idx, file)}
-             className='relative w-fit inline-block'
+             className='form-preview-file-cont'
     >
       <source srcSet={URL.createObjectURL(file)}
               type={file.type}
@@ -13,14 +12,14 @@ export function FormAttachments({ fileList, onFileRemove }) {
       <img src='' title={file.name}  // without 'alt' so as to display an empty box
            style={{ width: '100px', height: '100px', display: 'inline' }}
       />
-      <span className='absolute right-2 pointer-events-none text-red-400 font-bold'>
+      <span className='form-file-preview-close-btn'>
         X
       </span>
     </picture>
   );
 
   return (
-    <div className={`min-w-max`}>
+    <div className='form-files-wrap'>
       {attachments}
     </div>
   )

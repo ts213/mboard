@@ -1,26 +1,32 @@
 export function LoadMorePostsBtn(props) {
-  const { repliesLoadedCount, repliesCount, loadMorePosts } = props;
+  const { repliesLoadedCount, repliesCount, loadMorePosts, revalidator } = props;
   return (
     <div
-      className='w-[100%] py-2 ml-2 text-center border-2 border-slate-800 text-white font-thin'
+      className='load-more-wrap'
     >
       Posts loaded:
-      <span className='ml-1'>
+      <span style={{marginLeft: '0.25rem' }}>
         {repliesLoadedCount}/{repliesCount}
       </span>
+
       <button
+        hidden={revalidator.state !== 'idle'}
         name='loadMore'
         onClick={loadMorePosts}
-        className='ml-2 p-1 bg-slate-800'
       >
         [Load More]
       </button>
+
       <button
+        hidden={revalidator.state !== 'idle'}
         name='loadAll'
         onClick={loadMorePosts}
-        className='ml-2 p-1 bg-slate-800'
       >
         [All]
+      </button>
+
+      <button hidden={revalidator.state === 'idle'}>
+        Loading...
       </button>
     </div>
   )

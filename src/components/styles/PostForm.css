@@ -1,0 +1,85 @@
+.post-form {
+    margin: auto auto 5rem;
+    width: 35%;
+    max-width: 400px;
+    min-width: min-content;
+    border: 1px solid rgb(75 85 99);
+}
+
+.post-form-error {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: #EF4444;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    text-align: center;
+}
+
+.post-form-poster-input-wrap {
+    display: flex;
+}
+
+.post-form-poster-input {
+    border: none;
+    color: white;
+    padding-left: 0.5rem;
+    outline: 0;
+    flex-grow: 1;
+}
+
+.post-form-poster-input::placeholder {
+    opacity: 0.5;
+}
+
+.post-form-textarea {
+    color: #ffffff;
+    padding: 0;
+    border: 1px solid rgb(75 85 99);
+    font-size: large;
+    outline: 0;
+    resize: both;
+    min-width: 100%;
+}
+
+.file-input-label {
+    background-color: rgb(30 41 59);
+    letter-spacing: 0.1em;
+    border-width: 1px;
+    border-color: #4B5563;
+    cursor: pointer;
+    display: block;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+
+}
+
+.file-input-label:hover {
+    background-color: #374151;
+}
+
+.file-input-label-span {
+    color: #9CA3AF;
+    text-align: center;
+}
+
+.file-input-label input {
+    display: none;
+}
+
+.form-preview-file-cont {
+    width: fit-content;
+    display: inline-block;
+    position: relative;
+}
+
+.form-files-wrap {
+    min-width: max-content;
+}
+
+.form-file-preview-close-btn {
+    position: absolute;
+    right: 0.5rem;
+    color: #F87171;
+    font-weight: 700;
+    pointer-events: none;
+}

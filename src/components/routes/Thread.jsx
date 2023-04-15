@@ -1,4 +1,5 @@
-import { useLoaderData, useParams, useRevalidator } from 'react-router-dom';
+import './../styles/Thread.css';
+import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
 import { PostList } from '../PostList.jsx';
 import { PostForm } from '../PostForm.jsx';
 import { useEffect } from 'react';
@@ -7,30 +8,34 @@ const DEFAULT_LOAD_LIMIT = 10;
 let loadPostLimit = null;
 
 export function Thread() {
-  const { threadId, board } = useParams();
   const { thread, repliesCount } = useLoaderData();
   const revalidator = useRevalidator();
-  // useScrollToPost(thread.replies[0]?.id);
 
-  useEffect(() => () => loadPostLimit = null, []);  // clean-up
+  useEffect(() => {
+    window.threadWasMounted = true;
+
+    return () => {
+      loadPostLimit = null;
+    };
+  }, []);
 
   const loadMoreProps = {
     repliesLoadedCount: thread.replies.length,
-    repliesCount: repliesCount,
+    repliesCount,
     loadMorePosts,
+    revalidator,
   };
 
   return (
     <>
       <PostList
-        threads={[thread]}
+        threadList={[thread]}
         loadMoreProps={(repliesCount - thread.replies.length) > 0 // if not all posts loaded
           ? loadMoreProps
           : undefined}
       />
-      <PostForm threadId={threadId}
-                board={board}
-      />
+      <NavigationButtons />
+      <PostForm />
     </>
   );
 
@@ -48,7 +53,7 @@ export function Thread() {
   }
 }
 
-export async function threadLoader(request) {
+export async function ThreadLoader({ request }) {
   let url = '/api' + new URL(request.url).pathname;
 
   if (loadPostLimit) {
@@ -60,4 +65,24 @@ export async function threadLoader(request) {
     throw new Response('loader error', { status: r.status });
   }
   return await r.json();
+}
+
+function NavigationButtons() {
+  const navigate = useNavigate();
+  return (
+    <div id='bottom' style={{ marginLeft: '3rem', marginRight: '3rem' }}>
+        <span
+          onClick={() => navigate(-1)}
+          style={{ marginRight: '5px', cursor: 'pointer', fontWeight: '300' }}
+        >
+          [Return]
+        </span>
+      <span
+        onClick={() => document.body.scrollIntoView()}
+        style={{ cursor: 'pointer', fontWeight: '300' }}
+      >
+          [Top]
+      </span>
+    </div>
+  )
 }

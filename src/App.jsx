@@ -1,65 +1,73 @@
-import { lazy, Suspense } from 'react';
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, defer, } from 'react-router-dom';
-import { RootLayout } from './components/RootLayout.jsx';
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import { Root } from './components/Root.jsx';
 import { createNewPostAction, editPostAction, deletePostAction } from './utils/formAction.js'
 import { ErrorPage } from './components/routes/ErrorPage.jsx';
 import { PostHistoryContext } from './ContextProviders/PostHistoryContext.jsx';
-import { Thread, threadLoader } from './components/routes/Thread';
+import { ThreadListLoader } from './components/routes/ThreadList.jsx';
+import { GlobalContext } from './ContextProviders/GlobalContext.jsx';
+import { Feed, FeedLoader } from './components/routes/Feed.jsx';
 
-const BoardsList = lazy(() => import('./components/routes/BoardsList.jsx'));
-const PostList = lazy(() => import('./components/routes/ThreadList.jsx'));
-// const ErrorPage = lazy(() => import('./components/ErrorPage'));
-// const formAction = lazy(() => import('./utils/formAction'));  // submit form not working with lazy
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path='/'
+           Component={Root}
+           ErrorBoundary={ErrorPage}
+    >
 
+      <Route index Component={HomePage} />
+
+      <Route path='boards/'
+             id='boards'
+             lazy={async () => {
+               const { BoardList, boardLoader } = await import('./components/routes/BoardList.jsx');
+               return { Component: BoardList, loader: boardLoader };
+             }}
+      />
+
+      <Route path=':board/'
+             id='board'
+             action={createNewPostAction}
+             lazy={async () => {
+               const { ThreadList } = await import('./components/routes/ThreadList.jsx');
+               return { Component: ThreadList, loader: ThreadListLoader };
+             }}
+             shouldRevalidate={() => false}
+      />
+
+      <Route path=':board/thread/:threadId/'
+             id='thread'
+             action={createNewPostAction}
+
+             lazy={async () => {
+               const { Thread, ThreadLoader } = await import('./components/routes/Thread.jsx');
+               return { Component: Thread, loader: ThreadLoader };
+             }}
+      />
+
+      <Route path='edit/' action={editPostAction} />
+      <Route path='delete/:postId/' action={deletePostAction} />
+
+      <Route path='feed/'
+             Component={Feed}
+             loader={FeedLoader} />
+
+    </Route>
+  )
+);
 
 export default function App() {
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route
-        path='/'
-        element={
-          <Suspense fallback={<h1>loading..</h1>}>
-            <RootLayout />
-          </Suspense>
-        }
-        errorElement={<ErrorPage />}
-      >
-
-        <Route index element={<HomePage />} />
-
-        <Route path='boards'
-               loader={({ request }) => defer({ boards: routeLoader(request) })}
-               element={<BoardsList />}
-               shouldRevalidate={() => false}
-        />
-
-        <Route path=':board'
-               element={<PostList />}
-        />
-
-        <Route path=':board/thread/:threadId/'
-               loader={({ request }) => threadLoader(request)}
-               action={createNewPostAction}
-               element={<Thread />}
-        />
-
-        <Route path='edit/' action={editPostAction} />
-        <Route path='delete/:postId/' action={deletePostAction} />
-
-      </Route>
-    )
-  );
-
   return (
-    <PostHistoryContext>
-      <RouterProvider router={router} />
-    </PostHistoryContext>
+    <GlobalContext>
+      <PostHistoryContext>
+        <RouterProvider router={router} />
+      </PostHistoryContext>
+    </GlobalContext>
   );
 }
 
 function HomePage() {
   return (
-    <div className={'text-center m-20'}>home page.....</div>
+    <div>home page.....</div>
   )
 }
 

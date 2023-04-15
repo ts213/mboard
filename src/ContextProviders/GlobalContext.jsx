@@ -11,12 +11,11 @@ const initialState = {
 
 export function GlobalContext({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  // console.dir(state)
   const api = useMemo(() => {
 
     function onClick(ev) {
-      const classList = ['img', 'dropdown', 'del-btn'];
-      if (!classList.some(class_ => ev.target.classList.contains(class_))) {
+      const classList = ['img', 'dropdown-btn', 'del-btn'];
+      if (!classList.some(klass => ev.target.classList.contains(klass))) {
         dispatch({ type: 'click' });
       }
     }

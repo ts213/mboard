@@ -1,27 +1,34 @@
+import './styles/PostForm.css';
 import { Button } from './Button.jsx';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { FormAttachments } from './FormAttachments';
 import { formErrorList } from '../utils/postFormErrors.js';
-import { useFetcher } from 'react-router-dom';
+import { useFetcher, useNavigate } from 'react-router-dom';
 
-export function PostForm({ board, threadId = undefined }) {
+export function PostForm() {
   const [fileList, setFileList] = useState([]);
   const inputFileRef = useRef();
   const textAreaRef = useRef();
+  const navigate = useNavigate();
 
   const fetcher = useFetcher();
-  const errorList = useMemo(() => formErrorList(fileList, fetcher.data), [fetcher.data, fileList]);
+  const errorList = useMemo(() => formErrorList(fileList, fetcher.data),
+    [fetcher.data, fileList]
+  );
 
   useEffect(() => {
-    if (fetcher.data?.status === 1) {
+    if (fetcher.data?.status === 1) {  // post created
+      if (fetcher.data?.post?.thread === null) { // null == new thread
+        return navigate(`thread/${fetcher.data.post.id}`);
+      }
+
       textAreaRef.current.value = '';
       inputFileRef.current.value = '';
       setFileList([]);
-      // updateThread();
     }
-  }, [textAreaRef, inputFileRef, fetcher.data]);
+  }, [fetcher.data, navigate]);
 
-  function onChange(e) {
+  function onFileInputChange(e) {
     if (e.target.files.length > 4) {
       e.preventDefault();
       e.target.value = '';  // files might be left from previous input
@@ -33,58 +40,58 @@ export function PostForm({ board, threadId = undefined }) {
   }
 
   return (
-    <fetcher.Form
-      // action='/posting/'
-      // action={ttt}
-      // action={location.pathname + '?limit=' + (thr.replies.length + 1)}
-      method='POST' encType='multipart/form-data'
-      className='w-1/4 m-auto min-w-min mb-20' // min-w-min bc input elmnt has fixed default width
-    >
+    <>
       {errorList.length > 0 &&
         errorList.map((er, idx) =>
-          <output key={idx} className='block text-center text-red-500 text-lg mb-3'>
+          <output key={idx} className='post-form-error'>
             {er}
           </output>
         )}
 
-      <div className='flex'>
-        <input type='text' name='poster' maxLength='35' placeholder='Anon'
-               className='grow border border-gray-600 bg-slate-800 text-white pl-2 placeholder:opacity-50 outline-none'
-        />
-        <Button
-          disabled={errorList.length > 0 || fetcher.state !== 'idle'}
-          submitting={fetcher.state === 'submitting'}
-          buttonType='submit'
-        />
-      </div>
+      <fetcher.Form
+        method='POST' encType='multipart/form-data'
+        className='post-form' // min-w-min bc input elmnt has fixed default width
+      >
 
-      <textarea ref={textAreaRef} rows='7'
-                required={fileList.length < 1}
-                name='text'
-                minLength='1' maxLength='10000'
-                className='min-w-[100%] border border-gray-600 bg-slate-800 text-white resize outline-none'
-      />
+        <div className='post-form-poster-input-wrap'>
+          <input type='text' name='poster' maxLength='35' placeholder='Anon'
+                 className='post-form-poster-input'
+          />
+          <Button
+            disabled={errorList.length > 0 || fetcher.state !== 'idle'}
+            submitting={fetcher.state === 'submitting'}
+            buttonType='submit'
+          />
+        </div>
 
-      <label
-        className='py-3 flex [&_span]:hover:text-white border border-gray-600 tracking-widest cursor-pointer hover:bg-gray-700 bg-slate-800'>
-        <span className='m-auto text-gray-400 '>
-          SELECT A FILE
-        </span>
-        <input ref={inputFileRef} onChange={onChange}
-               multiple name='file' type='file' className='hidden' accept='image/*'
+        <textarea ref={textAreaRef} rows='7'
+                  required={fileList.length < 1}
+                  name='text'
+                  minLength='1' maxLength='10000'
+                  className='post-form-textarea'
         />
-      </label>
 
-      {fileList.length > 0 &&
-        <FormAttachments
-          onFileRemove={onFileRemove}
-          fileList={fileList}
-        />
-      }
+        <label
+          className='file-input-label'>
+          <div className='file-input-label-span'>
+            SELECT A FILE
+          </div>
+          <input
+            name='image' type='file' accept='image/*'
+            multiple
+            ref={inputFileRef}
+            onChange={onFileInputChange}
+          />
+        </label>
 
-      <input type='hidden' name='board' readOnly value={board} />
-      {threadId && <input type='hidden' name='thread' readOnly value={threadId} />}
-    </fetcher.Form>
+        {fileList.length > 0 &&
+          <FormAttachments
+            onFileRemove={onFileRemove}
+            fileList={fileList}
+          />
+        }
+      </fetcher.Form>
+    </>
   );
 
   function onFileRemove(idxToRemove, file) {
@@ -97,5 +104,4 @@ export function PostForm({ board, threadId = undefined }) {
     URL.revokeObjectURL(fileUrl);
     setFileList(nextFileList);
   }
-
 }
