@@ -1,19 +1,17 @@
 import { Outlet, ScrollRestoration } from 'react-router-dom';
-import { NavBar } from './NavBar.jsx';
-import { ImageOverlay } from './ImageOverlay';
-import { useGlobalContextApi } from '../ContextProviders/GlobalContext.jsx';
-import { usePostHistoryContextApi } from '../ContextProviders/PostHistoryContext.jsx';
-import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
+import { ImageOverlay } from './ImageOverlay.jsx';
+import { useGlobalContextApi } from '../../context/GlobalContext.jsx';
+import { usePostHistoryContextApi } from '../../context/PostHistoryContext.jsx';
+import { addRepliesToPosts } from '../../utils/addRepliesToPost.js';
 import { useEffect } from 'react';
-import { useDocumentTitle } from '../hooks/UseDocumentTitle.jsx';
+import { useDocumentTitle } from '../../hooks/UseDocumentTitle.jsx';
 
-export function Root() {
+export function ThreadsContainer() {
   useDocumentTitle();
   useEventListeners();
   return (
     <>
       <ScrollRestoration />
-      <NavBar />
       <main>
         <Outlet />
       </main>

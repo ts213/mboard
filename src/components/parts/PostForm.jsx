@@ -1,8 +1,8 @@
-import './styles/PostForm.css';
+import '../styles/PostForm.css';
 import { Button } from './Button.jsx';
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { FormAttachments } from './FormAttachments';
-import { formErrorList } from '../utils/postFormErrors.js';
+import { FormAttachments } from './FormAttachments.jsx';
+import { formErrorList } from '../../utils/postFormErrors.js';
 import { useFetcher, useNavigate } from 'react-router-dom';
 
 export function PostForm() {
@@ -17,7 +17,7 @@ export function PostForm() {
   );
 
   useEffect(() => {
-    if (fetcher.data?.status === 1) {  // post created
+    if (fetcher.data?.created === 1) {  // post created
       if (fetcher.data?.post?.thread === null) { // null == new thread
         return navigate(`thread/${fetcher.data.post.id}`);
       }
@@ -46,7 +46,8 @@ export function PostForm() {
           <output key={idx} className='post-form-error'>
             {er}
           </output>
-        )}
+        )
+      }
 
       <fetcher.Form
         method='POST' encType='multipart/form-data'
@@ -58,7 +59,7 @@ export function PostForm() {
                  className='post-form-poster-input'
           />
           <Button
-            disabled={errorList.length > 0 || fetcher.state !== 'idle'}
+            disabled={(fileList.length > 0 && errorList.length > 0) || fetcher.state !== 'idle'}
             submitting={fetcher.state === 'submitting'}
             buttonType='submit'
           />
@@ -96,8 +97,8 @@ export function PostForm() {
 
   function onFileRemove(idxToRemove, file) {
     const fileUrl = URL.createObjectURL(file);
-    const dt = new DataTransfer(); // workaround bc can't change input.files directly
-    const nextFileList = fileList.filter((_, idx) => idx !== idxToRemove);  // need sync. value instead of async
+    const dt = new DataTransfer(); // workaround, can't change input.files directly
+    const nextFileList = fileList.filter((_, idx) => idx !== idxToRemove);  // need sync. value, not async
     nextFileList.forEach(file => dt.items.add(file));
     inputFileRef.current.files = dt.files;
 

@@ -15,16 +15,16 @@ export async function createNewPostAction({ request, params }) {
     formData.delete('file');  // not to even include it? todo
   }
 
-  let userid = localStorage.getItem('userid');
+  let userid = localStorage.getItem('user_id');
   if (userid) {
-    formData.set('userid', userid);
+    formData.set('user_id', userid);
   }
 
   try {
     const data = await submitForm(request, formData);
-    if (!userid && data?.post?.userid) {
-      userid = data.post.userid;
-      localStorage.setItem('userid', userid);
+    if (!userid && data?.post?.user_id) {
+      userid = data.post.user_id;
+      localStorage.setItem('user_id', userid);
     }
 
     // dispatchPostChangeEvent(data.post.id);
@@ -34,7 +34,7 @@ export async function createNewPostAction({ request, params }) {
   }
 }
 
-export async function editPostAction({ request }) {
+export async function editPostAction(request) {
   const formData = await request.formData();
   try {
     return await submitForm(request, formData);
@@ -43,7 +43,7 @@ export async function editPostAction({ request }) {
   }
 }
 
-export async function deletePostAction({ request, params }) {
+export async function deletePostAction(request) {
   try {
     return await submitForm(request, null);
   } catch (e) {
@@ -59,9 +59,9 @@ async function submitForm(request, formData = undefined) {
   let headers = undefined;
 
   if (request.method === 'DELETE' || request.method === 'PATCH') {
-    const userid = localStorage.getItem('userid');
+    const userid = localStorage.getItem('user_id');
     if (userid) {
-      headers = { userid: userid };
+      headers = { 'User-Id': userid };
     }
   }
 
@@ -70,13 +70,15 @@ async function submitForm(request, formData = undefined) {
     body: formData,
     headers: headers,
   });
-
-  if (!response.ok) {
-    throw { errors: 'response error', status: 422 };  // ?? 422
-  }
   const data = await response.json();
 
-  dispatchPostChangeEvent(data.post.id, request.method);   // response.ok means form was ok?????
+  if (!response.ok) {
+    throw {
+      errors: data.errors ?? 'response error',
+    };
+  }
+
+  dispatchPostChangeEvent(data.post.id, request.method);
   return data;
 }
 

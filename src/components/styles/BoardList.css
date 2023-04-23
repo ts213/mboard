@@ -1,15 +1,95 @@
-.board-list {
-    margin-bottom: 1.25rem;
-    margin-left: 3rem;
-    font-size: 1.125rem;
-    line-height: 1.75rem;
+nav {
+    max-width: 500px;
+    margin: 10vh auto auto;
+}
+
+li {
+    list-style: none;
+}
+
+.board-category {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    max-height: 50vh;
+}
+
+.board-category:nth-child(2) {
+    margin-top: 20px;
+}
+
+.userboards svg {
+    margin-left: 5px;
+    position: relative;
+    top: 3px;
+    cursor: pointer;
+}
+
+.boards, .userboards {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+nav a {
+    line-height: 190%;
+    width: min-content;
+}
+
+.modal {
+    background: inherit;
+    position: fixed;
+    left: 50%;
+    top: 30%;
+    transform: translate(-50%, 0);
+    color: white;
+    border: 1px solid rgb(75 85 99);
+}
+
+.modal form {
+    padding: 30px;
+}
+
+.modal header {
+    text-align: center;
+    padding: 10px;
+    color: darkgray;
+    font-size: larger;
+}
+
+.modal input {
+    color: white;
+    padding: 10px 10px 10px 10px;
+    outline: 0;
+    border: 1px solid rgb(75 85 99);
+}
+
+.modal input::placeholder {
+    text-align: center;
+    font-size: larger;
+}
+
+.modal button {
+    width: auto;
+}
+
+.modal .input-wrap {
+    margin-bottom: 20px;
+}
+
+.modal sub {
+    display: block;
+    color: gray;
+}
+
+.modal .error {
+    font-size: small;
+    color: orangered;
+    display: block;
     text-align: center;
 }
 
-.board-list-hr {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    height: 1px;
-    border-width: 0;
-    background-color: #374151;
+.post-count {
+    font-size: small;
+    color: gray;
+    margin-left: 1%;
 }

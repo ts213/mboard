@@ -1,17 +1,21 @@
 import { Link } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
-export function NavBar() {
+function NavBar() {
   return (
     <header>
       <Link style={{ marginRight: '1.25rem' }} to='/'>
-        Home
-      </Link>
-      <Link style={{ marginRight: '1.25rem' }} to='/boards/'>
         boards
-      </Link>
-      <Link to='/feed/'>
-        Feed
       </Link>
     </header>
   )
+}
+
+export function NavBarLayout() {
+  return (
+    <>
+      <NavBar />
+      <Outlet />
+    </>
+  );
 }

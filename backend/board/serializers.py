@@ -1,7 +1,7 @@
+import re
 from rest_framework import serializers
-import uuid
-from django.core.exceptions import ValidationError
-from .models import Post, Board, Image
+from django.db import transaction
+from .models import *
 from .utils import make_thumb, process_post_text
 
 
@@ -27,30 +27,40 @@ class SinglePostSerializer(serializers.ModelSerializer):
     bump = serializers.SerializerMethodField(method_name='get_bump_timestamp')
     images = ImageSerializer(read_only=True, many=True)
     images_write = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
+    user_id = serializers.UUIDField(required=False, write_only=True)
 
     class Meta:
         model = Post
-        exclude = ('edited_at',)
-        extra_kwargs = {'userid': {'write_only': True}}
+        exclude = ('edited_at', 'user')
 
     def create(self, validated_data):
-        if not validated_data.get('userid', None):
-            validated_data['userid'] = uuid.uuid4()
-            self.fields['userid'].write_only = False
-
         images = validated_data.pop('images_write', None)
-        validated_data['text'] = process_post_text(validated_data['text'])
-        post = Post.objects.create(**validated_data)
-        if images:
-            images = [Image(post=post,
-                            image=image, thumb=make_thumb(image))
-                      for image in images]
-            Image.objects.bulk_create(images)
+        user_id = validated_data.pop('user_id', None)
+        try:
+            with transaction.atomic():
+                validated_data['text'] = process_post_text(validated_data['text'])
 
-        return post
+                user, created = User.objects.get_or_create(uuid=user_id)  # save() handles None
+                validated_data['user'] = user
+
+                post = Post.objects.create(**validated_data)
+                if created:
+                    self.fields['user_id'].write_only = False
+                    post.user_id = user.uuid
+
+                if images:
+                    images = [Image(post=post,
+                                    image=image, thumb=make_thumb(image))
+                              for image in images]
+                    Image.objects.bulk_create(images)
+
+                return post
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError('Error creating post')
 
     def validate(self, data):
-        images = data.get('images', None)
+        images = data.get('images_write', None)
         text = data.setdefault('text', '')
         post_message_length = len(text)
 
@@ -65,13 +75,13 @@ class SinglePostSerializer(serializers.ModelSerializer):
     def validate_images(files):
         total_file_size = sum([file.size for file in files])
         if total_file_size > 1_000_000:
-            raise ValidationError('Max size of files exceeded')
+            raise serializers.ValidationError('Max size of files exceeded')
         return files
 
     @staticmethod
     def validate_thread(thread):
         if thread.thread:  # posts can't have other posts as their thread
-            raise ValidationError("Thread doesn't exist")
+            raise serializers.ValidationError("Thread doesn't exist")
         return thread
 
     @staticmethod
@@ -96,6 +106,35 @@ class ThreadListSerializer(SinglePostSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(required=False, write_only=True)
+    posts_count = serializers.IntegerField()
+    posts_last24h = serializers.IntegerField()
+
     class Meta:
         model = Board
-        fields = '__all__'
+        exclude = ('creator',)
+        read_only_fields = ('userboard', )
+
+    @staticmethod
+    def validate_title(title):  # add spaces TODO
+        if re.fullmatch('^[A-Za-zА-Яа-яЁё]+[0-9]*$', title):  # latin/cyrillic followed by digits
+            return title
+        raise serializers.ValidationError('Incorrect titl   e')
+
+    @staticmethod
+    def validate_link(link):
+        if re.fullmatch('^[a-z]+[0-9]*$', link):  # latin followed by digits
+            return link
+        raise serializers.ValidationError('Incorrect link')
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            try:
+                user_id = validated_data.pop('user_id', None)
+                user, _ = User.objects.get_or_create(uuid=user_id)
+                validated_data['creator'] = user
+
+                return Board.objects.create(**validated_data)  # save() handles None
+            except Exception as e:
+                print(e)
+                raise serializers.ValidationError('error')

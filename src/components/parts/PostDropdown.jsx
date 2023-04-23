@@ -1,7 +1,7 @@
 import { Button } from './Button.jsx';
 import { useFetcher } from 'react-router-dom';
-import { usePostHistoryContextList } from '../ContextProviders/PostHistoryContext.jsx';
-import { ThreadListContext } from './routes/ThreadList.jsx';
+import { usePostHistoryContextList } from '../../context/PostHistoryContext.jsx';
+import { ThreadListContext } from '../pages/ThreadList.jsx';
 import { useContext, useEffect } from 'react';
 
 export function PostDropdown({ postId, onEditMenuClick, postDateSecs }) {
@@ -49,15 +49,7 @@ export function PostDropdown({ postId, onEditMenuClick, postDateSecs }) {
   function deletePost() {
     fetcher.submit(
       null,
-      { method: 'delete', action: `/delete/${postId}/` }
+      { method: 'delete', action: `/post/${postId}/` }
     );
   }
-  // async function deletePost() {
-  //
-  //   const request = new Request(`/delete/${postId}/`, { method: 'DELETE' });
-  //   const r = await deletePostAction({ request });
-  //   if (r?.deleted === 1) {
-  //     revalidator.revalidate();
-  //   }
-  // }
 }

@@ -1,6 +1,6 @@
-import { PostList } from '../PostList.jsx';
+import { PostList } from '../parts/PostList.jsx';
 import { createContext, useEffect, useState } from 'react';
-import { PostForm } from '../PostForm.jsx';
+import { PostForm } from '../parts/PostForm.jsx';
 import { useFetcher, useLoaderData } from 'react-router-dom';
 import { useThreadsPagination, page } from '../../hooks/useThreadsPagination.jsx';
 

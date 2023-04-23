@@ -1,10 +1,10 @@
-import './styles/Post.css';
+import '../styles/Post.css';
 import { Link } from 'react-router-dom';
 import { useRef } from 'react';
 import { PostDropdown } from './PostDropdown.jsx';
 import { PostEdit } from './PostEdit.jsx';
-import { PostImage } from './PostImage';
-import { toRelativeTime } from '../utils/timeToRelative.js';
+import { PostImage } from './PostImage.jsx';
+import { toRelativeTime } from '../../utils/timeToRelative.js';
 
 // import PropTypes from 'prop-types';
 

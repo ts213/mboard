@@ -1,6 +1,6 @@
 import { useMatches } from 'react-router-dom';
 
-const ROUTES_LIST = ['boards', 'board', 'thread', 'root'];
+const ROUTES_LIST = ['boards', 'board', 'thread',];
 
 export function useDocumentTitle() {
   const routes_matched = useMatches();
@@ -11,7 +11,7 @@ export function useDocumentTitle() {
 
   switch (route.id) {
     case 'boards':
-      // document.title = 'boards';
+      document.title = 'boards';
       return;
     case 'board':
       route.data?.board && (document.title = route.data.board);

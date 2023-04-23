@@ -1,55 +1,51 @@
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
-import { Root } from './components/Root.jsx';
+import { ThreadsContainer } from './components/parts/ThreadsContainer.jsx';
 import { createNewPostAction, editPostAction, deletePostAction } from './utils/formAction.js'
-import { ErrorPage } from './components/routes/ErrorPage.jsx';
-import { PostHistoryContext } from './ContextProviders/PostHistoryContext.jsx';
-import { ThreadListLoader } from './components/routes/ThreadList.jsx';
-import { GlobalContext } from './ContextProviders/GlobalContext.jsx';
-import { Feed, FeedLoader } from './components/routes/Feed.jsx';
+import { ErrorPage } from './components/pages/ErrorPage.jsx';
+import { PostHistoryContext } from './context/PostHistoryContext.jsx';
+import { GlobalContext } from './context/GlobalContext.jsx';
+import { NavBarLayout } from './components/parts/NavBar.jsx';
+import { BoardAction, BoardList, BoardLoader } from './components/pages/BoardList.jsx';
+import { ThreadList } from './components/pages/ThreadList.jsx';
+import { Thread, ThreadLoader } from './components/pages/Thread.jsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path='/'
-           Component={Root}
-           ErrorBoundary={ErrorPage}
+    <Route
+      ErrorBoundary={ErrorPage}
     >
 
-      <Route index Component={HomePage} />
-
-      <Route path='boards/'
+      <Route path='/'
              id='boards'
-             lazy={async () => {
-               const { BoardList, boardLoader } = await import('./components/routes/BoardList.jsx');
-               return { Component: BoardList, loader: boardLoader };
-             }}
-      />
-
-      <Route path=':board/'
-             id='board'
-             action={createNewPostAction}
-             lazy={async () => {
-               const { ThreadList } = await import('./components/routes/ThreadList.jsx');
-               return { Component: ThreadList, loader: ThreadListLoader };
-             }}
+             Component={BoardList}
+             loader={BoardLoader}
+             action={BoardAction}
              shouldRevalidate={() => false}
       />
 
-      <Route path=':board/thread/:threadId/'
-             id='thread'
-             action={createNewPostAction}
+      <Route Component={NavBarLayout}>
+        <Route Component={ThreadsContainer}>
+          <Route path=':board/'
+                 id='board'
+                 action={createNewPostAction}
+                 Component={ThreadList}
+                 loader={ThreadLoader}
+                 shouldRevalidate={() => false}
+          />
+          <Route path=':board/thread/:threadId/'
+                 id='thread'
+                 action={createNewPostAction}
+                 Component={Thread}
+                 loader={ThreadLoader}
+          />
+        </Route>
+      </Route>
 
-             lazy={async () => {
-               const { Thread, ThreadLoader } = await import('./components/routes/Thread.jsx');
-               return { Component: Thread, loader: ThreadLoader };
-             }}
+      <Route path='post/:postId/' action={({ request }) => {
+        if (request.method === 'PATCH') return editPostAction(request);
+        if (request.method === 'DELETE') return deletePostAction(request);
+      }}
       />
-
-      <Route path='edit/' action={editPostAction} />
-      <Route path='delete/:postId/' action={deletePostAction} />
-
-      <Route path='feed/'
-             Component={Feed}
-             loader={FeedLoader} />
 
     </Route>
   )
@@ -63,12 +59,6 @@ export default function App() {
       </PostHistoryContext>
     </GlobalContext>
   );
-}
-
-function HomePage() {
-  return (
-    <div>home page.....</div>
-  )
 }
 
 export async function routeLoader(request) {

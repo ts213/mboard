@@ -12,7 +12,7 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
   }, []);
 
   useEffect(() => {
-    if (fetcher.data?.status === 1) {
+    if (fetcher.data?.created === 1) {
       onEditMenuClick(0);
       postTextElmnt.innerHTML = fetcher.data.post.text;
     }
@@ -55,7 +55,7 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
         id: postId,
         board: board
       },
-      { method: 'patch', action: `/edit/` }
+      { method: 'patch', action: `/post/${postId}/` }
     );
   }
 }

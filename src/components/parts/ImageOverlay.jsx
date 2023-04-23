@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useGlobalContextApi, useImageOverlayContext } from '../ContextProviders/GlobalContext.jsx';
+import { useGlobalContextApi, useImageOverlayContext } from '../../context/GlobalContext.jsx';
 
 export function ImageOverlay() {
   const imageOverlay = useImageOverlayContext();

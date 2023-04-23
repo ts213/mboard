@@ -19,6 +19,11 @@ export default defineConfig(({ command, mode }) => {
           //   options.auth = `${username}:${password}`;
           // },
         }
+      },
+      watch: {
+        ignored: [
+          '**/venv/**'
+        ],
       }
     },
     build: {

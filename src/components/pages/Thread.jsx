@@ -1,7 +1,7 @@
-import './../styles/Thread.css';
+import '../styles/Thread.css';
 import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
-import { PostList } from '../PostList.jsx';
-import { PostForm } from '../PostForm.jsx';
+import { PostList } from '../parts/PostList.jsx';
+import { PostForm } from '../parts/PostForm.jsx';
 import { useEffect } from 'react';
 
 const DEFAULT_LOAD_LIMIT = 10;

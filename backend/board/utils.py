@@ -1,8 +1,16 @@
 from io import BytesIO
-from django.core.files.base import ContentFile
 import re
 import PIL.Image
 from django.utils.html import escape
+from django.core.files.base import ContentFile
+from rest_framework.views import exception_handler
+
+
+def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
+    if response:
+        response.data = {'errors': response.data}
+    return response
 
 
 def process_post_text(post_text):

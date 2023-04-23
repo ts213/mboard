@@ -1,8 +1,8 @@
-import { useEdiMenuContext, useGlobalContextApi, usePostDropdownContext } from '../ContextProviders/GlobalContext.jsx';
+import { useEdiMenuContext, useGlobalContextApi, usePostDropdownContext } from '../../context/GlobalContext.jsx';
 import { memo, useEffect, useState } from 'react';
 import { Post } from './Post.jsx';
 import { LoadMorePostsBtn } from './LoadMorePostsBtn.jsx';
-import { showTooltip } from '../utils/showTooltip.jsx';
+import { showTooltip } from '../../utils/showTooltip.jsx';
 
 const PostMemo = memo(Post);
 

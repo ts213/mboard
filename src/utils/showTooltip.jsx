@@ -1,6 +1,6 @@
 import { routeLoader } from '../App.jsx';
 import tippy from 'tippy.js';
-import { Post } from '../components/Post.jsx';
+import { Post } from '../components/parts/Post.jsx';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 export async function showTooltip(ev, threadList, dateNow) {
