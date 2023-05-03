@@ -1,47 +1,45 @@
 import { Button } from './Button.jsx';
-import { useFetcher } from 'react-router-dom';
-import { usePostHistoryContextList } from '../../context/PostHistoryContext.jsx';
-import { ThreadListContext } from '../pages/ThreadList.jsx';
-import { useContext, useEffect } from 'react';
+import { useFetcher, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { usePostPermissions } from '../../hooks/usePostPermissions.jsx';
 
-export function PostDropdown({ postId, onEditMenuClick, postDateSecs }) {
+export function PostDropdown({ post, onEditMenuClick }) {
   const fetcher = useFetcher();
-  const postIdList = usePostHistoryContextList();
-  const timeDiff = new Date().getTime() - postDateSecs * 1000;
-  const allowed_interval = (timeDiff / 1000 / 60 / 60 / 24) <= 1;
-  const deletePostCallback = useContext(ThreadListContext);
+  const navigate = useNavigate();
+
+  const [canEdit, canDelete] = usePostPermissions(post);
 
   useEffect(() => {
-    if (deletePostCallback && fetcher.data?.deleted) {  // only from thread list page
-      deletePostCallback(fetcher.data.post.id);
+    if (fetcher.data?.deleted) {
+      window.dispatchEvent(new CustomEvent(
+        'postDeleted',
+        { detail: { postId: fetcher.data?.post.id } }
+      ));
+      if (!post.thread) {
+        navigate('../..', { relative: 'path' });
+      }
     }
-  }, [fetcher.data?.deleted]);  // eslint-disable-line
+  }, [fetcher.data?.deleted, fetcher.data?.post.id, navigate, post.thread]);
 
   return (
     <div className='dropdown-menu'>
-      <Button
-        value={'Reply'}
-      />
-      {allowed_interval &&
-        <>
-          {postIdList.some(post => post.id === postId && post.ed) &&
-            <Button
-              clickHandler={() => onEditMenuClick(postId)}
-              value='Edit'
-              extraStyle={{display: 'block'}}
-            />
-          }
+      <Button value={'Reply'} />
+      {canEdit &&
+        <Button
+          clickHandler={() => onEditMenuClick(post.id)}
+          value='Edit'
+          extraStyle={{ display: 'block' }}
+        />
+      }
 
-          {postIdList.some(post => post.id === postId && post.del) &&
-            <Button
-              clickHandler={deletePost}
-              value={'Delete'}
-              submitting={fetcher.data}
-              extraStyle={{display: 'block'}}
-              extraClass='del-btn'
-            />
-          }
-        </>
+      {canDelete &&
+        <Button
+          clickHandler={deletePost}
+          value={'Delete'}
+          submitting={fetcher.data}
+          extraStyle={{ display: 'block' }}
+          extraClass='del-btn'
+        />
       }
     </div>
   );
@@ -49,7 +47,7 @@ export function PostDropdown({ postId, onEditMenuClick, postDateSecs }) {
   function deletePost() {
     fetcher.submit(
       null,
-      { method: 'delete', action: `/post/${postId}/` }
+      { method: 'delete', action: `/post/${post.id}/` }
     );
   }
 }

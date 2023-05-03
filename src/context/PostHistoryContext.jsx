@@ -35,7 +35,7 @@ const PostHistoryContextApi = createContext();
 export const usePostHistoryContextApi = () => useContext(PostHistoryContextApi);
 
 const PostHistoryContextList = createContext();
-export const usePostHistoryContextList = () => useContext(PostHistoryContextList);
+export const usePostHistoryContext = () => useContext(PostHistoryContextList);
 
 function reducer(state, action) {
   switch (action.type) {

@@ -1,17 +1,19 @@
 import { PostList } from '../parts/PostList.jsx';
-import { createContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PostForm } from '../parts/PostForm.jsx';
 import { useFetcher, useLoaderData } from 'react-router-dom';
 import { useThreadsPagination, page } from '../../hooks/useThreadsPagination.jsx';
+import { useOnPostDelete } from '../../hooks/useOnPostDelete.jsx';
 
 let threadListCache = [];
-export const ThreadListContext = createContext();
 
 export function ThreadList() {
   const { threads = [], pageNum, nextPageNum } = useLoaderData();
   const [threadList, setThreadList] = useState(threads);
+
   const fetcher = useFetcher();
   const paginationIntersectionRef = useThreadsPagination(fetcher, pageNum, nextPageNum);
+  useOnPostDelete(setThreadList);
 
   useEffect(() => {
     if (fetcher.data?.threads) {
@@ -29,29 +31,11 @@ export function ThreadList() {
 
   return (
     <>
-      <ThreadListContext.Provider value={deletePostCallback}>
-        <ToggleablePostForm />
-        <PostList threadList={threadList} />
-      </ThreadListContext.Provider>
+      <ToggleablePostForm />
+      <PostList threadList={threadList} />
       <var style={{ visibility: 'hidden' }} ref={paginationIntersectionRef}>treeshold</var>
     </>
   );
-
-  function deletePostCallback(postIdToDelete) {
-    const withoutDeletedPost = threads.filter(filterOutPost);
-
-    setThreadList(withoutDeletedPost);
-
-    function filterOutPost(post) {
-      if (post.id === postIdToDelete) {
-        return false; // no need to bother with replies if thread id matches
-      }
-      if (post.replies.find(reply => reply.id === postIdToDelete)) {
-        post.replies = post.replies.filter(reply => reply.id !== postIdToDelete);
-      }
-      return true;
-    }
-  }
 }
 
 export async function ThreadListLoader({ request }) {

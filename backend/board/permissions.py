@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from django.utils import timezone
-from .models import Post
+from .models import Post, User
 
 
 class PostPermission(permissions.BasePermission):
@@ -12,22 +12,25 @@ class PostPermission(permissions.BasePermission):
         if request.method == 'GET':
             return not forbidden
 
-        post_editor = request.headers.get('User-Id', None)
-        post_author = str(post.user.uuid)
+        user_id = request.headers.get('User-Id', None)
+        try:
+            user = User.objects.get(uuid=user_id)
+        except User.DoesNotExist:
+            return forbidden
+
+        if user.boards.contains(post.board):
+            return not forbidden
+
+        if not post.thread:
+            return forbidden
+
         time_diff_secs = (timezone.now() - post.date).seconds
 
-        if request.method == 'DELETE':
-            forbidden = \
-                time_diff_secs > self.allowed_time or \
-                post_editor is None or \
-                post_editor != post_author
+        forbidden = \
+            time_diff_secs > self.allowed_time or \
+            user != post.user
 
-        elif request.method == 'PATCH':
-            forbidden = \
-                time_diff_secs > self.allowed_time or \
-                post_editor is None or \
-                post_editor != post_author or \
-                post.edited_at is not None
+        if request.method == 'PATCH':
+            forbidden = post.edited_at is not None
 
         return not forbidden
-

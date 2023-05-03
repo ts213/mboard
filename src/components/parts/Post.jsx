@@ -31,8 +31,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
 
           {isDropdown &&
             <PostDropdown
-              postId={post.id}
-              postDateSecs={post.date}
+              post={post}
               onEditMenuClick={onEditMenuClick}
             />
           }

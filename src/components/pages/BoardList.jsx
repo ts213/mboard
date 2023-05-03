@@ -31,7 +31,7 @@ export function BoardList() {
           </span>
           {boards.map((board, idx) =>
             <li key={idx}>
-              <Link  to={'../' + board.link + '/'}>
+              <Link to={'../' + board.link + '/'}>
                 {board.title}
               </Link>
               <span className='post-count' title='posts in last 24 hours'>
@@ -71,7 +71,7 @@ const Modal = forwardRef(function Modal(props, ref) {
   const navigation = useNavigation();
   useEffect(() => {
     return () => {
-      if (errors) errors.link = errors.title = null;
+      if (errors) errors.link = errors.title = null; // clear errors on modal closing
     }
   }, []);  //eslint-disable-line
 
@@ -120,6 +120,11 @@ export async function BoardLoader() {
 
 export async function BoardAction({ request }) {
   const formData = await request.formData();
+  const user_id = localStorage.getItem('user_id');
+  if (user_id) {
+    formData.set('user_id', user_id);
+  }
+
   const url = api_prefix + '/boards/';
   const r = await fetch(url, {
     method: request.method,
@@ -127,8 +132,16 @@ export async function BoardAction({ request }) {
   });
   const data = await r.json();
 
-  if (data?.created && data.board?.link) {
-    return redirect(`/${data.board.link}/`);
+  if (data?.created && data.board) {
+    if (data.board?.boards) {
+      localStorage.setItem('boards', JSON.stringify(data.board.boards));
+    }
+    if (data.board?.user_id) {
+      localStorage.setItem('user_id', JSON.stringify(data.board.user_id));
+    }
+    return data.board?.link
+      ? redirect(`/${data.board.link}/`)
+      : redirect('');
   }
 
   return data.errors ?? { errors: 'error' };

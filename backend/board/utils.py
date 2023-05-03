@@ -1,8 +1,10 @@
-from io import BytesIO
 import re
+import uuid
+from io import BytesIO
 import PIL.Image
-from django.utils.html import escape
 from django.core.files.base import ContentFile
+from django.utils.html import escape
+from rest_framework.serializers import UUIDField
 from rest_framework.views import exception_handler
 
 
@@ -11,6 +13,21 @@ def custom_exception_handler(exc, context):
     if response:
         response.data = {'errors': response.data}
     return response
+
+
+class CoercingUUIDField(UUIDField):
+    """ passed user_id might be tampered with // coercing to None instead of raising
+        allows to continue as if nothing were passed in case of an error """
+    def to_internal_value(self, data):
+        if not isinstance(data, uuid.UUID):
+            try:
+                if isinstance(data, str):
+                    return uuid.UUID(hex=data)
+                else:
+                    self.fail('invalid', value=data)
+            except ValueError:
+                data = None
+        return data
 
 
 def process_post_text(post_text):

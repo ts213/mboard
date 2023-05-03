@@ -1,5 +1,13 @@
 import { useCallback, useRef } from 'react';
 
+export let page = {
+  current: undefined,
+  nextPageNum: undefined,
+  increment() {
+    this.current++;
+  }
+};
+
 export function useThreadsPagination(fetcher, pageNum, nextPageNum) {
   const prevY = useRef(0); // last intersection y position
 
@@ -25,11 +33,3 @@ export function useThreadsPagination(fetcher, pageNum, nextPageNum) {
     }
   }, []);  // eslint-disable-line
 }
-
-export const page = {
-  current: undefined,
-  nextPageNum: undefined,
-  increment() {
-    this.current++;
-  }
-};

@@ -2,12 +2,13 @@ import pathlib
 import uuid
 from django.db import models
 from django.db import IntegrityError
-from .utils import delete_folder_if_empty, path_for_image, path_for_thumb
+from .utils import delete_folder_if_empty, path_for_image, path_for_thumb, process_post_text
 
 
 class User(models.Model):
     id = models.BigAutoField(primary_key=True)
     uuid = models.UUIDField(default=uuid.uuid4)  # https://docs.djangoproject.com/en/dev/ref/databases/#manually-specified-autoincrement-pk
+    boards = models.ManyToManyField('Board', related_name='janny')
 
     def save(self, *args, **kwargs):
         if self.uuid is None:
@@ -21,7 +22,6 @@ class User(models.Model):
 
 class Post(models.Model):
     id = models.BigAutoField(primary_key=True)
-    # userid = models.UUIDField(null=True, blank=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='posts', null=True, blank=True)
 
     board = models.ForeignKey('Board', on_delete=models.CASCADE, related_name='posts')
@@ -43,6 +43,10 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if self.thread and self.thread.thread:
             raise IntegrityError('Post cannot have another post as its thread')
+
+        if self.text:
+            self.text = process_post_text(self.text)
+
         super().save(*args, **kwargs)
 
     def delete(self: 'Post', *args, **kwargs):  # "docs: delete is not necessarily called when deleting in bulk"
@@ -68,8 +72,8 @@ class Image(models.Model):
 class Board(models.Model):
     link = models.CharField(primary_key=True, max_length=5)
     title = models.CharField(max_length=15, unique=True)
-    creator = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='boards')
     userboard = models.BooleanField(default=True)
+    # creator = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='boards')
 
     def save(self, *args, **kwargs):
         assert len(self.link) > 0 and len(self.title) > 0, 'length'

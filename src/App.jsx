@@ -6,7 +6,7 @@ import { PostHistoryContext } from './context/PostHistoryContext.jsx';
 import { GlobalContext } from './context/GlobalContext.jsx';
 import { NavBarLayout } from './components/parts/NavBar.jsx';
 import { BoardAction, BoardList, BoardLoader } from './components/pages/BoardList.jsx';
-import { ThreadList } from './components/pages/ThreadList.jsx';
+import { ThreadList, ThreadListLoader } from './components/pages/ThreadList.jsx';
 import { Thread, ThreadLoader } from './components/pages/Thread.jsx';
 
 const router = createBrowserRouter(
@@ -29,7 +29,7 @@ const router = createBrowserRouter(
                  id='board'
                  action={createNewPostAction}
                  Component={ThreadList}
-                 loader={ThreadLoader}
+                 loader={ThreadListLoader}
                  shouldRevalidate={() => false}
           />
           <Route path=':board/thread/:threadId/'

@@ -24,28 +24,24 @@ export function PostList({ threadList, loadMoreProps = undefined }) {
           key={thread.id}
           className='thread'>
           {loadMoreProps && <LoadMorePostsBtn {...loadMoreProps} />}
-          <PostMemo
-            post={thread}
-            dateNow={dateNow}
-            isEditMenu={postEditMenu === thread.id}
-            isDropdown={dropdown === thread.id}
-            onDropdownClick={onDropdownClick}
-            onEditMenuClick={onEditMenuClick}
-          />
+          <PostMemo{...postProps(thread)} />
 
           {thread.replies.map(reply =>
-            <PostMemo
-              key={reply.id}
-              post={reply}
-              dateNow={dateNow}
-              isEditMenu={postEditMenu === reply.id}
-              isDropdown={dropdown === reply.id}
-              onDropdownClick={onDropdownClick}
-              onEditMenuClick={onEditMenuClick}
-            />
+            <PostMemo key={reply.id} {...postProps(reply)} />
           )}
         </section>
       )}
     </div>
   );
+
+  function postProps(post) {
+    return {
+      post,
+      dateNow,
+      isEditMenu: postEditMenu === post.id,
+      isDropdown: dropdown === post.id,
+      onDropdownClick,
+      onEditMenuClick,
+    };
+  }
 }

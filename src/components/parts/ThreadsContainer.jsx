@@ -4,7 +4,7 @@ import { useGlobalContextApi } from '../../context/GlobalContext.jsx';
 import { usePostHistoryContextApi } from '../../context/PostHistoryContext.jsx';
 import { addRepliesToPosts } from '../../utils/addRepliesToPost.js';
 import { useEffect } from 'react';
-import { useDocumentTitle } from '../../hooks/UseDocumentTitle.jsx';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle.jsx';
 
 export function ThreadsContainer() {
   useDocumentTitle();

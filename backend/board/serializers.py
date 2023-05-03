@@ -2,7 +2,7 @@ import re
 from rest_framework import serializers
 from django.db import transaction
 from .models import *
-from .utils import make_thumb, process_post_text
+from .utils import make_thumb, process_post_text, CoercingUUIDField
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -23,11 +23,11 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class SinglePostSerializer(serializers.ModelSerializer):
+    user_id = CoercingUUIDField(required=False, write_only=True)
     date = serializers.SerializerMethodField(method_name='get_date_timestamp')
     bump = serializers.SerializerMethodField(method_name='get_bump_timestamp')
     images = ImageSerializer(read_only=True, many=True)
     images_write = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
-    user_id = serializers.UUIDField(required=False, write_only=True)
 
     class Meta:
         model = Post
@@ -38,8 +38,6 @@ class SinglePostSerializer(serializers.ModelSerializer):
         user_id = validated_data.pop('user_id', None)
         try:
             with transaction.atomic():
-                validated_data['text'] = process_post_text(validated_data['text'])
-
                 user, created = User.objects.get_or_create(uuid=user_id)  # save() handles None
                 validated_data['user'] = user
 
@@ -106,20 +104,21 @@ class ThreadListSerializer(SinglePostSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
-    user_id = serializers.UUIDField(required=False, write_only=True)
-    posts_count = serializers.IntegerField()
-    posts_last24h = serializers.IntegerField()
+    user_id = CoercingUUIDField(required=False, write_only=True)
+    posts_count = serializers.IntegerField(required=False)
+    posts_last24h = serializers.IntegerField(required=False)
+    boards = serializers.ListField(required=False, help_text='boards a user has moderating perm. on')
 
     class Meta:
         model = Board
-        exclude = ('creator',)
-        read_only_fields = ('userboard', )
+        fields = '__all__'
+        read_only_fields = ('userboard',)
 
     @staticmethod
     def validate_title(title):  # add spaces TODO
         if re.fullmatch('^[A-Za-zА-Яа-яЁё]+[0-9]*$', title):  # latin/cyrillic followed by digits
             return title
-        raise serializers.ValidationError('Incorrect titl   e')
+        raise serializers.ValidationError('Incorrect title')
 
     @staticmethod
     def validate_link(link):
@@ -131,10 +130,17 @@ class BoardSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             try:
                 user_id = validated_data.pop('user_id', None)
-                user, _ = User.objects.get_or_create(uuid=user_id)
-                validated_data['creator'] = user
+                user, created = User.objects.get_or_create(uuid=user_id)
 
-                return Board.objects.create(**validated_data)  # save() handles None
+                board = Board.objects.create(**validated_data)  # save() handles None
+                board.janny.add(user)
+                boards = user.boards.values_list('link', flat=True)
+                board.boards = boards
+
+                if created:
+                    self.fields['user_id'].write_only = False
+                    board.user_id = user.uuid
+                return board
             except Exception as e:
                 print(e)
                 raise serializers.ValidationError('error')

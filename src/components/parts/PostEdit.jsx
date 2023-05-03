@@ -27,7 +27,7 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
 
       {fetcher.data?.errors &&
         <div className='edit-post-errors'>
-          {fetcher.data.errors}
+          {Object.values(fetcher.data.errors)}
         </div>
       }
 

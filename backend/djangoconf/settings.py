@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     # 'corsheaders',
 
-    'board',
+    'board.apps.BoardConfig',
 ]
 
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

@@ -12,7 +12,7 @@ export async function createNewPostAction({ request, params }) {
   }
 
   if (formData.get('file')?.size === 0) {  // not sending empty file field to server, validation error if sent
-    formData.delete('file');  // not to even include it? todo
+    formData.delete('file');
   }
 
   let userid = localStorage.getItem('user_id');
@@ -27,10 +27,9 @@ export async function createNewPostAction({ request, params }) {
       localStorage.setItem('user_id', userid);
     }
 
-    // dispatchPostChangeEvent(data.post.id);
     return data;
   } catch (e) {
-    return e;  // stopping here if error, error is available in useActionData()
+    return e;
   }
 }
 
