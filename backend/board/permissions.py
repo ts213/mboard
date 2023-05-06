@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from django.utils import timezone
-from .models import Post, User
+from .models import Post
+from .utils import get_user_from_header, user_is_janny
 
 
 class PostPermission(permissions.BasePermission):
@@ -12,13 +13,11 @@ class PostPermission(permissions.BasePermission):
         if request.method == 'GET':
             return not forbidden
 
-        user_id = request.headers.get('User-Id', None)
-        try:
-            user = User.objects.get(uuid=user_id)
-        except User.DoesNotExist:
+        user = get_user_from_header(request)
+        if not user:
             return forbidden
 
-        if user.boards.contains(post.board):
+        if user_is_janny(user, post):
             return not forbidden
 
         if not post.thread:

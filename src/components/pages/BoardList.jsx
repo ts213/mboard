@@ -85,7 +85,7 @@ const Modal = forwardRef(function Modal(props, ref) {
           {errors && <output className='error'>{errors.title || errors.error}</output>}
           <input type='text' name='title'
                  required maxLength='15' minLength='1' pattern='^[A-Za-zА-Яа-яЁё]+[0-9]*$'
-                 placeholder='Board title'
+                 placeholder='Board title' autoComplete='off'
           />
           <sub>Any title less than 15 characters</sub>
         </div>
@@ -94,9 +94,10 @@ const Modal = forwardRef(function Modal(props, ref) {
           {errors && <output className='error'>{errors.link}</output>}
           <input type='text' name='link'
                  required maxLength='5' minLength='1' pattern='^[a-z]+[0-9]*$'
-                 placeholder={'Board link'}
+                 placeholder={'Board link'} autoComplete='off'
           />
           <sub>Like &quot;/b/&quot;, without slashes</sub>
+          {errors && <output className='error'>{errors.detail}</output>}
         </div>
 
         <div style={{ textAlign: 'center' }}>

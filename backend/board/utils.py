@@ -4,8 +4,56 @@ from io import BytesIO
 import PIL.Image
 from django.core.files.base import ContentFile
 from django.utils.html import escape
+from django.core.cache import cache
 from rest_framework.serializers import UUIDField
 from rest_framework.views import exception_handler
+import board.models as models
+
+
+def check_if_banned(request, board: str) -> int | None:
+    ip = request.META['REMOTE_ADDR']
+    cache_key = 'ban' + ':' + ip + ':' + board
+    banned: str | None = cache.get(cache_key)
+    if banned:
+        ban_time_remaining_secs: int = cache.ttl(cache_key)
+        if ban_time_remaining_secs and ban_time_remaining_secs > 0:
+            return ban_time_remaining_secs
+    return None
+
+
+def ban_user(request, post: 'models.Post'):
+    if ban_time := request.query_params.get('ban', None):
+        user = get_user_from_header(request)
+
+        try:
+            ban_time = int(ban_time)
+
+            assert user is not False
+            assert user_is_janny(user, post)
+            assert ban_time <= 30
+        except (AssertionError, ValueError):
+            return
+
+        ip = request.META['REMOTE_ADDR']
+        ban_time_days_to_secs = ban_time * 24 * 60 * 60
+        cache.set('ban' + ':' + ip + ':' + post.board.link,
+                  '1',
+                  timeout=ban_time_days_to_secs)
+        return True
+
+
+def user_is_janny(user: 'models.User', post: 'models.Post'):
+    if user.boards.contains(post.board):
+        return True
+
+
+def get_user_from_header(request):
+    if user_id := request.headers.get('User-Id', None):
+
+        try:
+            return models.User.objects.get(uuid=user_id)
+        except models.User.DoesNotExist:
+            return False
 
 
 def custom_exception_handler(exc, context):
@@ -15,9 +63,15 @@ def custom_exception_handler(exc, context):
     return response
 
 
+def store_ip_temporarily(request):
+    ip = request.META['REMOTE_ADDR']
+    cache.set(ip, '', timeout=60 * 60 * 24)
+
+
 class CoercingUUIDField(UUIDField):
     """ passed user_id might be tampered with // coercing to None instead of raising
         allows to continue as if nothing were passed in case of an error """
+
     def to_internal_value(self, data):
         if not isinstance(data, uuid.UUID):
             try:

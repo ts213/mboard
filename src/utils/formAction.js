@@ -1,3 +1,5 @@
+const api_prefix = import.meta.env.VITE_API_PREFIX;
+
 export async function createNewPostAction({ request, params }) {
   const formData = await request.formData();
 
@@ -51,10 +53,10 @@ export async function deletePostAction(request) {
 }
 
 async function submitForm(request, formData = undefined) {
-  let url = '/api' + new URL(request.url).pathname; // building backend url
+  let url = api_prefix + new URL(request.url).pathname;
   url += url.endsWith('/') ? '' : '/';
+  url += new URL(request.url).search;
 
-  // const url = '/api' + new URL(request.url).pathname + new URL(request.url).search; // building backend url
   let headers = undefined;
 
   if (request.method === 'DELETE' || request.method === 'PATCH') {

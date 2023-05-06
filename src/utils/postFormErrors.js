@@ -13,7 +13,11 @@ export function formErrorList(fileList, data) {
   }
 
   function errFromServer() {
-    return data?.errors ? data.errors : null;
+    if (data?.errors?.type === 'ban') {
+      let banned_until = new Date(Date.now() + data.errors.message * 1000);
+      return 'Banned until: ' + banned_until.toLocaleString();
+    }
+    return data?.errors ? data.errors?.message : null;
   }
 
   return [fileTooLarge(), checkFileType(), errFromServer()]

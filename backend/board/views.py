@@ -9,6 +9,8 @@ from .models import *
 from . import serializers
 from .permissions import *
 from .pagination import *
+from .utils import check_if_banned, ban_user
+
 
 
 class ThreadListAPI(generics.ListAPIView):
@@ -82,6 +84,10 @@ class ThreadAPI(generics.ListCreateAPIView):
         return Response(data)
 
     def post(self, request, *args, **kwargs):
+        if ban_time := check_if_banned(request, board=self.kwargs.get('board')):
+            return Response(data={'errors': {'type': 'ban', 'message': ban_time}},
+                            status=status.HTTP_418_IM_A_TEAPOT)
+
         if request.data.get('image', None):
             images_list = request.data.pop('image')
             request.data.setlist('images_write', images_list)
@@ -94,6 +100,7 @@ class ThreadAPI(generics.ListCreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         response_data = {'created': 1, 'post': serializer.data}
+        # store_ip_temporarily(request)
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_context(self):
@@ -108,7 +115,7 @@ class ThreadAPI(generics.ListCreateAPIView):
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail={'errors': 'wait before posting again'})
+        raise exceptions.Throttled(detail={'errors': {'message': 'wait before posting again'}})
 
     class PostRequestThrottle(AnonRateThrottle):
         # rate = '1/min'
@@ -127,7 +134,7 @@ class BoardsAPI(generics.ListCreateAPIView):
 
     def get_queryset(self):
         last_24h = timezone.now() - timedelta(days=1)
-        return Board.objects.all().prefetch_related('posts').annotate(
+        return Board.objects.all().annotate(
             posts_count=Count('posts'),
             posts_last24h=Count(
                 'posts',
@@ -147,6 +154,17 @@ class BoardsAPI(generics.ListCreateAPIView):
         response.data = {'created': 1, 'board': response.data}
         return response
 
+    def get_throttles(self):
+        if self.request.method == 'POST':
+            return [self.BoardCreationThrottle()]
+        return [throttle() for throttle in self.throttle_classes]
+
+    def throttled(self, request, wait):
+        raise exceptions.Throttled(detail='wait before creating new board')
+
+    class BoardCreationThrottle(AnonRateThrottle):
+        rate = '1/hour'
+
 
 class PostAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
@@ -164,7 +182,11 @@ class PostAPI(generics.RetrieveUpdateDestroyAPIView):
         return Response({'post': response.data, 'created': 1})
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
+        post = self.get_object()
+        self.perform_destroy(post, request)
         return Response(status=status.HTTP_200_OK,
                         data={'post': {'id': self.kwargs['post_id']}, 'deleted': 1})
+
+    def perform_destroy(self, post: Post, request):  # noqa
+        ban_user(request, post)
+        post.delete()
