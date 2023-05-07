@@ -4,10 +4,14 @@ export function PostHistoryContext({ children }) {
   const [state, dispatch] = useReducer(reducer, null, loadPostHistoryFromStorage);
 
   useEffect(() => {
+    if (state.postIdList.length < 1) {
+      return;
+    }
+
     if (state.postIdList.length > 100) {
       state.postIdList.shift();
     }
-    
+
     localStorage.setItem('posts', JSON.stringify(state.postIdList));
   }, [state.postIdList]);
 
@@ -59,19 +63,14 @@ function reducer(state, action) {
   }
 }
 
-function loadPostHistoryFromStorage() {  // convert to set??? to do
+function loadPostHistoryFromStorage() {
   try {
-    const postHistory = window.localStorage.getItem('posts');
-    if (postHistory) {
-      const postIdList = JSON.parse(postHistory);
-      if (Array.isArray(postIdList)) {
-        return { postIdList };  // post history found and is ok
-      }
+    const postIdList = JSON.parse(localStorage.getItem('posts'));
+    if (Array.isArray(postIdList)) {
+      return { postIdList };  // post history found and is ok
     }
 
-  } catch {  // might be tampered with, coercing...
-    window.localStorage.setItem('posts', '[]');
-  }
+  } catch { /* empty */ }
 
   return { postIdList: [], };
 }

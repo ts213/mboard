@@ -3,11 +3,16 @@ import { Outlet } from 'react-router-dom';
 
 function NavBar() {
   return (
-    <header>
+    // <header>
+    //   <Link style={{ marginRight: '1.25rem' }} to='/'>
+    //     boards
+    //   </Link>
+    // </header>
+    <div>
       <Link style={{ marginRight: '1.25rem' }} to='/'>
         boards
       </Link>
-    </header>
+    </div>
   )
 }
 

@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.urls import reverse
 from django.core.cache import cache
 from rest_framework import status
@@ -39,6 +41,11 @@ class PostTestCase(APITestCase):
                                              thread=cls.user1_thread1,
                                              board=cls.board_with_janny1)
 
+        cls.user1_old_post = Post.objects.create(text='test',
+                                                 user=cls.user1,
+                                                 thread=cls.user1_thread1,
+                                                 board=cls.board_with_janny1)
+
         cls.user2_post = Post.objects.create(text='test',
                                              user=cls.user2,
                                              thread=cls.user2_thread2,
@@ -73,6 +80,16 @@ class PostTestCase(APITestCase):
         response = self.client.delete(url, headers={'User-Id': self.user1.uuid})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_can_NOT_delete_hist_post_after_n_time(self):
+        date = timezone.now() - timedelta(days=2)
+        self.user1_old_post.date = date
+        self.user1_old_post.save(update_fields=['date'])
+
+        url = reverse('post', kwargs={'post_id': self.user1_old_post.pk})
+        response = self.client.delete(url, headers={'User-Id': self.user1.uuid})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_can_NOT_delete_NOT_his_post(self):
         url = reverse('post', kwargs={'post_id': self.user2_post.pk})

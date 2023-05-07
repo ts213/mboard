@@ -8,7 +8,11 @@ export async function createNewPostAction({ request, params }) {
   if (!params.threadId) {
     let new_path = request.url; // request is immutable
     new_path += new_path.endsWith('/') ? 'thread/0/' : '/thread/0/';  // thread/0/ == new thread
-    request = new Request(new_path, request);
+    request = new Request(new_path, {
+      headers: request.headers,
+      method: request.method,
+      mode: request.mode,
+    });
   } else {
     formData.set('thread', params.threadId);
   }

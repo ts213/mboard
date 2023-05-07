@@ -1,6 +1,12 @@
-nav {
+#boards-nav {
     max-width: 500px;
     margin: 10vh auto auto;
+}
+
+#boards-nav a {
+    line-height: 190%;
+    /*width: min-content;*/
+    font-size: large;
 }
 
 li {
@@ -28,11 +34,6 @@ li {
 .boards, .userboards {
     text-decoration: underline;
     font-weight: bold;
-}
-
-nav a {
-    line-height: 190%;
-    width: min-content;
 }
 
 .modal {

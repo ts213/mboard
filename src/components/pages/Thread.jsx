@@ -1,5 +1,5 @@
 import '../styles/Thread.css';
-import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
+import { Link, useLoaderData, useRevalidator } from 'react-router-dom';
 import { PostList } from '../parts/PostList.jsx';
 import { PostForm } from '../parts/PostForm.jsx';
 import { useEffect } from 'react';
@@ -68,21 +68,17 @@ export async function ThreadLoader({ request }) {
 }
 
 function NavigationButtons() {
-  const navigate = useNavigate();
   return (
-    <div id='bottom' style={{ marginLeft: '3rem', marginRight: '3rem' }}>
-        <span
-          onClick={() => navigate(-1)}
-          style={{ marginRight: '5px', cursor: 'pointer', fontWeight: '300' }}
-        >
-          [Return]
-        </span>
-      <span
-        onClick={() => document.body.scrollIntoView()}
-        style={{ cursor: 'pointer', fontWeight: '300' }}
+    <div id='bottom'>
+      <Link to='../../' relative='path'>[Return]</Link>
+      <Link to=''
+            onClick={(e) => {
+              e.preventDefault();
+              document.body.scrollIntoView();
+            }}
       >
-          [Top]
-      </span>
+        [Top]
+      </Link>
     </div>
   )
 }

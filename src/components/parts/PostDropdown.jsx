@@ -19,7 +19,7 @@ export function PostDropdown({ post, onEditMenuClick }) {
         navigate('../..', { relative: 'path' });
       }
     }
-  }, [fetcher.data?.deleted, fetcher.data?.post.id, navigate, post.thread]);
+  }, [fetcher.data?.deleted, fetcher.data?.post?.id, navigate, post.thread]);
 
   return (
     <div className='dropdown-menu'>

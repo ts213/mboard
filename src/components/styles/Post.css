@@ -18,6 +18,10 @@
     white-space: pre-wrap;
 }
 
+.post header {
+    margin-bottom: 1%;
+}
+
 .reply-post {
     background-color: rgb(30 41 59);
     border: 1px solid rgb(75 85 99);

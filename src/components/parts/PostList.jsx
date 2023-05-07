@@ -3,6 +3,8 @@ import { memo, useEffect, useState } from 'react';
 import { Post } from './Post.jsx';
 import { LoadMorePostsBtn } from './LoadMorePostsBtn.jsx';
 import { showTooltip } from '../../utils/showTooltip.jsx';
+import { ImageOverlay } from './ImageOverlay.jsx';
+import { useThreadEventListeners } from '../../hooks/useThreadEventListeners.jsx';
 
 const PostMemo = memo(Post);
 
@@ -10,15 +12,14 @@ export function PostList({ threadList, loadMoreProps = undefined }) {
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
   const { onDropdownClick, onEditMenuClick } = useGlobalContextApi();
+  useThreadEventListeners();
 
   const [dateNow, setDate] = useState(new Date());
   useEffect(() => setDate(new Date()), [threadList]);
 
-  return (
+  const postList =
     <div
-      className='threads-wrap'
-      onMouseOver={ev => showTooltip(ev, threadList, dateNow)}
-    >
+      onMouseOver={ev => showTooltip(ev, threadList, dateNow)}>
       {threadList.map(thread =>
         <section
           key={thread.id}
@@ -31,7 +32,13 @@ export function PostList({ threadList, loadMoreProps = undefined }) {
           )}
         </section>
       )}
-    </div>
+    </div>;
+
+  return (
+    <>
+      {postList}
+      <ImageOverlay />
+    </>
   );
 
   function postProps(post) {

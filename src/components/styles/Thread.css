@@ -23,3 +23,17 @@
 .load-more-wrap button:hover {
     background: #2f3943;
 }
+
+#bottom {
+    color: #5e718e;
+    font-weight: bold;
+}
+
+#bottom a {
+    cursor: pointer;
+    margin-left: 0.5rem;
+}
+
+a:hover {
+    color: white;
+}

@@ -12,7 +12,6 @@ from .pagination import *
 from .utils import check_if_banned, ban_user
 
 
-
 class ThreadListAPI(generics.ListAPIView):
     serializer_class = serializers.ThreadListSerializer
     pagination_class = ThreadListPagination

@@ -22,7 +22,7 @@ export function BoardList() {
   );
 
   return (
-    <nav>
+    <nav id='boards-nav'>
       {Object.entries(boardsByCategory).map(([category, boards], idx) =>
         <ul className='board-category' key={idx}>
           <span className={category}>

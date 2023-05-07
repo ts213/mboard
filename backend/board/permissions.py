@@ -23,7 +23,7 @@ class PostPermission(permissions.BasePermission):
         if not post.thread:
             return forbidden
 
-        time_diff_secs = (timezone.now() - post.date).seconds
+        time_diff_secs = (timezone.now() - post.date).total_seconds()
 
         forbidden = \
             time_diff_secs > self.allowed_time or \

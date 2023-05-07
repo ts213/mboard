@@ -10,8 +10,8 @@ export function PostForm() {
   const inputFileRef = useRef();
   const textAreaRef = useRef();
   const navigate = useNavigate();
-
   const fetcher = useFetcher();
+
   const errorList = useMemo(() => formErrorList(fileList, fetcher.data),
     [fetcher.data, fileList]
   );
@@ -51,7 +51,7 @@ export function PostForm() {
 
       <fetcher.Form
         method='POST' encType='multipart/form-data'
-        className='post-form' // min-w-min bc input elmnt has fixed default width
+        className='post-form'
       >
 
         <div className='post-form-poster-input-wrap'>

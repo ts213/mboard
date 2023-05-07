@@ -2,7 +2,7 @@
     margin: auto auto 5rem;
     width: 35%;
     max-width: 400px;
-    min-width: min-content;
+    min-width: min-content;  /* input elmnt has fixed default width */
     border: 1px solid rgb(75 85 99);
 }
 

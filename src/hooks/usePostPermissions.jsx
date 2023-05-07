@@ -12,6 +12,10 @@ export function usePostPermissions(post) {
     return [true, true, true];
   }
 
+  if (!post.thread) {
+    return [false, false, false];
+  }
+
   const postIdList = usePostHistoryContext();  // eslint-disable-line
   const user_post = postIdList.find(user_post => user_post.id === post.id);
   return [user_post?.ed, user_post?.del, false];
