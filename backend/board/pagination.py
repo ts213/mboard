@@ -1,10 +1,11 @@
 from rest_framework import pagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import replace_query_param, remove_query_param
+from djangoconf.settings import env
 
 
 class ThreadListPagination(pagination.PageNumberPagination):
-    page_size = 11
+    page_size = env.get('THREADS_PER_PAGE')
 
     def get_paginated_response(self, data):
         return Response({
@@ -22,7 +23,7 @@ class ThreadListPagination(pagination.PageNumberPagination):
 
 
 class SingleThreadPagination(pagination.LimitOffsetPagination):
-    default_limit = 5
+    default_limit = env.get('POSTS_PER_PAGE')
     # max_limit = 3
 
     def get_paginated_response(self, data):

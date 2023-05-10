@@ -1,25 +1,11 @@
 import { Button } from './Button.jsx';
-import { useFetcher, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useFetcher } from 'react-router-dom';
 import { usePostPermissions } from '../../hooks/usePostPermissions.jsx';
 
 export function PostDropdown({ post, onEditMenuClick }) {
   const fetcher = useFetcher();
-  const navigate = useNavigate();
 
   const [canEdit, canDelete, canBan] = usePostPermissions(post);
-
-  useEffect(() => {
-    if (fetcher.data?.deleted) {
-      window.dispatchEvent(new CustomEvent(
-        'postDeleted',
-        { detail: { postId: fetcher.data?.post.id } }
-      ));
-      if (!post.thread) {
-        navigate('../..', { relative: 'path' });
-      }
-    }
-  }, [fetcher.data?.deleted, fetcher.data?.post?.id, navigate, post.thread]);
 
   return (
     <div className='dropdown-menu'>

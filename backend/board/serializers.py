@@ -1,8 +1,8 @@
 import re
 from rest_framework import serializers
 from django.db import transaction
-from .models import *
-from .utils import make_thumb, process_post_text, CoercingUUIDField
+from .models import Post, User, Board, Image
+from .utils import make_thumb, CoercingUUIDField
 
 
 class ImageSerializer(serializers.ModelSerializer):

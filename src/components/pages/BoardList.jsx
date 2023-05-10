@@ -6,8 +6,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '../parts/Button.jsx';
 import { useOnClickOutside } from '../../hooks/useOnClickOutside.jsx';
 import { ArrowDownSvg } from '../svg/ArrowDownSvg.jsx';
-
-const api_prefix = import.meta.env.VITE_API_PREFIX;
+import { api_prefix } from '../../App.jsx';
 
 export function BoardList() {
   const boardList = useLoaderData() ?? [];

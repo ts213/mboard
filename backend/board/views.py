@@ -3,13 +3,16 @@ from django.db.models import Prefetch, Count, Q
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from django.http import JsonResponse
+from django.utils import timezone
 from rest_framework import generics, status, exceptions
+from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
-from .models import *
+from .models import Post, Board
 from . import serializers
-from .permissions import *
-from .pagination import *
+from .permissions import PostPermission
+from .pagination import ThreadListPagination, SingleThreadPagination
 from .utils import check_if_banned, ban_user
+from djangoconf.settings import env
 
 
 class ThreadListAPI(generics.ListAPIView):
@@ -99,7 +102,6 @@ class ThreadAPI(generics.ListCreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         response_data = {'created': 1, 'post': serializer.data}
-        # store_ip_temporarily(request)
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_context(self):
@@ -114,19 +116,19 @@ class ThreadAPI(generics.ListCreateAPIView):
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail={'errors': {'message': 'wait before posting again'}})
+        raise exceptions.Throttled(detail={'message': 'wait before posting again'})
 
     class PostRequestThrottle(AnonRateThrottle):
-        # rate = '1/min'
-        rate = '22/min'
+        rate = env.get('POST_THROTTLE')
 
 
 class BoardsAPI(generics.ListCreateAPIView):
     queryset = Board.objects.all()
     serializer_class = serializers.BoardSerializer
+    use_boards_cache = env.get('USE_BOARDS_CACHE', False)
 
     def dispatch(self, request, *args, **kwargs):
-        if request.method == 'GET':
+        if request.method == 'GET' and self.use_boards_cache:
             if data := cache.get('boards_list'):
                 return JsonResponse(data, safe=False)
         return super().dispatch(request, *args, **kwargs)
@@ -145,7 +147,8 @@ class BoardsAPI(generics.ListCreateAPIView):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
 
-        cache.set('boards_list', serializer.data, timeout=300)  # caching for 5 min
+        if self.use_boards_cache:
+            cache.set('boards_list', serializer.data, timeout=300)  # caching for 5 min
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
@@ -159,10 +162,10 @@ class BoardsAPI(generics.ListCreateAPIView):
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail='wait before creating new board')
+        raise exceptions.Throttled(detail={'message': 'wait before posting again'})
 
     class BoardCreationThrottle(AnonRateThrottle):
-        rate = '1/hour'
+        rate = env.get('NEW_BOARD_THROTTLE')
 
 
 class PostAPI(generics.RetrieveUpdateDestroyAPIView):
@@ -182,9 +185,13 @@ class PostAPI(generics.RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         post = self.get_object()
+        post_id, thread_id, board = post.id, post.thread_id, post.board_id
         self.perform_destroy(post, request)
-        return Response(status=status.HTTP_200_OK,
-                        data={'post': {'id': self.kwargs['post_id']}, 'deleted': 1})
+        data = {'deleted': 1,
+                'post': {'id': post_id,
+                         'thread': thread_id,
+                         'board': board}}
+        return Response(status=status.HTTP_200_OK, data=data)
 
     def perform_destroy(self, post: Post, request):  # noqa
         ban_user(request, post)

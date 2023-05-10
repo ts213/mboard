@@ -1,9 +1,10 @@
 import { PostList } from '../parts/PostList.jsx';
 import { useEffect, useState } from 'react';
-import { PostForm } from '../parts/PostForm.jsx';
+import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { useFetcher, useLoaderData } from 'react-router-dom';
 import { useThreadsPagination, page } from '../../hooks/useThreadsPagination.jsx';
 import { useOnPostDelete } from '../../hooks/useOnPostDelete.jsx';
+import { api_prefix } from '../../App.jsx';
 
 let threadListCache = [];
 
@@ -31,7 +32,7 @@ export function ThreadList() {
 
   return (
     <>
-      <ToggleablePostForm />
+      <PostFormsStateContainer toggleable={true} />
       <PostList threadList={threadList} />
       <var style={{ visibility: 'hidden' }} ref={paginationIntersectionRef}>treeshold</var>
     </>
@@ -47,7 +48,7 @@ export async function ThreadListLoader({ request }) {
     }
   }
 
-  let url = '/api' + new URL(request.url).pathname;
+  let url = api_prefix + new URL(request.url).pathname;
   const page = new URL(request.url).searchParams.get('page');
   if (page) {
     url += `?page=${page}`;
@@ -58,15 +59,4 @@ export async function ThreadListLoader({ request }) {
     throw new Response('loader error', { status: response.status });
   }
   return response.json();
-}
-
-function ToggleablePostForm() {
-  return (
-    <details>
-      <summary>
-        New Thread
-      </summary>
-      <PostForm />
-    </details>
-  )
 }

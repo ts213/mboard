@@ -1,7 +1,7 @@
-import { routeLoader } from '../App.jsx';
 import tippy from 'tippy.js';
 import { Post } from '../components/parts/Post.jsx';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { api_prefix } from '../App.jsx';
 
 export async function showTooltip(ev, threadList, dateNow) {
   if (ev.target.classList.contains('quote-link') && !Object.hasOwn(ev.target, '_tippy')) {
@@ -15,7 +15,7 @@ export async function showTooltip(ev, threadList, dateNow) {
     if (!postObject) {
       try {
         const request = new Request(`/post/${quotedPostId}/`);
-        postObject = await routeLoader(request);
+        postObject = await loader(request);
       } catch {
         tooltipProps.content = '';
         tippy(ev.nativeEvent.target, tooltipProps);
@@ -38,3 +38,13 @@ const tooltipProps = {
   maxWidth: 'none',
   // onHidden: instance => instance.destroy(),
 };
+
+
+async function loader(request) {
+  let url = api_prefix + new URL(request.url).pathname;
+  const r = await fetch(url);
+  if (!r.ok) {
+    throw new Response('loader error', { status: r.status });
+  }
+  return r.json();
+}

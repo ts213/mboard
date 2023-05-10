@@ -1,7 +1,7 @@
-export function FormAttachments({ fileList, onFileRemove }) {
+export function FormAttachments({ fileList, onClick }) {
   const attachments = fileList.map((file, idx) =>
     <picture key={idx}
-             onClick={() => onFileRemove(idx, file)}
+             onClick={() => onClick(idx)}
              className='form-preview-file-cont'
     >
       <source srcSet={URL.createObjectURL(file)}

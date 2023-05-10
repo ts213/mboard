@@ -1,9 +1,33 @@
-.post-form {
+.postForm {
+    color: #9CA3AF;
+    background-color: rgb(30 41 59);
     margin: auto auto 5rem;
     width: 35%;
     max-width: 400px;
-    min-width: min-content;  /* input elmnt has fixed default width */
+    min-width: min-content; /* input elmnt has fixed default width */
     border: 1px solid rgb(75 85 99);
+}
+
+.floatingFormWrapper {
+    z-index: 1;
+    color: #9CA3AF;
+    background-color: rgb(30 41 59);
+    position: fixed;
+    left: 30%;
+    top: 40%;
+}
+
+.floatingFormWrapper header {
+    display: flex;
+    text-align: center;
+    padding: 2% 0 2% 0;
+    border: 1px solid rgb(75 85 99);
+    border-bottom: none;
+}
+
+.floatingFormWrapper .postForm {
+    margin: 0;
+    width: auto;
 }
 
 .post-form-error {
@@ -42,7 +66,6 @@
 }
 
 .file-input-label {
-    background-color: rgb(30 41 59);
     letter-spacing: 0.1em;
     border-width: 1px;
     border-color: #4B5563;
@@ -58,7 +81,6 @@
 }
 
 .file-input-label-span {
-    color: #9CA3AF;
     text-align: center;
 }
 

@@ -5,11 +5,14 @@ import { PostDropdown } from './PostDropdown.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage.jsx';
 import { toRelativeTime } from '../../utils/timeToRelative.js';
+import { toggleFloatingForm } from '../../utils/utils.js';
+import { useFormDispatchContext } from '../posting/PostFormReducer.jsx';
 
 // import PropTypes from 'prop-types';
 
 export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, onEditMenuClick }) {
   const postTextElmnt = useRef();
+  const dispatch = useFormDispatchContext();
 
   return (
     <article
@@ -18,10 +21,15 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
     >
       <header>
         <span>{post.poster ? post.poster : 'Anon'}</span>
-        <span className='post-date'>{toRelativeTime(post.date, dateNow)}</span>
-        <span className='post-id'>{post.id}</span>
+        <time>{toRelativeTime(post.date, dateNow)}</time>
+        <a href={`#${post.id}`}
+           onClick={onPostIdClick}
+           className='postId'
+        >
+          {post.id}
+        </a>
 
-        <div className='dropdown-wrap'>
+        <div style={{ display: 'inline-block' }}>
           <span
             onClick={() => onDropdownClick(post.id)}
             className='dropdown-btn'
@@ -37,9 +45,9 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
           }
         </div>
 
-        {(!document.location.pathname.includes('thread') && !post.thread) &&
+        {(!post.thread && !document.location.pathname.includes('thread')) &&
           <Link to={'thread/' + post.id + '/'}
-                style={{ marginLeft: '0.5rem' }}>
+          >
             Open
           </Link>}
       </header>
@@ -81,4 +89,13 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
       <sub className='replies'></sub>
     </article>
   );
+
+  function onPostIdClick(ev) {
+    ev.preventDefault();
+    toggleFloatingForm(ev, post, false);
+    const textArea = document.querySelector('.floatingFormWrapper textarea');
+    const selStart = textArea.selectionStart;
+    dispatch({ type: 'insertQuoteId', value: { selStart, postId: post.id, textArea } });
+    setTimeout(() => textArea.focus(), 100);
+  }
 }

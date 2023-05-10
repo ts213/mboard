@@ -1,19 +1,19 @@
+from dotenv import dotenv_values
 from pathlib import Path
+import os
+
+env = dotenv_values('.env')
+assert len(env) > 0, 'error loading .env file'
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MEDIA_DIR = Path(__file__).resolve().parent.parent.parent
 
+DEBUG = env.get('DEBUG', False)
+
 SECRET_KEY = 'django-insecure-ms_1(dc*(xcc@)n!ryq=laphhsx!t$x85(vtfc%!_8@)y&=x3q'
 
-DEBUG = True
-
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.133', 'localhost']
-
-INTERNAL_IPS = [
-    "127.0.0.1",
-    "192.168.1.133",
-]
+ALLOWED_HOSTS = env.get('ALLOWED_HOSTS').split()
 
 REST_FRAMEWORK = {
     # 'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
@@ -25,7 +25,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '20/min',
+        'anon': env.get('DEFAULT_THROTTLE'),
     },
     'EXCEPTION_HANDLER': 'board.utils.custom_exception_handler',
 }
@@ -87,9 +87,9 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'reactdb',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'NAME': env.get('DB_NAME'),
+        'USER': env.get('DB_USER'),
+        'PASSWORD': env.get('DB_PASS'),
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }

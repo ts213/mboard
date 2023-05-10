@@ -1,7 +1,15 @@
+import { useMemo } from 'react';
+
+export function useFormErrors(fileList, data) {
+  return useMemo(
+    () => formErrorList(fileList, data),
+    [fileList, data]
+  );
+}
+
 const fileTypes = ['image/jpeg', 'image/png', 'image/bmp', 'image/gif', 'image/webp',];
 
 export function formErrorList(fileList, data) {
-
   function fileTooLarge() {
     const totalSize = fileList.reduce((sum, v) => sum + v.size, 0);
     return totalSize > 1_000_000 ? 'file too large' : null;

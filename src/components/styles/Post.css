@@ -22,27 +22,22 @@
     margin-bottom: 1%;
 }
 
+.post header > * {
+    margin-right: 0.5rem;
+}
+
 .reply-post {
     background-color: rgb(30 41 59);
     border: 1px solid rgb(75 85 99);
 }
 
-.post-id {
-    margin-left: 0.5rem;
+.postId {
+    cursor: pointer;
 }
 
 .post-text {
     overflow: auto;
     margin: 0.5rem 0.5rem 0.5rem 0;
-}
-
-.post-date {
-    margin-left: 0.5rem;
-}
-
-.dropdown-wrap {
-    display: inline-block;
-    margin-left: 0.5rem;
 }
 
 .dropdown-menu {

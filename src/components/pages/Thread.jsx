@@ -1,8 +1,9 @@
 import '../styles/Thread.css';
 import { Link, useLoaderData, useRevalidator } from 'react-router-dom';
 import { PostList } from '../parts/PostList.jsx';
-import { PostForm } from '../parts/PostForm.jsx';
+import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { useEffect } from 'react';
+import { api_prefix } from '../../App.jsx';
 
 const DEFAULT_LOAD_LIMIT = 10;
 let loadPostLimit = null;
@@ -35,7 +36,7 @@ export function Thread() {
           : undefined}
       />
       <NavigationButtons />
-      <PostForm />
+      <PostFormsStateContainer />
     </>
   );
 
@@ -54,7 +55,7 @@ export function Thread() {
 }
 
 export async function ThreadLoader({ request }) {
-  let url = '/api' + new URL(request.url).pathname;
+  let url = api_prefix + new URL(request.url).pathname;
 
   if (loadPostLimit) {
     url += `?limit=${loadPostLimit}`;

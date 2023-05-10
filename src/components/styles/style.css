@@ -73,3 +73,7 @@ summary:hover {
     margin: 0 1% 0 1%;
     color: #5e718e;
 }
+
+.hidden {
+    display: none;
+}
