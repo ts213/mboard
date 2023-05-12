@@ -1,10 +1,22 @@
 from rest_framework import permissions
 from django.utils import timezone
 from .models import Post
-from .utils import get_user_from_header, user_is_janny
+from .utils import get_user_from_header, user_is_janny, check_if_banned
 
 
-class PostPermission(permissions.BasePermission):
+class NewPostPermission(permissions.BasePermission):
+    message = None
+
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            if ban_time := check_if_banned(request, board=view.kwargs.get('board')):
+                self.message = {'type': 'ban', 'message': ban_time}
+                return False
+
+        return True
+
+
+class ChangePostPermission(permissions.BasePermission):
     allowed_time = 60 * 60 * 24  # day
 
     def has_object_permission(self, request, view, post: Post):

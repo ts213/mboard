@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 
-export function useAfterNewPostCreated(fetcher, dispatch) {
-  const params = useParams();
-
+export function useAfterNewPostCreated(dispatch, fetcher) {
   useEffect(() => {
-    dispatch({ type: 'textEdited', value: '' });
-    dispatch({ type: 'fileListChange', value: [] });
+    if (fetcher.data?.created === 1) {
+      dispatch({ type: 'textEdited', value: '' });
+      dispatch({ type: 'fileListChange', value: [] });
+      delete fetcher.data.created;
+    }
 
-  }, [dispatch, params]);
+  }, [dispatch, fetcher.data?.created]);
 }
+
+/** @property {number} fetcher.data.created */

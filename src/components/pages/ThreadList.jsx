@@ -4,7 +4,7 @@ import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { useFetcher, useLoaderData } from 'react-router-dom';
 import { useThreadsPagination, page } from '../../hooks/useThreadsPagination.jsx';
 import { useOnPostDelete } from '../../hooks/useOnPostDelete.jsx';
-import { api_prefix } from '../../App.jsx';
+import { VITE_API_PREFIX } from '../../App.jsx';
 
 let threadListCache = [];
 
@@ -48,7 +48,7 @@ export async function ThreadListLoader({ request }) {
     }
   }
 
-  let url = api_prefix + new URL(request.url).pathname;
+  let url = VITE_API_PREFIX + new URL(request.url).pathname;
   const page = new URL(request.url).searchParams.get('page');
   if (page) {
     url += `?page=${page}`;

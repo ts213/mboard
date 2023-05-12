@@ -12,7 +12,7 @@ export function PostFormsStateContainer({ toggleable = false }) {
   const state = useFormStateContext();
   const dispatch = useFormDispatchContext();
 
-  useAfterNewPostCreated(fetcher, dispatch);
+  useAfterNewPostCreated(dispatch, fetcher);
   const errorList = useFormErrors(state.fileList, fetcher.data);
 
   function onFormFilesInput(e) {

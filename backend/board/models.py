@@ -3,11 +3,15 @@ import uuid
 from django.db import models
 from django.db import IntegrityError
 from .utils import delete_folder_if_empty, path_for_image, path_for_thumb, process_post_text
+from djangoconf.settings import env
+
+REPLIES_LIMIT = int(env.get('REPLIES_LIMIT'))
 
 
 class User(models.Model):
     id = models.BigAutoField(primary_key=True)
-    uuid = models.UUIDField(default=uuid.uuid4)  # https://docs.djangoproject.com/en/dev/ref/databases/#manually-specified-autoincrement-pk
+    uuid = models.UUIDField(
+        default=uuid.uuid4)  # https://docs.djangoproject.com/en/dev/ref/databases/#manually-specified-autoincrement-pk
     boards = models.ManyToManyField('Board', related_name='janny')
 
     def save(self, *args, **kwargs):
@@ -41,8 +45,12 @@ class Post(models.Model):
         return str(self.pk)
 
     def save(self, *args, **kwargs):
-        if self.thread and self.thread.thread:
-            raise IntegrityError('Post cannot have another post as its thread')
+        if self.thread:
+            if self.thread.thread:
+                raise IntegrityError('Post cannot have another post as its thread')
+
+            if self.thread.posts.all().count() >= REPLIES_LIMIT:
+                self.thread.posts.order_by('pk')[0].delete()
 
         if self.text:
             self.text = process_post_text(self.text)
@@ -73,7 +81,6 @@ class Board(models.Model):
     link = models.CharField(primary_key=True, max_length=5)
     title = models.CharField(max_length=15, unique=True)
     userboard = models.BooleanField(default=True)
-    # creator = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='boards')
 
     def save(self, *args, **kwargs):
         assert len(self.link) > 0 and len(self.title) > 0, 'length'

@@ -1,10 +1,7 @@
 import { redirect } from 'react-router-dom';
-import { api_prefix } from '../../App.jsx';
+import { VITE_API_PREFIX } from '../../App.jsx';
 
 export async function newPostAction({ request, params }) {
-  /** @property {string | undefined} params.threadId */
-  /** @property {string} data.post.user_id */
-
   const formData = await buildFormData(request, params);
 
   if (!params.threadId) {
@@ -42,7 +39,6 @@ export async function editPostAction(request) {
 }
 
 export async function deletePostAction(request) {
-  /** @property {number | undefined} data.deleted */ /** @property {number | null} data.post.thread */
   try {
     const data = await submitForm(request, null);
 
@@ -64,7 +60,7 @@ export async function deletePostAction(request) {
 }
 
 async function submitForm(request, formData = undefined) {
-  let url = api_prefix + new URL(request.url).pathname;
+  let url = VITE_API_PREFIX + new URL(request.url).pathname;
   url += url.endsWith('/') ? '' : '/';
   url += new URL(request.url).search;
 
@@ -129,3 +125,8 @@ function buildNewThreadRequest(request, formData) {
     mode: request.mode,
   });
 }
+
+/** @property {string | undefined} params.threadId */
+/** @property {string} data.post.user_id */
+/** @property {number | undefined} data.deleted */
+/** @property {number | null} data.post.thread */

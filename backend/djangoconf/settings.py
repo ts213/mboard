@@ -2,7 +2,7 @@ from dotenv import dotenv_values
 from pathlib import Path
 import os
 
-env = dotenv_values('.env')
+env = dotenv_values('.env') or dotenv_values('../.env')
 assert len(env) > 0, 'error loading .env file'
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,20 +15,21 @@ SECRET_KEY = 'django-insecure-ms_1(dc*(xcc@)n!ryq=laphhsx!t$x85(vtfc%!_8@)y&=x3q
 
 ALLOWED_HOSTS = env.get('ALLOWED_HOSTS').split()
 
+INTERNAL_IPS = ['localhost', '192.168.1.133']  # debug toolbar
+
 REST_FRAMEWORK = {
     # 'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],
     'UNAUTHENTICATED_USER': None,  # if django.contrib.auth is disabled
 
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-    ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': env.get('DEFAULT_THROTTLE'),
-    },
     'EXCEPTION_HANDLER': 'board.utils.custom_exception_handler',
 }
+if env.get('USE_THROTTLE') == 'True':
+    REST_FRAMEWORK.update({
+        'DEFAULT_THROTTLE_CLASSES': ['rest_framework.throttling.AnonRateThrottle', ],
+        'DEFAULT_THROTTLE_RATES': {'anon': env.get('DEFAULT_THROTTLE'), },
+    })
 
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:5173",

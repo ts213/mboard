@@ -3,9 +3,8 @@ import { Link, useLoaderData, useRevalidator } from 'react-router-dom';
 import { PostList } from '../parts/PostList.jsx';
 import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { useEffect } from 'react';
-import { api_prefix } from '../../App.jsx';
+import { VITE_API_PREFIX, VITE_REPLIES_LOAD_LIMIT } from '../../App.jsx';
 
-const DEFAULT_LOAD_LIMIT = 10;
 let loadPostLimit = null;
 
 export function Thread() {
@@ -20,8 +19,9 @@ export function Thread() {
     };
   }, []);
 
+  const isMoreReplies = (repliesCount - thread.replies.length) > 0;
   const loadMoreProps = {
-    repliesLoadedCount: thread.replies.length,
+    repliesLoaded: thread.replies.length,
     repliesCount,
     loadMorePosts,
     revalidator,
@@ -31,9 +31,7 @@ export function Thread() {
     <>
       <PostList
         threadList={[thread]}
-        loadMoreProps={(repliesCount - thread.replies.length) > 0 // if not all posts loaded
-          ? loadMoreProps
-          : undefined}
+        loadMoreProps={isMoreReplies && loadMoreProps}
       />
       <NavigationButtons />
       <PostFormsStateContainer />
@@ -43,9 +41,9 @@ export function Thread() {
   async function loadMorePosts(ev) {
     switch (ev.target.name) {
       case 'loadMore':
-        (repliesCount - thread.replies.length) < (DEFAULT_LOAD_LIMIT * 1.5)
+        (repliesCount - thread.replies.length) < (VITE_REPLIES_LOAD_LIMIT * 1.5)
           ? loadPostLimit = repliesCount
-          : loadPostLimit = thread.replies.length + DEFAULT_LOAD_LIMIT;
+          : loadPostLimit = thread.replies.length + VITE_REPLIES_LOAD_LIMIT;
         return revalidator.revalidate();
       case 'loadAll':
         loadPostLimit = repliesCount;
@@ -55,7 +53,7 @@ export function Thread() {
 }
 
 export async function ThreadLoader({ request }) {
-  let url = api_prefix + new URL(request.url).pathname;
+  let url = VITE_API_PREFIX + new URL(request.url).pathname;
 
   if (loadPostLimit) {
     url += `?limit=${loadPostLimit}`;

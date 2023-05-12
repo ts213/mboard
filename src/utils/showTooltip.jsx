@@ -1,7 +1,7 @@
 import tippy from 'tippy.js';
 import { Post } from '../components/parts/Post.jsx';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { api_prefix } from '../App.jsx';
+import { VITE_API_PREFIX } from '../App.jsx';
 
 export async function showTooltip(ev, threadList, dateNow) {
   if (ev.target.classList.contains('quote-link') && !Object.hasOwn(ev.target, '_tippy')) {
@@ -41,7 +41,7 @@ const tooltipProps = {
 
 
 async function loader(request) {
-  let url = api_prefix + new URL(request.url).pathname;
+  let url = VITE_API_PREFIX + new URL(request.url).pathname;
   const r = await fetch(url);
   if (!r.ok) {
     throw new Response('loader error', { status: r.status });

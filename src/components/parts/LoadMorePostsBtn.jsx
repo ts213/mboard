@@ -1,12 +1,11 @@
-export function LoadMorePostsBtn(props) {
-  const { repliesLoadedCount, repliesCount, loadMorePosts, revalidator } = props;
+export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMorePosts, revalidator }) {
   return (
     <div
       className='load-more-wrap'
     >
       Posts loaded:
-      <span style={{marginLeft: '0.25rem' }}>
-        {repliesLoadedCount}/{repliesCount}
+      <span style={{ marginLeft: '0.25rem' }}>
+        {repliesLoaded}/{repliesCount}
       </span>
 
       <button

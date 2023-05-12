@@ -30,7 +30,7 @@ def ban_user(request, post: 'models.Post'):
 
             assert user is not False
             assert user_is_janny(user, post)
-            assert ban_time <= 30
+            assert 30 >= ban_time >= 1
         except (AssertionError, ValueError):
             return
 

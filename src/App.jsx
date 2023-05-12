@@ -8,7 +8,9 @@ import { Thread, ThreadLoader } from './components/pages/Thread.jsx';
 import { useCurrentRoute } from './hooks/useCurrentRoute.jsx';
 import { setDocumentTitle } from './utils/utils.js';
 
-export const api_prefix = import.meta.env.VITE_API_PREFIX;
+let { VITE_API_PREFIX, VITE_REPLIES_LOAD_LIMIT } = import.meta.env;
+VITE_REPLIES_LOAD_LIMIT = Number(VITE_REPLIES_LOAD_LIMIT);
+export { VITE_API_PREFIX, VITE_REPLIES_LOAD_LIMIT };
 
 export default function App() {
   return <RouterProvider router={router} />

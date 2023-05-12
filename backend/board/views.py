@@ -9,9 +9,9 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from .models import Post, Board
 from . import serializers
-from .permissions import PostPermission
+from .permissions import ChangePostPermission, NewPostPermission
 from .pagination import ThreadListPagination, SingleThreadPagination
-from .utils import check_if_banned, ban_user
+from .utils import ban_user
 from djangoconf.settings import env
 
 
@@ -58,6 +58,8 @@ class ThreadListAPI(generics.ListAPIView):
 class ThreadAPI(generics.ListCreateAPIView):
     serializer_class = serializers.SinglePostSerializer
     pagination_class = SingleThreadPagination
+    USE_THROTTLE = env.get('USE_THROTTLE')
+    permission_classes = [NewPostPermission]
 
     def get_queryset(self):
         pk = self.kwargs['thread_id']
@@ -65,8 +67,7 @@ class ThreadAPI(generics.ListCreateAPIView):
         self.thread = get_object_or_404(Post, board=board, pk=pk, thread__pk=None)
         self.request.kwargs = self.kwargs  # for paginator
 
-        thread_replies = Post.objects.filter(board=board, thread__pk=pk) \
-            .select_related('board').prefetch_related('images')
+        thread_replies = self.thread.posts.all().select_related('board').prefetch_related('images')
         return thread_replies
 
     def list(self, request, *args, **kwargs):
@@ -83,13 +84,10 @@ class ThreadAPI(generics.ListCreateAPIView):
             thread_serialized['replies'] = reversed(replies_serialized)
             data = {'board': self.request.kwargs['board'],
                     'thread': thread_serialized}
+
         return Response(data)
 
     def post(self, request, *args, **kwargs):
-        if ban_time := check_if_banned(request, board=self.kwargs.get('board')):
-            return Response(data={'errors': {'type': 'ban', 'message': ban_time}},
-                            status=status.HTTP_418_IM_A_TEAPOT)
-
         if request.data.get('image', None):
             images_list = request.data.pop('image')
             request.data.setlist('images_write', images_list)
@@ -111,12 +109,12 @@ class ThreadAPI(generics.ListCreateAPIView):
                 }
 
     def get_throttles(self):
-        if self.request.method == 'POST':
+        if self.request.method == 'POST' and self.USE_THROTTLE:
             return [self.PostRequestThrottle()]
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail={'message': 'wait before posting again'})
+        raise exceptions.Throttled(detail={'message': 'too many requests'})
 
     class PostRequestThrottle(AnonRateThrottle):
         rate = env.get('POST_THROTTLE')
@@ -126,6 +124,7 @@ class BoardsAPI(generics.ListCreateAPIView):
     queryset = Board.objects.all()
     serializer_class = serializers.BoardSerializer
     use_boards_cache = env.get('USE_BOARDS_CACHE', False)
+    cache_time = env.get('BOARDS_CACHE_TIME')
 
     def dispatch(self, request, *args, **kwargs):
         if request.method == 'GET' and self.use_boards_cache:
@@ -148,7 +147,7 @@ class BoardsAPI(generics.ListCreateAPIView):
         serializer = self.get_serializer(queryset, many=True)
 
         if self.use_boards_cache:
-            cache.set('boards_list', serializer.data, timeout=300)  # caching for 5 min
+            cache.set('boards_list', serializer.data, timeout=self.cache_time)  # caching for 5 min
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
@@ -162,7 +161,7 @@ class BoardsAPI(generics.ListCreateAPIView):
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail={'message': 'wait before posting again'})
+        raise exceptions.Throttled(detail={'message': 'too many requests'})
 
     class BoardCreationThrottle(AnonRateThrottle):
         rate = env.get('NEW_BOARD_THROTTLE')
@@ -171,7 +170,7 @@ class BoardsAPI(generics.ListCreateAPIView):
 class PostAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = serializers.SinglePostSerializer
-    permission_classes = [PostPermission]
+    permission_classes = [ChangePostPermission]
     lookup_field = 'pk'
     lookup_url_kwarg = 'post_id'
     http_method_names = ['get', 'delete', 'patch']

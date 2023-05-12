@@ -35,6 +35,7 @@ export function dragHtmlElement(e) {
 
 export function toggleFloatingForm(ev, post = undefined, force = undefined) {
   const formWrapper = document.querySelector('.floatingFormWrapper');
+  formWrapper.classList.toggle('hidden', force);
 
   if (post) {
     const form = formWrapper.querySelector('.postForm');
@@ -46,8 +47,6 @@ export function toggleFloatingForm(ev, post = undefined, force = undefined) {
       + `${post.thread ?? post.id}/`
     ).replace('//', '/');
   }
-
-  formWrapper.classList.toggle('hidden', force);
 }
 
 export function setDocumentTitle(route) {

@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '../parts/Button.jsx';
 import { useOnClickOutside } from '../../hooks/useOnClickOutside.jsx';
 import { ArrowDownSvg } from '../svg/ArrowDownSvg.jsx';
-import { api_prefix } from '../../App.jsx';
+import { VITE_API_PREFIX } from '../../App.jsx';
 
 export function BoardList() {
   const boardList = useLoaderData() ?? [];
@@ -33,7 +33,7 @@ export function BoardList() {
               <Link to={'../' + board.link + '/'}>
                 {board.title}
               </Link>
-              <span className='post-count' title='posts in last 24 hours'>
+              <span className='post-count' title='posts in the last 24 hours'>
                 [{board.posts_last24h}]
               </span>
             </li>
@@ -110,7 +110,7 @@ const Modal = forwardRef(function Modal(props, ref) {
 });
 
 export async function BoardLoader() {
-  const url = api_prefix + '/boards/';
+  const url = VITE_API_PREFIX + '/boards/';
   const r = await fetch(url);
   if (!r.ok) {
     throw new Response('loader error', { status: r.status });
@@ -125,7 +125,7 @@ export async function BoardAction({ request }) {
     formData.set('user_id', user_id);
   }
 
-  const url = api_prefix + '/boards/';
+  const url = VITE_API_PREFIX + '/boards/';
   const r = await fetch(url, {
     method: request.method,
     body: formData,
@@ -146,3 +146,6 @@ export async function BoardAction({ request }) {
 
   return data.errors ?? { errors: 'error' };
 }
+
+/** @property {boolean} curr.userboard */
+/** @property {number} board.posts_last24h*/

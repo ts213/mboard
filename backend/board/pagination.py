@@ -5,7 +5,7 @@ from djangoconf.settings import env
 
 
 class ThreadListPagination(pagination.PageNumberPagination):
-    page_size = env.get('THREADS_PER_PAGE')
+    page_size = int(env.get('THREADS_PER_PAGE'))
 
     def get_paginated_response(self, data):
         return Response({
@@ -23,7 +23,7 @@ class ThreadListPagination(pagination.PageNumberPagination):
 
 
 class SingleThreadPagination(pagination.LimitOffsetPagination):
-    default_limit = env.get('POSTS_PER_PAGE')
+    default_limit = int(env.get('REPLIES_PER_PAGE'))
     # max_limit = 3
 
     def get_paginated_response(self, data):
