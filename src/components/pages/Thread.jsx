@@ -23,7 +23,7 @@ export function Thread() {
   const loadMoreProps = {
     repliesLoaded: thread.replies.length,
     repliesCount,
-    loadMorePosts,
+    loadMoreReplies,
     revalidator,
   };
 
@@ -38,7 +38,7 @@ export function Thread() {
     </>
   );
 
-  async function loadMorePosts(ev) {
+  async function loadMoreReplies(ev) {
     switch (ev.target.name) {
       case 'loadMore':
         (repliesCount - thread.replies.length) < (VITE_REPLIES_LOAD_LIMIT * 1.5)

@@ -1,4 +1,4 @@
-export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMorePosts, revalidator }) {
+export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMoreReplies, revalidator }) {
   return (
     <div
       className='load-more-wrap'
@@ -11,7 +11,7 @@ export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMorePosts, r
       <button
         hidden={revalidator.state !== 'idle'}
         name='loadMore'
-        onClick={loadMorePosts}
+        onClick={loadMoreReplies}
       >
         [Load More]
       </button>
@@ -19,7 +19,7 @@ export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMorePosts, r
       <button
         hidden={revalidator.state !== 'idle'}
         name='loadAll'
-        onClick={loadMorePosts}
+        onClick={loadMoreReplies}
       >
         [All]
       </button>

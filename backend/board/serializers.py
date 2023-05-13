@@ -11,11 +11,17 @@ class ImageSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_width(instance):
-        return instance.image.width
+        try:
+            return instance.image.width
+        except FileNotFoundError:
+            return 0
 
     @staticmethod
     def get_height(instance):
-        return instance.image.height
+        try:
+            return instance.image.height
+        except FileNotFoundError:
+            return 0
 
     class Meta:
         model = Image

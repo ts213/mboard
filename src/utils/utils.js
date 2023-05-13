@@ -33,11 +33,11 @@ export function dragHtmlElement(e) {
   }
 }
 
-export function toggleFloatingForm(ev, post = undefined, force = undefined) {
+export function toggleFloatingForm({ force, post, dispatch } = {}) {
   const formWrapper = document.querySelector('.floatingFormWrapper');
   formWrapper.classList.toggle('hidden', force);
 
-  if (post) {
+  if (post && dispatch) {
     const form = formWrapper.querySelector('.postForm');
     formWrapper.querySelector('output').innerText = post.id;
 
@@ -46,6 +46,11 @@ export function toggleFloatingForm(ev, post = undefined, force = undefined) {
       + 'thread/'
       + `${post.thread ?? post.id}/`
     ).replace('//', '/');
+
+    const textArea = formWrapper.querySelector('textarea');
+    const selStart = textArea.selectionStart;
+    dispatch({ type: 'insertQuoteId', value: { selStart, postId: post.id, textArea } });
+    setTimeout(() => textArea.focus(), 100);
   }
 }
 

@@ -5,6 +5,7 @@ input, textarea {
 .quote-link {
     color: rgb(232, 170, 81);
     font-size: small;
+    margin-right: 4px;
 }
 
 body {
@@ -76,4 +77,13 @@ summary:hover {
 
 .hidden {
     display: none;
+}
+
+.quoted-text {
+    color: bisque;
+}
+
+.tippy-content .post {
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(75, 85, 99);
 }

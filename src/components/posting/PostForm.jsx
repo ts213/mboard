@@ -2,7 +2,7 @@ import '../styles/PostForm.css';
 import { Button } from '../parts/Button.jsx';
 import { FormAttachments } from '../parts/FormAttachments.jsx';
 import { useFetcher } from 'react-router-dom';
-import { useAfterNewPostCreated } from '../../hooks/useAfterNewPostCreated.jsx';
+import { useResetFormState } from '../../hooks/useResetFormState.jsx';
 import { toggleFloatingForm, dragHtmlElement } from '../../utils/utils.js';
 import { useFormErrors } from '../../hooks/useFormErrors.jsx';
 import { useFormDispatchContext, useFormStateContext } from './PostFormReducer.jsx';
@@ -12,8 +12,8 @@ export function PostFormsStateContainer({ toggleable = false }) {
   const state = useFormStateContext();
   const dispatch = useFormDispatchContext();
 
-  useAfterNewPostCreated(dispatch, fetcher);
-  const errorList = useFormErrors(state.fileList, fetcher.data);
+  useResetFormState(dispatch);
+  const [errorList, isSubmitDisabled] = useFormErrors(state.fileList, fetcher.data);
 
   function onFormFilesInput(e) {
     if (e.target.files.length > 4) {
@@ -32,7 +32,7 @@ export function PostFormsStateContainer({ toggleable = false }) {
     e.target.image.files = dt.files;
   }
 
-  const formProps = { dispatch, state, fetcher, errorList, syncFormFilesWithState, onFormFilesInput };
+  const formProps = { dispatch, state, fetcher, errorList, isSubmitDisabled, syncFormFilesWithState, onFormFilesInput };
 
   return (
     <>
@@ -46,13 +46,13 @@ export function PostFormsStateContainer({ toggleable = false }) {
   )
 }
 
-function PostForm({ dispatch, state, fetcher, errorList, ...props }) {
+function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...props }) {
   return (
     <>
       {errorList.length > 0 &&
         errorList.map((er, idx) =>
           <output key={idx} className='post-form-error'>
-            {er}
+            {er.message}
           </output>
         )
       }
@@ -71,7 +71,7 @@ function PostForm({ dispatch, state, fetcher, errorList, ...props }) {
                  type='text' maxLength='35' placeholder='Anon'
           />
           <Button
-            disabled={(state.fileList.length > 0 && errorList.length > 0) || fetcher.state !== 'idle'}
+            disabled={isSubmitDisabled || fetcher.state !== 'idle'}
             submitting={fetcher.state === 'submitting'}
             buttonType='submit'
           />
@@ -115,14 +115,14 @@ function FloatingFormWrapper({ children }) {
         onMouseDownCapture={dragHtmlElement}
       >
           <span
-            onClick={toggleFloatingForm}
+            onClick={() => toggleFloatingForm()}
             style={{ marginLeft: '2%', fontSize: 'larger', cursor: 'pointer' }}
           >
             ⨯
           </span>
         <span style={{ flexGrow: '1', cursor: 'move' }}>
           Reply to thread:
-          <output style={{ marginLeft: '1%', color: 'cornflowerblue'}}/>
+          <output style={{ marginLeft: '1%', color: 'cornflowerblue' }} />
           </span>
       </header>
       {children}

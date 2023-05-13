@@ -2,7 +2,10 @@ import pathlib
 import uuid
 from django.db import models
 from django.db import IntegrityError
-from .utils import delete_folder_if_empty, path_for_image, path_for_thumb, process_post_text
+from django.utils import timezone
+from django.core.cache import cache
+from .utils import rm_empty_dir, get_image_path, get_thumb_path, process_post_text, prune_inactive_boards, \
+    get_board_path, delete_dir
 from djangoconf.settings import env
 
 REPLIES_LIMIT = int(env.get('REPLIES_LIMIT'))
@@ -39,39 +42,46 @@ class Post(models.Model):
     edited_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-bump']
 
     def __str__(self):
         return str(self.pk)
 
-    def save(self, *args, **kwargs):
+    def save(self: 'Post', *args, **kwargs):
         if self.thread:
             if self.thread.thread:
                 raise IntegrityError('Post cannot have another post as its thread')
 
             if self.thread.posts.all().count() >= REPLIES_LIMIT:
-                self.thread.posts.order_by('pk')[0].delete()
+                self.thread.posts.last().delete()
+
+            self.thread.bump = timezone.now()
+            self.thread.save(update_fields=['bump'])
 
         if self.text:
             self.text = process_post_text(self.text)
 
+        self.board.bump = timezone.now()
+        self.board.save(update_fields=['bump'])
+
         super().save(*args, **kwargs)
 
-    def delete(self: 'Post', *args, **kwargs):  # "docs: delete is not necessarily called when deleting in bulk"
+    def delete(self: 'Post', *args, **kwargs):
+        # "docs: delete is not necessarily called when deleting in bulk"
         if images := self.images.all():
             thread_dir_path = pathlib.Path(images[0].image.path).parent.parent  # img -> img dir -> thread dir
             for image_model in images:
                 image_model.image.delete(save=None)
                 image_model.thumb.delete(save=None)
-            delete_folder_if_empty(thread_dir_path)
+            rm_empty_dir(thread_dir_path)
 
         return super().delete(*args, **kwargs)
 
 
 class Image(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to=path_for_image)
-    thumb = models.ImageField(upload_to=path_for_thumb)
+    image = models.ImageField(upload_to=get_image_path)
+    thumb = models.ImageField(upload_to=get_thumb_path)
 
     def __str__(self):
         return self.image.name
@@ -81,10 +91,25 @@ class Board(models.Model):
     link = models.CharField(primary_key=True, max_length=5)
     title = models.CharField(max_length=15, unique=True)
     userboard = models.BooleanField(default=True)
+    bump = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
+    class Meta:
+        ordering = ['-bump']
+
+    def save(self: 'Board', *args, **kwargs):
         assert len(self.link) > 0 and len(self.title) > 0, 'length'
+        prune_inactive_boards()
+
         return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        board_files_path = get_board_path(self)
+        super().delete(*args, **kwargs)
+
+        if board_files_path:
+            delete_dir(board_files_path)
+
+        cache.delete('boards_list')
 
     def __str__(self):
         return self.link

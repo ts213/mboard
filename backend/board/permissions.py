@@ -17,7 +17,7 @@ class NewPostPermission(permissions.BasePermission):
 
 
 class ChangePostPermission(permissions.BasePermission):
-    allowed_time = 60 * 60 * 24  # day
+    allowed_interval = 60 * 60 * 24  # day
 
     def has_object_permission(self, request, view, post: Post):
         forbidden = False
@@ -25,23 +25,40 @@ class ChangePostPermission(permissions.BasePermission):
         if request.method == 'GET':
             return not forbidden
 
-        user = get_user_from_header(request)
-        if not user:
-            return forbidden
+        try:
+            self.header_has_userid(request)
 
-        if user_is_janny(user, post):
+            if request.method == 'DELETE':
+                if self.is_janny(post):
+                    return not forbidden
+
+            if request.method == 'PATCH':
+                self.post_was_not_edited(post)
+
+            self.verify_user(post, self.user)
+            self.is_not_thread(post)
+            self.is_allowed_interval(post)
+
             return not forbidden
-
-        if not post.thread:
+        except AssertionError:
             return forbidden
 
+    def header_has_userid(self, request):
+        self.user = get_user_from_header(request)
+        assert self.user is not None
+
+    def is_janny(self, post):
+        return user_is_janny(self.user, post)
+
+    def verify_user(self, post, user):
+        assert user == post.user
+
+    def is_not_thread(self, post):
+        assert post.thread is not None
+
+    def is_allowed_interval(self, post):
         time_diff_secs = (timezone.now() - post.date).total_seconds()
+        assert time_diff_secs <= self.allowed_interval
 
-        forbidden = \
-            time_diff_secs > self.allowed_time or \
-            user != post.user
-
-        if request.method == 'PATCH':
-            forbidden = post.edited_at is not None
-
-        return not forbidden
+    def post_was_not_edited(self, post):
+        assert post.edited_at is None

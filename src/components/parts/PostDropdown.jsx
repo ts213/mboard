@@ -1,15 +1,20 @@
 import { Button } from './Button.jsx';
 import { useFetcher } from 'react-router-dom';
 import { usePostPermissions } from '../../hooks/usePostPermissions.jsx';
+import { toggleFloatingForm } from '../../utils/utils.js';
 
-export function PostDropdown({ post, onEditMenuClick }) {
+export function PostDropdown({ post, onEditMenuClick, dispatch }) {
   const fetcher = useFetcher();
 
   const [canEdit, canDelete, canBan] = usePostPermissions(post);
 
   return (
     <div className='dropdown-menu'>
-      <Button value={'Reply'} />
+      <Button
+        value={'Reply'}
+        clickHandler={() => toggleFloatingForm({ force: false, post, dispatch })}
+      />
+
       {canEdit &&
         <Button
           clickHandler={() => onEditMenuClick(post.id)}

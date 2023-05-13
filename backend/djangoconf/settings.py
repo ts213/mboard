@@ -18,7 +18,7 @@ ALLOWED_HOSTS = env.get('ALLOWED_HOSTS').split()
 INTERNAL_IPS = ['localhost', '192.168.1.133']  # debug toolbar
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],
     'UNAUTHENTICATED_USER': None,  # if django.contrib.auth is disabled
@@ -46,11 +46,10 @@ INSTALLED_APPS = [
     # 'django.contrib.sessions',
     # 'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 3rd party
+
     'rest_framework',
     "debug_toolbar",
     # 'corsheaders',
-
     'board.apps.BoardConfig',
 ]
 

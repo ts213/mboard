@@ -50,6 +50,11 @@ const router = createBrowserRouter(
                action={newPostAction}
                Component={Thread}
                loader={ThreadLoader}
+               shouldRevalidate={({ actionResult }) => {
+                 return actionResult ?
+                   !Object.hasOwn(actionResult, 'errors')
+                   : true;
+               }}
         />
       </Route>
 

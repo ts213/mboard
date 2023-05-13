@@ -5,10 +5,8 @@
     align-items: flex-start;
 }
 
-.threads-wrap {
-    margin-left: 3rem;
-    margin-right: 3rem;
-    margin-top: 3rem;
+main {
+    margin: 3rem 3rem 0 3rem;
 }
 
 .post {

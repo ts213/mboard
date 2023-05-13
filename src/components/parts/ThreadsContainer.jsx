@@ -9,7 +9,7 @@ export function ThreadsContainer() {
   return (
     <>
       <ScrollRestoration />
-      <main className='threads-wrap'>
+      <main>
         <Breadcrumbs />
         <GlobalContext>
           <PostHistoryContext>

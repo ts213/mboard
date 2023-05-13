@@ -41,6 +41,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
             <PostDropdown
               post={post}
               onEditMenuClick={onEditMenuClick}
+              dispatch={dispatch}
             />
           }
         </div>
@@ -92,10 +93,6 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
 
   function onPostIdClick(ev) {
     ev.preventDefault();
-    toggleFloatingForm(ev, post, false);
-    const textArea = document.querySelector('.floatingFormWrapper textarea');
-    const selStart = textArea.selectionStart;
-    dispatch({ type: 'insertQuoteId', value: { selStart, postId: post.id, textArea } });
-    setTimeout(() => textArea.focus(), 100);
+    toggleFloatingForm({force: false, post, dispatch});
   }
 }

@@ -1,13 +1,47 @@
+import pathlib
 import re
+import shutil
 import uuid
 from io import BytesIO
+from datetime import timedelta
 import PIL.Image
 from django.core.files.base import ContentFile
 from django.utils.html import escape
+from django.utils import timezone
 from django.core.cache import cache
 from rest_framework.serializers import UUIDField
 from rest_framework.views import exception_handler
 import board.models as models
+from djangoconf.settings import env
+
+
+def delete_dir(path: pathlib.Path) -> None:
+    try:
+        shutil.rmtree(path)
+    except FileNotFoundError:
+        pass
+
+
+def get_board_path(board: 'models.Board') -> pathlib.Path | None:
+    # get first post with files, if exists, then deduce board path from it
+    post = next(
+        (post for post in board.posts.all() if post.images.count() > 0),
+        None
+    )
+    if post:
+        path_to_image = post.images.first().image.path
+        board_dir_path = pathlib.Path(path_to_image).parent.parent.parent  # img -> img dir -> thread dir -> board dir
+        return board_dir_path
+
+
+def prune_inactive_boards():
+    days = int(env.get('PRUNE_BOARDS_AFTER'))
+    assert days and isinstance(days, int)
+
+    inactivity_threshold = timezone.now() - timedelta(days=days)
+    if boards := models.Board.objects.filter(bump__lt=inactivity_threshold):
+        for b in boards:
+            b.delete()
 
 
 def check_if_banned(request, board: str) -> int | None:
@@ -89,6 +123,7 @@ def process_post_text(post_text):
     post_text = escape(post_text)
     post_text = wrap_quoted_text_in_tag(post_text)
     post_text = insert_anchor_tag(post_text)
+    post_text = color_quoted_text(post_text)
     return post_text
 
 
@@ -118,6 +153,15 @@ def insert_anchor_tag(post_text: str):
     return post_text
 
 
+def color_quoted_text(post_string):
+    quoted_text = re.findall('^\\s*&gt;.+', post_string, flags=re.MULTILINE)  # '^\s*&gt;[^&gt;].+'
+    if quoted_text:
+        span = "<span class='quoted-text'>{index}</span>"
+        for count, index in enumerate(quoted_text):
+            post_string = post_string.replace(index, span.format(index=index.strip().replace('&gt;', '>')))
+    return post_string
+
+
 def make_thumb(inmemory_image):
     image = PIL.Image.open(inmemory_image)
     image.thumbnail(size=(200, 220))
@@ -128,7 +172,7 @@ def make_thumb(inmemory_image):
     return thumb
 
 
-def delete_folder_if_empty(thread_dir_path):
+def rm_empty_dir(thread_dir_path):
     for folder in thread_dir_path.iterdir():
         folder_not_empty = next(folder.iterdir(), False)
         if folder_not_empty:
@@ -138,13 +182,13 @@ def delete_folder_if_empty(thread_dir_path):
         thread_dir_path.rmdir()
 
 
-def path_for_image(instance, filename):
+def get_image_path(instance, filename):
     if instance.post.thread:
         return f'{instance.post.board}/{instance.post.thread.pk}/images/{filename}'
     return f'{instance.post.board}/{instance.post.pk}/images/{filename}'
 
 
-def path_for_thumb(instance, filename):
+def get_thumb_path(instance, filename):
     post = instance.post
     if post.thread:
         return f'{post.board}/{post.thread.pk}/thumbs/{filename}'

@@ -25,7 +25,8 @@ class ThreadListAPI(generics.ListAPIView):
 
         threads_queryset = Post.objects \
             .select_related('board').prefetch_related('images') \
-            .filter(board=self.board, thread__isnull=True)
+            .filter(board=self.board, thread__isnull=True) \
+            .order_by('-bump')
 
         thread_replies_qset = Post.objects \
                                   .select_related('board').prefetch_related('images') \
@@ -114,10 +115,17 @@ class ThreadAPI(generics.ListCreateAPIView):
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail={'message': 'too many requests'})
+        raise exceptions.Throttled(detail={'message': 'Wait before posting again'})
 
     class PostRequestThrottle(AnonRateThrottle):
         rate = env.get('POST_THROTTLE')
+        scope = 'anon_post'
+
+        def get_cache_key(self, request, view):
+            return self.cache_format % {
+                'scope': self.scope,
+                'ident': self.get_ident(request)
+            }
 
 
 class BoardsAPI(generics.ListCreateAPIView):

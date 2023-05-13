@@ -16,6 +16,6 @@ function createAnchorElmnt(replyId) {
   const a = document.createElement('a');
   a.href = `#${replyId}`;
   a.text = `>>${replyId}`;
-  a.className = 'quote-link mr-1';
+  a.className = 'quote-link';
   return a;
 }
