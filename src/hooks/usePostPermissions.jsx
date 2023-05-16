@@ -1,22 +1,41 @@
 import { usePostHistoryContext } from '../context/PostHistoryContext.jsx';
 
 export function usePostPermissions(post) {
-  const boards = JSON.parse(localStorage.getItem('boards'));
+  let boards = JSON.parse(localStorage.getItem('boards'));
+  const postIdList = usePostHistoryContext();
+  const userPost = postIdList.find(userPost => userPost.id === post.id);
+
   if (boards?.includes(post.board)) {
-    return [true, true, true];
+    return Permissions({
+      canEdit: Boolean(post.thread) && userPost?.ed, canDelete: true, canBan: true, canClose: !post.thread,
+    });
   }
 
   const timeDiff = new Date().getTime() - post.date * 1000;  // post.date in secs
   const allowed_interval = (timeDiff / 1000 / 60 / 60 / 24) <= 1;
   if (!allowed_interval) {
-    return [false, false, false];
+    return Permissions({
+      canEdit: false, canDelete: false, canBan: false, canClose: false,
+    });
   }
 
   if (!post.thread) {
-    return [false, false, false];
+    return Permissions({
+      canEdit: false, canDelete: false, canBan: false, canClose: false,
+    });
   }
 
-  const postIdList = usePostHistoryContext();  // eslint-disable-line
-  const user_post = postIdList.find(user_post => user_post.id === post.id);
-  return [user_post?.ed, user_post?.del, false];
+  return Permissions({
+      canEdit: Boolean(userPost?.ed), canDelete: Boolean(userPost?.del), canBan: false, canClose: !post.thread,
+    }
+  );
+}
+
+function Permissions({ canEdit, canDelete, canBan, canClose }) {
+  return {
+    canEdit,
+    canDelete,
+    canBan,
+    canClose,
+  }
 }

@@ -5,7 +5,6 @@ import { Breadcrumbs } from './Breadcrumbs.jsx';
 import { PostFormReducer } from '../posting/PostFormReducer.jsx';
 
 export function ThreadsContainer() {
-
   return (
     <>
       <ScrollRestoration />

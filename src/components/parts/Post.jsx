@@ -4,13 +4,12 @@ import { useRef } from 'react';
 import { PostDropdown } from './PostDropdown.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage.jsx';
-import { toRelativeTime } from '../../utils/timeToRelative.js';
-import { toggleFloatingForm } from '../../utils/utils.js';
+import { toggleFloatingForm, toRelativeTime } from '../../utils/utils.js';
 import { useFormDispatchContext } from '../posting/PostFormReducer.jsx';
 
 // import PropTypes from 'prop-types';
 
-export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, onEditMenuClick }) {
+export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, onEditMenuClick, closed }) {
   const postTextElmnt = useRef();
   const dispatch = useFormDispatchContext();
 
@@ -29,6 +28,8 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
           {post.id}
         </a>
 
+        {(closed && !post.thread) && <span title='Thread closed'>🔒</span>}
+
         <div style={{ display: 'inline-block' }}>
           <span
             onClick={() => onDropdownClick(post.id)}
@@ -41,7 +42,9 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
             <PostDropdown
               post={post}
               onEditMenuClick={onEditMenuClick}
+              onDropdownClick={onDropdownClick}
               dispatch={dispatch}
+              closed={closed}
             />
           }
         </div>
@@ -93,6 +96,10 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
 
   function onPostIdClick(ev) {
     ev.preventDefault();
-    toggleFloatingForm({force: false, post, dispatch});
+    if (closed) {
+      return;
+    }
+
+    toggleFloatingForm({ force: false, post, dispatch });
   }
 }

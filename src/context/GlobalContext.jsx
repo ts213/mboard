@@ -14,7 +14,7 @@ export function GlobalContext({ children }) {
   const api = useMemo(() => {
 
     function onClick(ev) {
-      const classList = ['img', 'dropdown-btn', 'del-btn', 'ban-btn'];
+      const classList = ['img', 'dropdown-btn', 'fetcher-btn'];
       if (!classList.some(klass => ev.target.classList.contains(klass))) {
         dispatch({ type: 'click' });
       }

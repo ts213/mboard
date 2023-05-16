@@ -1,39 +1,50 @@
 from rest_framework import permissions
 from django.utils import timezone
 from .models import Post
-from .utils import get_user_from_header, user_is_janny, check_if_banned
+from .utils import get_user_from_header, user_is_janny, get_ban_time_from_cache
 
 
-class NewPostPermission(permissions.BasePermission):
+class PostPermission(permissions.BasePermission):
+    allowed_interval = 60 * 60 * 24  # day
+    user = None
     message = None
+    SAFE_TO_EDIT_FIELDS = ('poster', 'text')
+    SAFE_TO_CLOSE_FIELDS = ('closed',)
 
     def has_permission(self, request, view):
-        if request.method == 'POST':
-            if ban_time := check_if_banned(request, board=view.kwargs.get('board')):
-                self.message = {'type': 'ban', 'message': ban_time}
-                return False
-
-        return True
-
-
-class ChangePostPermission(permissions.BasePermission):
-    allowed_interval = 60 * 60 * 24  # day
-
-    def has_object_permission(self, request, view, post: Post):
         forbidden = False
 
-        if request.method == 'GET':
+        if request.method == 'POST':
+            try:
+                self.check_ban(request, board=view.kwargs.get('board'))
+
+                post = Post.objects.get(pk=request.data.get('thread'))
+                self.is_thread_not_closed(post)
+                return not forbidden
+            except AssertionError:
+                return forbidden
+            except Post.DoesNotExist:  # new thread
+                return not forbidden
+        else:
+            return not forbidden
+
+    def has_object_permission(self, request, view, post: Post | None):
+        forbidden = False
+
+        if request.method in permissions.SAFE_METHODS:
             return not forbidden
 
         try:
             self.header_has_userid(request)
 
             if request.method == 'DELETE':
+                self.is_thread_not_closed(post)
                 if self.is_janny(post):
                     return not forbidden
 
             if request.method == 'PATCH':
-                self.post_was_not_edited(post)
+                if self.determine_safe_patch_action(request, post):
+                    return not forbidden
 
             self.verify_user(post, self.user)
             self.is_not_thread(post)
@@ -50,15 +61,54 @@ class ChangePostPermission(permissions.BasePermission):
     def is_janny(self, post):
         return user_is_janny(self.user, post)
 
-    def verify_user(self, post, user):
+    @staticmethod
+    def verify_user(post, user):
         assert user == post.user
 
-    def is_not_thread(self, post):
+    @staticmethod
+    def is_not_thread(post):
         assert post.thread is not None
 
     def is_allowed_interval(self, post):
         time_diff_secs = (timezone.now() - post.date).total_seconds()
         assert time_diff_secs <= self.allowed_interval
 
-    def post_was_not_edited(self, post):
+    @staticmethod
+    def has_post_been_edited(post):
         assert post.edited_at is None
+
+    @staticmethod
+    def is_thread_not_closed(post):
+        if post.thread:
+            assert post.thread.closed is False
+        assert post.closed is False
+
+    def determine_safe_patch_action(self, request, post):
+        match request.data.get('type'):
+            case 'edit':
+                self.has_post_been_edited(post)
+                self.is_thread_not_closed(post)
+                self.pop_extra_fields(request, self.SAFE_TO_EDIT_FIELDS)
+                return False
+            case 'close':
+                assert self.is_janny(post)
+                self.pop_extra_fields(request, self.SAFE_TO_CLOSE_FIELDS)
+                request.data.update({
+                    'text': post.text,  # text required by SinglePostSer validate()
+                    'closed': not post.closed,
+                })
+                return True
+            case None:
+                raise AssertionError
+
+    @staticmethod
+    def pop_extra_fields(request, safe_fields):
+        request.data._mutable = True
+        for key in request.data.copy():
+            if key not in safe_fields:
+                request.data.pop(key)
+
+    def check_ban(self, request, board):
+        if ban_time := get_ban_time_from_cache(request, board=board):
+            self.message = {'type': 'ban', 'message': ban_time}
+            raise AssertionError

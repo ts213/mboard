@@ -3,8 +3,8 @@ import re
 import shutil
 import uuid
 from io import BytesIO
-from datetime import timedelta
 import PIL.Image
+from typing import TypedDict, NotRequired
 from django.core.files.base import ContentFile
 from django.utils.html import escape
 from django.utils import timezone
@@ -12,7 +12,22 @@ from django.core.cache import cache
 from rest_framework.serializers import UUIDField
 from rest_framework.views import exception_handler
 import board.models as models
-from djangoconf.settings import env
+
+
+class CacheItems(TypedDict):
+    thread: NotRequired[int]
+    board: NotRequired[str]
+    board_list: NotRequired[str]
+
+
+def set_cache(cache_items: CacheItems):
+    timestamp = timezone.now().timestamp()
+    for prefix, value in cache_items.items():
+        cache.set(
+            key=f'{prefix}:{value}',
+            value=f'{value}:{timestamp}',
+            timeout=3600 * 24 if prefix != 'board_list' else 1800
+        )
 
 
 def delete_dir(path: pathlib.Path) -> None:
@@ -34,17 +49,7 @@ def get_board_path(board: 'models.Board') -> pathlib.Path | None:
         return board_dir_path
 
 
-def prune_inactive_boards():
-    days = int(env.get('PRUNE_BOARDS_AFTER'))
-    assert days and isinstance(days, int)
-
-    inactivity_threshold = timezone.now() - timedelta(days=days)
-    if boards := models.Board.objects.filter(bump__lt=inactivity_threshold):
-        for b in boards:
-            b.delete()
-
-
-def check_if_banned(request, board: str) -> int | None:
+def get_ban_time_from_cache(request, board: str) -> int | None:
     ip = request.META['REMOTE_ADDR']
     cache_key = 'ban' + ':' + ip + ':' + board
     banned: str | None = cache.get(cache_key)
@@ -120,6 +125,8 @@ class CoercingUUIDField(UUIDField):
 
 def process_post_text(post_text):
     """escapes user input, converts '>>' to links, colours quoted text"""
+    if not post_text:
+        return post_text
     post_text = escape(post_text)
     post_text = wrap_quoted_text_in_tag(post_text)
     post_text = insert_anchor_tag(post_text)
@@ -132,7 +139,7 @@ def wrap_quoted_text_in_tag(post_text: str):
         span = '<span style="color:red">{repl}</span>'
         return span.format(repl=match_obj.group(0).strip())
 
-    post_text = re.sub('^\\s*::.+(?m)', callback, post_text)
+    post_text = re.sub('(?m)^\\s*::.+', callback, post_text)
     return post_text
 
 
@@ -149,7 +156,7 @@ def insert_anchor_tag(post_text: str):
                            found_quote.strip('gt;&gt;'),
                            found_quote.strip())
 
-    post_text = re.sub('^\\s*&gt;&gt;[0-9]+(?m)', callback, post_text)
+    post_text = re.sub('(?m)^\\s*&gt;&gt;[0-9]+', callback, post_text)
     return post_text
 
 

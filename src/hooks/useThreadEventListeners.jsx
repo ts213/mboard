@@ -1,7 +1,7 @@
 import { useGlobalContextApi } from '../context/GlobalContext.jsx';
 import { usePostHistoryContextApi } from '../context/PostHistoryContext.jsx';
 import { useEffect } from 'react';
-import { addRepliesToPosts } from '../utils/addRepliesToPost.js';
+import { addRepliesToPosts } from '../utils/utils.js';
 
 export function useThreadEventListeners() {
   const { onClick } = useGlobalContextApi();

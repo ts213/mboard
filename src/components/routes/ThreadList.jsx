@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { useFetcher, useLoaderData } from 'react-router-dom';
 import { useThreadsPagination, page } from '../../hooks/useThreadsPagination.jsx';
-import { useOnPostDelete } from '../../hooks/useOnPostDelete.jsx';
+import { useThreadListEventHandler } from '../../hooks/useThreadListEventHandler.jsx';
 import { VITE_API_PREFIX } from '../../App.jsx';
 
 let threadListCache = [];
@@ -14,21 +14,8 @@ export function ThreadList() {
 
   const fetcher = useFetcher();
   const paginationIntersectionRef = useThreadsPagination(fetcher, pageNum, nextPageNum);
-  useOnPostDelete(setThreadList);
-
-  useEffect(() => {
-    if (fetcher.data?.threads) {
-      setThreadList(t => {
-        const withNewThreads = [...t, ...fetcher.data.threads];
-        threadListCache = withNewThreads;
-        return withNewThreads;
-      });
-    }
-
-    if (fetcher.data?.nextPageNum === null) {
-      page.nextPageNum = false;
-    }
-  }, [fetcher.data?.threads, fetcher.data?.nextPageNum]);
+  useThreadListEventHandler(setThreadList);
+  useThreadListCache(fetcher, setThreadList);
 
   return (
     <>
@@ -53,10 +40,25 @@ export async function ThreadListLoader({ request }) {
   if (page) {
     url += `?page=${page}`;
   }
-
   const response = await fetch(url);
   if (!response.ok) {
     throw new Response('loader error', { status: response.status });
   }
   return response.json();
+}
+
+function useThreadListCache(fetcher, setThreadList) {
+  useEffect(() => {
+    if (fetcher.data?.threads) {
+      setThreadList(threads => {
+        const withNewThreads = [...threads, ...fetcher.data.threads];
+        threadListCache = withNewThreads;
+        return withNewThreads;
+      });
+    }
+
+    if (fetcher.data?.nextPageNum === null) {
+      page.nextPageNum = false;
+    }
+  }, [fetcher.data?.threads, fetcher.data?.nextPageNum, setThreadList]);
 }

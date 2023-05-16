@@ -2,17 +2,25 @@ import { Button } from './Button.jsx';
 import { useFetcher } from 'react-router-dom';
 import { usePostPermissions } from '../../hooks/usePostPermissions.jsx';
 import { toggleFloatingForm } from '../../utils/utils.js';
+import { useEffect } from 'react';
 
-export function PostDropdown({ post, onEditMenuClick, dispatch }) {
+export function PostDropdown({ post, onEditMenuClick, onDropdownClick, dispatch, closed }) {
   const fetcher = useFetcher();
 
-  const [canEdit, canDelete, canBan] = usePostPermissions(post);
+  const { canEdit, canDelete, canBan, canClose } = usePostPermissions(post);
+
+  useEffect(() => {
+    if (fetcher.data?.created) {
+      setTimeout(() => onDropdownClick(0), 200);
+    }
+  }, [fetcher.data?.created, onDropdownClick]);
 
   return (
     <div className='dropdown-menu'>
       <Button
-        value={'Reply'}
+        value='Reply'
         clickHandler={() => toggleFloatingForm({ force: false, post, dispatch })}
+        disabled={closed}
       />
 
       {canEdit &&
@@ -20,6 +28,7 @@ export function PostDropdown({ post, onEditMenuClick, dispatch }) {
           clickHandler={() => onEditMenuClick(post.id)}
           value='Edit'
           extraStyle={{ display: 'block' }}
+          disabled={closed}
         />
       }
 
@@ -27,25 +36,44 @@ export function PostDropdown({ post, onEditMenuClick, dispatch }) {
         <>
           <Button
             clickHandler={deletePost}
-            value={'Delete'}
-            submitting={fetcher.data}
+            value='Delete'
             extraStyle={{ display: 'block' }}
-            extraClass='del-btn'
+            extraClass='fetcher-btn'
+            submitting={fetcher.state !== 'idle'}
+            disabled={closed}
           />
           {canBan &&
-            <Button extraStyle={{ transform: 'translate(100%, -100%)', display: 'none' }}
-                    extraClass='ban-btn'
+            <Button extraStyle={{ transform: 'translate(100%, -100%)', display: 'none', position: 'absolute' }}
+                    extraClass='ban-btn fetcher-btn'
                     value='& Ban'
                     clickHandler={(ev) => deletePost(ev, { promtForBan: true })}
+                    disabled={closed}
             />
           }
         </>
       }
+
+      {canClose &&
+        <Button
+          value={closed ? 'Open' : 'Close'}
+          clickHandler={closeThread}
+          extraClass='fetcher-btn'
+          submitting={fetcher.state !== 'idle'}
+        />
+      }
     </div>
   );
 
+  function closeThread() {
+    let url = `/${post.board}/thread/${post.id}`;
+    fetcher.submit(
+      { type: 'close' },
+      { method: 'patch', action: url }
+    );
+  }
+
   function deletePost(ev, options = undefined) {
-    let url = `/post/${post.id}/`;
+    let url = `/${post.board}/thread/${post.id}`;
 
     if (canBan) {
       const toggled = toggleBanButtonOnFirstClick(ev);

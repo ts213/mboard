@@ -70,7 +70,7 @@ const Modal = forwardRef(function Modal(props, ref) {
   const navigation = useNavigation();
   useEffect(() => {
     return () => {
-      if (errors) errors.link = errors.title = null; // clear errors on modal closing
+      if (errors) errors.link = errors.title = errors.message = null; // clear errors on modal closing
     }
   }, []);  //eslint-disable-line
 
@@ -96,7 +96,7 @@ const Modal = forwardRef(function Modal(props, ref) {
                  placeholder={'Board link'} autoComplete='off'
           />
           <sub>Like &quot;/b/&quot;, without slashes</sub>
-          {errors && <output className='error'>{errors.detail}</output>}
+          {errors && <output className='error'>{errors.message}</output>}
         </div>
 
         <div style={{ textAlign: 'center' }}>

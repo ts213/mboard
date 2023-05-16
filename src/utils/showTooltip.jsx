@@ -3,18 +3,24 @@ import { Post } from '../components/parts/Post.jsx';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { VITE_API_PREFIX } from '../App.jsx';
 
-export async function showTooltip(ev, threadList, dateNow) {
-  if (ev.target.classList.contains('quote-link') && !Object.hasOwn(ev.target, '_tippy')) {
+const displayTooltipsFor = ['quote-link', 'reply-link'];
+
+export async function showTooltip(ev, threadList, dateNow, board) {
+  if (
+    displayTooltipsFor.some(klass => ev.target.classList.contains(klass))
+    && !Object.hasOwn(ev.target, '_tippy')
+  ) {
     const regex = /#(\d+)/;
     const quotedPostId = ev.target.href.match(regex)[1];  // [1] first matched group
 
+    // noinspection EqualityComparisonWithCoercionJS
     let postObject = threadList.concat(
       threadList.flatMap(thread => thread.replies)
     ).find(post => post.id == quotedPostId);
 
     if (!postObject) {
       try {
-        const request = new Request(`/post/${quotedPostId}/`);
+        const request = new Request(`/${board}/thread/${quotedPostId}/`);
         postObject = await loader(request);
       } catch {
         tooltipProps.content = '';
@@ -36,6 +42,7 @@ const tooltipProps = {
   arrow: false,
   delay: [150, 150],
   maxWidth: 'none',
+  appendTo: document.body,
   // onHidden: instance => instance.destroy(),
 };
 
@@ -46,5 +53,6 @@ async function loader(request) {
   if (!r.ok) {
     throw new Response('loader error', { status: r.status });
   }
-  return r.json();
+  const { thread: post } = await r.json();
+  return post;
 }

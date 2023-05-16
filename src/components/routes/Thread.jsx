@@ -1,11 +1,14 @@
 import '../styles/Thread.css';
-import { Link, useLoaderData, useRevalidator } from 'react-router-dom';
+import { useLoaderData, useRevalidator } from 'react-router-dom';
 import { PostList } from '../parts/PostList.jsx';
 import { PostFormsStateContainer } from '../posting/PostForm.jsx';
-import { useEffect } from 'react';
+import { createContext, useEffect } from 'react';
 import { VITE_API_PREFIX, VITE_REPLIES_LOAD_LIMIT } from '../../App.jsx';
+import { LoadMorePostsBtn } from '../parts/LoadMorePostsBtn.jsx';
+import { ThreadNavigationButtons } from '../parts/ThreadNavigationButtons.jsx';
 
 let loadPostLimit = null;
+export const IsThreadClosed = createContext(false);
 
 export function Thread() {
   const { thread, repliesCount } = useLoaderData();
@@ -13,28 +16,33 @@ export function Thread() {
 
   useEffect(() => {
     window.threadWasMounted = true;
-
-    return () => {
-      loadPostLimit = null;
-    };
+    return () => loadPostLimit = null;
   }, []);
-
-  const isMoreReplies = (repliesCount - thread.replies.length) > 0;
-  const loadMoreProps = {
-    repliesLoaded: thread.replies.length,
-    repliesCount,
-    loadMoreReplies,
-    revalidator,
-  };
 
   return (
     <>
-      <PostList
-        threadList={[thread]}
-        loadMoreProps={isMoreReplies && loadMoreProps}
+      {thread.closed &&
+        <div style={{ textAlign: 'center', color: '#d03e3e', fontSize: 'larger', marginBottom: '3%' }}>
+          Thread closed
+        </div>
+      }
+      {(repliesCount - thread.replies.length) > 0 &&
+        <LoadMorePostsBtn
+          repliesLoaded={thread.replies.length}
+          repliesCount={repliesCount}
+          loadMoreReplies={loadMoreReplies}
+          revalidator={revalidator}
+        />
+      }
+      <IsThreadClosed.Provider value={thread.closed}>
+        <PostList threadList={[thread]} />
+      </IsThreadClosed.Provider>
+
+      <ThreadNavigationButtons
+        revalidator={revalidator}
+        repliesCount={repliesCount}
       />
-      <NavigationButtons />
-      <PostFormsStateContainer />
+      {!thread.closed && <PostFormsStateContainer />}
     </>
   );
 
@@ -64,20 +72,4 @@ export async function ThreadLoader({ request }) {
     throw new Response('loader error', { status: r.status });
   }
   return await r.json();
-}
-
-function NavigationButtons() {
-  return (
-    <div id='bottom'>
-      <Link to='../../' relative='path'>[Return]</Link>
-      <Link to=''
-            onClick={(e) => {
-              e.preventDefault();
-              document.body.scrollIntoView();
-            }}
-      >
-        [Top]
-      </Link>
-    </div>
-  )
 }

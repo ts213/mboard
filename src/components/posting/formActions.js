@@ -31,8 +31,19 @@ export async function newPostAction({ request, params }) {
 
 export async function editPostAction(request) {
   const formData = await request.formData();
+
+  const editType = formData.get('type');
+
   try {
-    return await submitForm(request, formData);
+    const submitResponse = await submitForm(request, formData);
+    if (editType === 'close' && submitResponse?.created) {
+      dispatchCustomEvent(
+        'threadClosed',
+        { postId: submitResponse.post.id, result: submitResponse.post.closed },
+      );
+    }
+    return submitResponse;
+
   } catch (e) {
     return e;
   }
@@ -42,11 +53,8 @@ export async function deletePostAction(request) {
   try {
     const data = await submitForm(request, null);
 
-    if (data?.deleted === 1) {
-      window.dispatchEvent(new CustomEvent(
-        'postDeleted',
-        { detail: { postId: data?.post.id } }
-      ));
+    if (data?.deleted) {
+      dispatchCustomEvent('postDeleted', { postId: data?.post.id });
 
       if (!data?.post.thread) {
         return redirect(`/${data.post.board ?? ''}/`);
@@ -65,7 +73,6 @@ async function submitForm(request, formData = undefined) {
   url += new URL(request.url).search;
 
   let headers;
-
   if (request.method === 'DELETE' || request.method === 'PATCH') {
     const userid = localStorage.getItem('user_id');
     if (userid) {
@@ -86,14 +93,14 @@ async function submitForm(request, formData = undefined) {
     };
   }
 
-  dispatchPostChangeEvent(data.post.id, request.method);
+  dispatchCustomEvent('postChange', { postId: data.post.id }, request.method);
   return data;
 }
 
-function dispatchPostChangeEvent(postId, method) {
+function dispatchCustomEvent(eventType, { postId, result }, method = undefined) {
   window.dispatchEvent(new CustomEvent(
-    'postChange',
-    { detail: { postId: Number(postId), method: method } }
+    eventType,
+    { detail: { postId: Number(postId), result, method } }
   ));
 }
 
@@ -106,7 +113,7 @@ async function buildFormData(request, params) {
     formData.delete('file');
   }
 
-  let userid = localStorage.getItem('user_id');
+  const userid = localStorage.getItem('user_id');
   if (userid) {
     formData.set('user_id', userid);
   }

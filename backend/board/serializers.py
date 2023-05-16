@@ -31,13 +31,14 @@ class ImageSerializer(serializers.ModelSerializer):
 class SinglePostSerializer(serializers.ModelSerializer):
     user_id = CoercingUUIDField(required=False, write_only=True)
     date = serializers.SerializerMethodField(method_name='get_date_timestamp')
-    bump = serializers.SerializerMethodField(method_name='get_bump_timestamp')
     images = ImageSerializer(read_only=True, many=True)
     images_write = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
+    thread = serializers.PrimaryKeyRelatedField(allow_null=True, required=False,
+                                                queryset=Post.objects.filter(closed=False))
 
     class Meta:
         model = Post
-        exclude = ('edited_at', 'user')
+        exclude = ('edited_at', 'user', 'bump')
 
     def create(self, validated_data):
         images = validated_data.pop('images_write', None)
@@ -61,7 +62,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
                 return post
         except Exception as e:
             print(e)
-            raise serializers.ValidationError('Error creating post')
+            raise serializers.ValidationError({'message': 'Error creating a new post'})
 
     def validate(self, data):
         images = data.get('images_write', None)
@@ -91,10 +92,6 @@ class SinglePostSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_date_timestamp(thread: Post):
         return thread.date.timestamp()
-
-    @staticmethod
-    def get_bump_timestamp(thread: Post):
-        return thread.bump.timestamp()
 
 
 class ThreadListSerializer(SinglePostSerializer):

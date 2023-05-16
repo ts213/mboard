@@ -1,19 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useReducer } from 'react';
 
 export function PostHistoryContext({ children }) {
-  const [state, dispatch] = useReducer(reducer, null, loadPostHistoryFromStorage);
+  const [postIdList, dispatch] = useReducer(reducer, null, loadPostHistoryFromStorage);
 
   useEffect(() => {
-    if (state.postIdList.length < 1) {
+    if (postIdList.length < 1) {
       return;
     }
 
-    if (state.postIdList.length > 100) {
-      state.postIdList.shift();
+    if (postIdList.length > 100) {
+      postIdList.shift();
     }
 
-    localStorage.setItem('posts', JSON.stringify(state.postIdList));
-  }, [state.postIdList]);
+    localStorage.setItem('posts', JSON.stringify(postIdList));
+  }, [postIdList]);
 
   const onPostChange = useCallback((ev) => {
     switch (ev.detail.method) {
@@ -28,7 +28,7 @@ export function PostHistoryContext({ children }) {
 
   return (
     <PostHistoryContextApi.Provider value={onPostChange}>
-      <PostHistoryContextList.Provider value={state.postIdList}>
+      <PostHistoryContextList.Provider value={postIdList}>
         {children}
       </PostHistoryContextList.Provider>
     </PostHistoryContextApi.Provider>
@@ -44,33 +44,21 @@ export const usePostHistoryContext = () => useContext(PostHistoryContextList);
 function reducer(state, action) {
   switch (action.type) {
     case 'postCreated':
-      return {
-        ...state,
-        postIdList: [...state.postIdList, { id: action.postId, ed: 1, del: 1 }]
-      };
+      return [...state, { id: action.postId, ed: 1, del: 1 }];
     case 'postEdited':
-      return {
-        ...state,
-        postIdList: state.postIdList.map(post =>
-          post.id === action.postId ? { ...post, ed: 0 } : post
-        )
-      };
+      return state.map(post =>
+        post.id === action.postId ? { ...post, ed: 0 } : post
+      );
     case 'postDeleted':
-      return {
-        ...state,
-        postIdList: state.postIdList.filter(post => post.id !== action.postId)
-      };
+      return state.filter(post => post.id !== action.postId);
   }
 }
 
 function loadPostHistoryFromStorage() {
-  try {
-    const postIdList = JSON.parse(localStorage.getItem('posts'));
-    if (Array.isArray(postIdList)) {
-      return { postIdList };  // post history found and is ok
-    }
+  const postIdList = JSON.parse(localStorage.getItem('posts'));
+  if (Array.isArray(postIdList)) {
+    return postIdList;  // post history found and is ok
+  }
 
-  } catch { /* empty */ }
-
-  return { postIdList: [], };
+  return [];
 }

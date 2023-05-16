@@ -12,7 +12,7 @@ export function PostFormsStateContainer({ toggleable = false }) {
   const state = useFormStateContext();
   const dispatch = useFormDispatchContext();
 
-  useResetFormState(dispatch);
+  useResetFormState(dispatch, fetcher);
   const [errorList, isSubmitDisabled] = useFormErrors(state.fileList, fetcher.data);
 
   function onFormFilesInput(e) {
@@ -83,6 +83,7 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...pr
                   required={state.fileList.length < 1}
                   rows='7' minLength='1' maxLength='10000'
                   className='post-form-textarea'
+                  onKeyDown={(ev) => (ev.altKey && ev.key === 'Enter') && ev.target.form.querySelector('button[type="submit"]').click()}
         />
 
         <label

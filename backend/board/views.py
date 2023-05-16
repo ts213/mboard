@@ -2,16 +2,17 @@ from datetime import timedelta
 from django.db.models import Prefetch, Count, Q
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache
-from django.http import JsonResponse
 from django.utils import timezone
-from rest_framework import generics, status, exceptions
+from django.utils.decorators import method_decorator
+from django.views.decorators.http import etag
+from rest_framework import generics, mixins, status, exceptions
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from .models import Post, Board
 from . import serializers
-from .permissions import ChangePostPermission, NewPostPermission
+from .permissions import PostPermission
 from .pagination import ThreadListPagination, SingleThreadPagination
-from .utils import ban_user
+from .utils import ban_user, set_cache
 from djangoconf.settings import env
 
 
@@ -40,6 +41,15 @@ class ThreadListAPI(generics.ListAPIView):
         )
         return threads_w_replies
 
+    @staticmethod
+    def get_or_set_board_cache_etag(request, board) -> str | None:
+        board_etag = cache.get(f'board:{board}')
+        if not board_etag:
+            set_cache({'board': board})
+
+        return board_etag
+
+    @method_decorator(etag(get_or_set_board_cache_etag))
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
@@ -56,37 +66,48 @@ class ThreadListAPI(generics.ListAPIView):
                 'format': self.format_kwarg, 'view': self}
 
 
-class ThreadAPI(generics.ListCreateAPIView):
+class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
     serializer_class = serializers.SinglePostSerializer
     pagination_class = SingleThreadPagination
     USE_THROTTLE = env.get('USE_THROTTLE')
-    permission_classes = [NewPostPermission]
+    permission_classes = [PostPermission]
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
-    def get_queryset(self):
-        pk = self.kwargs['thread_id']
-        board = self.kwargs['board']
-        self.thread = get_object_or_404(Post, board=board, pk=pk, thread__pk=None)
-        self.request.kwargs = self.kwargs  # for paginator
+    @staticmethod
+    def get_or_set_thread_cache_etag(request, thread_id, **kwargs) -> str | None:
+        thread_etag = cache.get(f'thread:{thread_id}')
+        if not thread_etag:
+            set_cache({'thread': thread_id})
 
-        thread_replies = self.thread.posts.all().select_related('board').prefetch_related('images')
+        return thread_etag
+
+    @method_decorator(etag(get_or_set_thread_cache_etag))
+    def get(self, request, *args, **kwargs):
+        thread: Post = self.get_object()
+        replies: [Post] = self.get_replies_queryset(thread)
+
+        thread_data = serializers.SinglePostSerializer(thread).data
+        thread_data['replies'] = self.paginate_replies(replies)
+        response_data = self.get_paginated_response(thread_data).data
+        return Response(response_data)
+
+    def get_object(self):
+        pk = self.kwargs.get('thread_id')
+        board = self.kwargs.get('board')
+        self.post = get_object_or_404(Post, board=board, pk=pk)
+        self.check_object_permissions(self.request, self.post)
+        return self.post
+
+    @staticmethod
+    def get_replies_queryset(thread):
+        thread_replies = thread.posts.all().select_related('board').prefetch_related('images')
         return thread_replies
 
-    def list(self, request, *args, **kwargs):
-        replies_queryset = self.get_queryset()
-        thread_serialized = serializers.SinglePostSerializer(self.thread).data
-
-        page = self.paginate_queryset(replies_queryset)
-        if page is not None:
-            replies_serialized = self.get_serializer(page, many=True).data
-            thread_serialized['replies'] = reversed(replies_serialized)
-            data = self.get_paginated_response(thread_serialized).data
-        else:
-            replies_serialized = self.get_serializer(replies_queryset, many=True).data
-            thread_serialized['replies'] = reversed(replies_serialized)
-            data = {'board': self.request.kwargs['board'],
-                    'thread': thread_serialized}
-
-        return Response(data)
+    def paginate_replies(self, replies):
+        self.request.kwargs = self.kwargs  # for paginator
+        page = self.paginate_queryset(replies)
+        replies_data = self.get_serializer(page, many=True).data
+        return reversed(replies_data)
 
     def post(self, request, *args, **kwargs):
         if request.data.get('image', None):
@@ -104,10 +125,11 @@ class ThreadAPI(generics.ListCreateAPIView):
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_context(self):
-        return {'request': None,  # for relative urls
-                'format': self.format_kwarg,
-                'view': self,
-                }
+        return {
+            'request': None,  # for relative urls
+            'format': self.format_kwarg,
+            'view': self,
+        }
 
     def get_throttles(self):
         if self.request.method == 'POST' and self.USE_THROTTLE:
@@ -127,18 +149,38 @@ class ThreadAPI(generics.ListCreateAPIView):
                 'ident': self.get_ident(request)
             }
 
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        serializer.save(edited_at=timezone.now())
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        return Response({'post': response.data, 'created': 1})
+
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+        post_id, thread_id, board = post.id, post.thread_id, post.board_id
+        self.perform_destroy(post, request)
+        data = {
+            'deleted': 1,
+            'post': {
+                'id': post_id,
+                'thread': thread_id,
+                'board': board
+            }
+        }
+        return Response(status=status.HTTP_200_OK, data=data)
+
+    def perform_destroy(self, post: Post, request):  # noqa
+        ban_user(request, post)
+        post.delete()
+
 
 class BoardsAPI(generics.ListCreateAPIView):
     queryset = Board.objects.all()
     serializer_class = serializers.BoardSerializer
-    use_boards_cache = env.get('USE_BOARDS_CACHE', False)
-    cache_time = env.get('BOARDS_CACHE_TIME')
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.method == 'GET' and self.use_boards_cache:
-            if data := cache.get('boards_list'):
-                return JsonResponse(data, safe=False)
-        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         last_24h = timezone.now() - timedelta(days=1)
@@ -150,12 +192,17 @@ class BoardsAPI(generics.ListCreateAPIView):
             )
         ).order_by('-posts_last24h')[:30]
 
+    @staticmethod
+    def get_or_set_board_list_cache_etag(request) -> str | None:
+        board_list_etag = cache.get('board_list:1')
+        if not board_list_etag:
+            set_cache({'board_list': '1'})
+        return board_list_etag
+
+    @method_decorator(etag(get_or_set_board_list_cache_etag))
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
-
-        if self.use_boards_cache:
-            cache.set('boards_list', serializer.data, timeout=self.cache_time)  # caching for 5 min
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
@@ -169,37 +216,7 @@ class BoardsAPI(generics.ListCreateAPIView):
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail={'message': 'too many requests'})
+        raise exceptions.Throttled(detail={'message': 'Too many requests, try later'})
 
     class BoardCreationThrottle(AnonRateThrottle):
         rate = env.get('NEW_BOARD_THROTTLE')
-
-
-class PostAPI(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
-    serializer_class = serializers.SinglePostSerializer
-    permission_classes = [ChangePostPermission]
-    lookup_field = 'pk'
-    lookup_url_kwarg = 'post_id'
-    http_method_names = ['get', 'delete', 'patch']
-
-    def perform_update(self, serializer):
-        serializer.save(edited_at=timezone.now())
-
-    def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        return Response({'post': response.data, 'created': 1})
-
-    def destroy(self, request, *args, **kwargs):
-        post = self.get_object()
-        post_id, thread_id, board = post.id, post.thread_id, post.board_id
-        self.perform_destroy(post, request)
-        data = {'deleted': 1,
-                'post': {'id': post_id,
-                         'thread': thread_id,
-                         'board': board}}
-        return Response(status=status.HTTP_200_OK, data=data)
-
-    def perform_destroy(self, post: Post, request):  # noqa
-        ban_user(request, post)
-        post.delete()

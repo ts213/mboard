@@ -18,6 +18,7 @@
     border: none;
     cursor: pointer;
     font-size: 100%;
+    font-family: inherit;
 }
 
 .load-more-wrap button:hover {
@@ -27,13 +28,18 @@
 #bottom {
     color: #5e718e;
     font-weight: bold;
-}
-
-#bottom a {
-    cursor: pointer;
     margin-left: 0.5rem;
 }
 
-a:hover {
+#bottom * {
+    margin-right: 0.5rem;
+}
+
+#bottom *:hover {
+    cursor: pointer;
+    color: white;
+}
+
+.crumb:hover {
     color: white;
 }

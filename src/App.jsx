@@ -1,10 +1,10 @@
 import { createBrowserRouter, createRoutesFromElements, Outlet, Route, RouterProvider } from 'react-router-dom';
 import { ThreadsContainer } from './components/parts/ThreadsContainer.jsx';
 import { newPostAction, deletePostAction, editPostAction } from './components/posting/formActions.js'
-import { ErrorPage } from './components/pages/ErrorPage.jsx';
-import { BoardAction, BoardList, BoardLoader } from './components/pages/BoardList.jsx';
-import { ThreadList, ThreadListLoader } from './components/pages/ThreadList.jsx';
-import { Thread, ThreadLoader } from './components/pages/Thread.jsx';
+import { ErrorPage } from './components/routes/ErrorPage.jsx';
+import { BoardAction, BoardList, BoardLoader } from './components/routes/BoardList.jsx';
+import { ThreadList, ThreadListLoader } from './components/routes/ThreadList.jsx';
+import { Thread, ThreadLoader } from './components/routes/Thread.jsx';
 import { useCurrentRoute } from './hooks/useCurrentRoute.jsx';
 import { setDocumentTitle } from './utils/utils.js';
 
@@ -47,7 +47,11 @@ const router = createBrowserRouter(
         />
         <Route path=':board/thread/:threadId/'
                id='thread'
-               action={newPostAction}
+               action={({ request, params }) => {
+                 if (request.method === 'POST') return newPostAction({ request, params });
+                 else if (request.method === 'PATCH') return editPostAction(request);
+                 else if (request.method === 'DELETE') return deletePostAction(request);
+               }}
                Component={Thread}
                loader={ThreadLoader}
                shouldRevalidate={({ actionResult }) => {
@@ -57,13 +61,6 @@ const router = createBrowserRouter(
                }}
         />
       </Route>
-
-      <Route path='post/:postId/' action={({ request }) => {
-        if (request.method === 'PATCH') return editPostAction(request);
-        if (request.method === 'DELETE') return deletePostAction(request);
-      }}
-      />
-
     </Route>
   )
 );

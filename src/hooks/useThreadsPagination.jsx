@@ -31,5 +31,7 @@ export function useThreadsPagination(fetcher, pageNum, nextPageNum) {
 
       prevY.current = y;
     }
-  }, []);  // eslint-disable-line
+
+    // eslint-disable-next-line
+  }, []);
 }

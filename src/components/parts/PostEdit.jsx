@@ -7,11 +7,6 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
   const textareaRef = useRef();
 
   useEffect(() => {
-    textareaRef.current.focus();
-    textareaRef.current.selectionStart = textareaRef.current.value.length;  // moving caret to end of text
-  }, []);
-
-  useEffect(() => {
     if (fetcher.data?.created === 1) {
       onEditMenuClick(0);
       postTextElmnt.innerHTML = fetcher.data.post.text;
@@ -23,6 +18,8 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
       <textarea className='edit-post-textarea'
                 defaultValue={postTextElmnt.innerText}
                 ref={textareaRef}
+                autoFocus
+                onFocus={(ev) => ev.target.selectionStart = ev.target.value.length}
       />
 
       {fetcher.data?.errors &&
@@ -31,7 +28,6 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
         </div>
       }
 
-      {/*<div className='mt-5 clear-both'>*/}
       <div style={{ clear: 'both', marginTop: '1.25rem' }}>
         <Button type='button'
                 value='Cancel'
@@ -51,11 +47,14 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
   async function editPost() {
     fetcher.submit(
       {
+        type: 'edit',
         text: textareaRef.current.value,
         id: postId,
-        board: board
       },
-      { method: 'patch', action: `/post/${postId}/` }
+      {
+        method: 'patch',
+        action: `/${board}/thread/${postId}`
+      }
     );
   }
 }

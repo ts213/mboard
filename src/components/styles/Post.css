@@ -57,7 +57,7 @@ main {
 }
 
 .edit-post-textarea {
-    overflow: scroll;
+    /*overflow: scroll;*/
     padding-bottom: 2.5rem;
     outline: 0;
     resize: both;
