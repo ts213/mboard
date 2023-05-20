@@ -181,6 +181,7 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
 class BoardsAPI(generics.ListCreateAPIView):
     queryset = Board.objects.all()
     serializer_class = serializers.BoardSerializer
+    USE_THROTTLE = env.get('USE_THROTTLE') == 'True'
 
     def get_queryset(self):
         last_24h = timezone.now() - timedelta(days=1)
@@ -211,7 +212,7 @@ class BoardsAPI(generics.ListCreateAPIView):
         return response
 
     def get_throttles(self):
-        if self.request.method == 'POST':
+        if self.request.method == 'POST' and self.USE_THROTTLE:
             return [self.BoardCreationThrottle()]
         return [throttle() for throttle in self.throttle_classes]
 
@@ -220,3 +221,4 @@ class BoardsAPI(generics.ListCreateAPIView):
 
     class BoardCreationThrottle(AnonRateThrottle):
         rate = env.get('NEW_BOARD_THROTTLE')
+        scope = 'anon_board_post'

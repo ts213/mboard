@@ -23,7 +23,7 @@ class ThreadListPagination(pagination.PageNumberPagination):
 
 
 class SingleThreadPagination(pagination.LimitOffsetPagination):
-    default_limit = int(env.get('REPLIES_PER_PAGE'))
+    default_limit = int(env.get('VITE_REPLIES_PER_PAGE'))
     # max_limit = 3
 
     def get_paginated_response(self, data):

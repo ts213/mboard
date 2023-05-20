@@ -3,7 +3,7 @@ import { useLoaderData, useRevalidator } from 'react-router-dom';
 import { PostList } from '../parts/PostList.jsx';
 import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { createContext, useEffect } from 'react';
-import { VITE_API_PREFIX, VITE_REPLIES_LOAD_LIMIT } from '../../App.jsx';
+import { VITE_API_PREFIX, VITE_REPLIES_PER_PAGE } from '../../App.jsx';
 import { LoadMorePostsBtn } from '../parts/LoadMorePostsBtn.jsx';
 import { ThreadNavigationButtons } from '../parts/ThreadNavigationButtons.jsx';
 
@@ -49,9 +49,9 @@ export function Thread() {
   async function loadMoreReplies(ev) {
     switch (ev.target.name) {
       case 'loadMore':
-        (repliesCount - thread.replies.length) < (VITE_REPLIES_LOAD_LIMIT * 1.5)
+        (repliesCount - thread.replies.length) < (VITE_REPLIES_PER_PAGE * 1.5)
           ? loadPostLimit = repliesCount
-          : loadPostLimit = thread.replies.length + VITE_REPLIES_LOAD_LIMIT;
+          : loadPostLimit = thread.replies.length + VITE_REPLIES_PER_PAGE;
         return revalidator.revalidate();
       case 'loadAll':
         loadPostLimit = repliesCount;

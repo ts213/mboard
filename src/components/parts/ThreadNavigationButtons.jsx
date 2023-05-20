@@ -59,7 +59,7 @@ export function ThreadNavigationButtons({ revalidator, repliesCount }) {
     }
   }
 
-  function manualUpdateHandler() {
+  function manualUpdateHandler() {  // todo
     setUpdateButtonDisabled(true);
     revalidator.revalidate();
   }

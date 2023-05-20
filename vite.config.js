@@ -13,14 +13,13 @@ export default defineConfig(({ command, mode }) => {
           target: env.VITE_API,
           changeOrigin: true,
           secure: false,
-          // configure: (proxy, options) => {
-          //   const username = 'aaaaaaaaa';
-          //   const password = 'bbbbbbbb';
-          //   options.auth = `${username}:${password}`;
-          // },
         }
       },
+      hmr: {
+        clientPort: 5173,
+      },
       watch: {
+        usePolling: true,
         ignored: [
           '**/venv/**'
         ],

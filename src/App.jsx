@@ -8,9 +8,9 @@ import { Thread, ThreadLoader } from './components/routes/Thread.jsx';
 import { useCurrentRoute } from './hooks/useCurrentRoute.jsx';
 import { setDocumentTitle } from './utils/utils.js';
 
-let { VITE_API_PREFIX, VITE_REPLIES_LOAD_LIMIT } = import.meta.env;
-VITE_REPLIES_LOAD_LIMIT = Number(VITE_REPLIES_LOAD_LIMIT);
-export { VITE_API_PREFIX, VITE_REPLIES_LOAD_LIMIT };
+let { VITE_API_PREFIX, VITE_REPLIES_PER_PAGE } = import.meta.env;
+VITE_REPLIES_PER_PAGE = Number(VITE_REPLIES_PER_PAGE);
+export { VITE_API_PREFIX, VITE_REPLIES_PER_PAGE };
 
 export default function App() {
   return <RouterProvider router={router} />
@@ -61,6 +61,9 @@ const router = createBrowserRouter(
                }}
         />
       </Route>
+
+      <Route path='boards' Component={ErrorPage} />
+
     </Route>
   )
 );

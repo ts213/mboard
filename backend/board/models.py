@@ -8,8 +8,9 @@ from .utils import rm_empty_dir, get_image_path, get_thumb_path, process_post_te
     get_board_path, delete_dir, set_cache
 from djangoconf.settings import env
 
-THREAD_REPLIES_LIMIT = int(env.get('REPLIES_LIMIT', 'fail'))
-PRUNE_BOARDS_AFTER = int(env.get('PRUNE_BOARDS_AFTER', 'fail'))
+THREAD_REPLIES_LIMIT = int(env.get('REPLIES_LIMIT'))
+PRUNE_BOARDS_AFTER = int(env.get('PRUNE_BOARDS_AFTER'))
+MAIN_BOARDS_COUNT = int(env.get('MAIN_BOARDS_COUNT'))
 
 
 class User(models.Model):
@@ -64,8 +65,7 @@ class Post(models.Model):
             'board': self.board.link,
         })
 
-    def delete(self: 'Post', *args, **kwargs):
-        # "docs: delete is not necessarily called when deleting in bulk"
+    def delete(self: 'Post', *args, **kwargs):  # "docs: delete is not necessarily called when deleting in bulk"
         if images := self.images.all():  # should be after delete() todo
             thread_dir_path = pathlib.Path(images[0].image.path).parent.parent  # img -> img dir -> thread dir
             for image_model in images:
@@ -119,11 +119,14 @@ class Board(models.Model):
         assert len(self.link) > 0 and len(self.title) > 0, 'length'
         self.prune_inactive_boards()
 
-        super().save(*args, **kwargs)
+        if Board.objects.count() <= MAIN_BOARDS_COUNT:
+            self.userboard = False
 
         set_cache({'board_list': '1', })
 
-    def delete(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):  # add frontend board del todo
         board_files_path = get_board_path(self)
         super().delete(*args, **kwargs)
 

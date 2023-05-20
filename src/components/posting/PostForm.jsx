@@ -83,7 +83,7 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...pr
                   required={state.fileList.length < 1}
                   rows='7' minLength='1' maxLength='10000'
                   className='post-form-textarea'
-                  onKeyDown={(ev) => (ev.altKey && ev.key === 'Enter') && ev.target.form.querySelector('button[type="submit"]').click()}
+                  onKeyDown={(ev) => (ev.altKey && ev.key === 'Enter') && ev.target.form.requestSubmit()}
         />
 
         <label

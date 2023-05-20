@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend.dockerfile
+    ports:
+      - "8000:8000"
+    env_file: .env
+    restart: on-failure
+    depends_on:
+      - postgres
+      - redis
+
+  nginx:
+    image: nginx:mainline-alpine3.17-slim
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    volumes:
+      - ./dist:/home/dist
+      - ./media:/home/media
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:alpine3.18
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine3.18
+    ports:
+    - "6379:6379"

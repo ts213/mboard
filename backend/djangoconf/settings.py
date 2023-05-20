@@ -1,21 +1,19 @@
 from dotenv import dotenv_values
+from django.core.cache import cache
 from pathlib import Path
-import os
 
-env = dotenv_values('.env') or dotenv_values('../.env')
+env = dotenv_values('../.env') or dotenv_values('.env')
 assert len(env) > 0, 'error loading .env file'
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MEDIA_DIR = Path(__file__).resolve().parent.parent.parent
 
-DEBUG = env.get('DEBUG', False)
+DEBUG = env.get('DEBUG') == 'True'
 
-SECRET_KEY = 'django-insecure-ms_1(dc*(xcc@)n!ryq=laphhsx!t$x85(vtfc%!_8@)y&=x3q'
+SECRET_KEY = env.get('SECRET_KEY')
 
 ALLOWED_HOSTS = env.get('ALLOWED_HOSTS').split()
-
-INTERNAL_IPS = ['localhost', '192.168.1.133']  # debug toolbar
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
@@ -31,14 +29,6 @@ if env.get('USE_THROTTLE') == 'True':
         'DEFAULT_THROTTLE_RATES': {'anon': env.get('DEFAULT_THROTTLE'), },
     })
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",
-# ]
-
-# CORS_ALLOW_ALL_ORIGINS = True
-
-# CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
-
 INSTALLED_APPS = [
     # 'django.contrib.admin',
     # 'django.contrib.auth',
@@ -48,18 +38,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    "debug_toolbar",
-    # 'corsheaders',
     'board.apps.BoardConfig',
 ]
 
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
-
     'django.middleware.common.CommonMiddleware',
 ]
+
+if DEBUG:
+    INTERNAL_IPS = ['localhost', '192.168.1.133']  # debug toolbar
+    INSTALLED_APPS.insert(-1, 'debug_toolbar')
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'djangoconf.urls'
 
@@ -90,7 +81,8 @@ DATABASES = {
         'NAME': env.get('DB_NAME'),
         'USER': env.get('DB_USER'),
         'PASSWORD': env.get('DB_PASS'),
-        'HOST': '127.0.0.1',
+        # 'HOST': '127.0.0.1',
+        'HOST': env.get('DB_HOST'),
         'PORT': '5432',
     }
 }
@@ -99,7 +91,8 @@ CACHES = {
     "default": {
         # "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "BACKEND": "board.redis_cache_customized.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
+        # "LOCATION": "redis://127.0.0.1:6379",
+        "LOCATION": "redis://redis:6379",
     }
 }
 
@@ -128,7 +121,7 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+USE_I18N = False
 
 USE_TZ = True
 
@@ -140,7 +133,7 @@ STATIC_URL = 'static/'
 # STATICFILES_DIRS = [
 #     BASE_DIR.parent / 'dist/assets',
 # ]
-#
+
 MEDIA_ROOT = MEDIA_DIR / 'media/'
 MEDIA_URL = '/media/'
 
