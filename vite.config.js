@@ -26,6 +26,7 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     build: {
+      target: 'es2015',
       cssCodeSplit: false,
     },
   }

@@ -15,6 +15,6 @@ COPY backend/ .env gunicorn.conf.py ./
 #
 #USER backenduser
 
-ENTRYPOINT sleep 5 && \
+ENTRYPOINT sleep 4 && \
 python manage.py migrate && \
 gunicorn -c gunicorn.conf.py djangoconf.wsgi

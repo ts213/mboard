@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     env_file: .env
-    restart: on-failure
+    restart: on-failure:5
     depends_on:
       - postgres
       - redis
