@@ -9,11 +9,9 @@ RUN pip install -r requirements.txt
 
 COPY backend/ .env gunicorn.conf.py ./
 
-#RUN addgroup -S backendgroup &&  \
-#    adduser -S backenduser -G backendgroup && \
-#    chown backenduser:backendgroup -R ./
-#
-#USER backenduser
+RUN adduser -S 1000 -G users
+
+USER 1000
 
 ENTRYPOINT sleep 4 && \
 python manage.py migrate && \

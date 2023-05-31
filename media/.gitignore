@@ -1,0 +1,3 @@
+# if this empty folder is not present, docker will auto create it but with root permissions
+*
+!.gitignore

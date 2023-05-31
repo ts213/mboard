@@ -7,7 +7,7 @@ assert len(env) > 0, 'error loading .env file'
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-MEDIA_DIR = Path(__file__).resolve().parent.parent.parent
+MEDIA_DIR = BASE_DIR.parent
 
 DEBUG = env.get('DEBUG') == 'True'
 
@@ -92,7 +92,8 @@ CACHES = {
         # "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "BACKEND": "board.redis_cache_customized.RedisCache",
         # "LOCATION": "redis://127.0.0.1:6379",
-        "LOCATION": "redis://redis:6379",
+        # "LOCATION": "redis://redis:6379",
+        "LOCATION": env.get('REDIS_HOST'),
     }
 }
 

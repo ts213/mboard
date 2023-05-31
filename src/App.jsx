@@ -2,11 +2,12 @@ import { createBrowserRouter, createRoutesFromElements, Outlet, Route, RouterPro
 import { ThreadsContainer } from './components/parts/ThreadsContainer.jsx';
 import { newPostAction, deletePostAction, editPostAction } from './components/posting/formActions.js'
 import { ErrorPage } from './components/routes/ErrorPage.jsx';
-import { BoardAction, BoardList, BoardLoader } from './components/routes/BoardList.jsx';
+import { boardAction, BoardList, BoardLoader } from './components/routes/BoardList.jsx';
 import { ThreadList, ThreadListLoader } from './components/routes/ThreadList.jsx';
 import { Thread, ThreadLoader } from './components/routes/Thread.jsx';
 import { useCurrentRoute } from './hooks/useCurrentRoute.jsx';
 import { setDocumentTitle } from './utils/utils.js';
+import { Catalog } from './components/routes/Catalog.jsx';
 
 let { VITE_API_PREFIX, VITE_REPLIES_PER_PAGE } = import.meta.env;
 VITE_REPLIES_PER_PAGE = Number(VITE_REPLIES_PER_PAGE);
@@ -33,7 +34,7 @@ const router = createBrowserRouter(
              id='boards'
              Component={BoardList}
              loader={BoardLoader}
-             action={BoardAction}
+             action={boardAction}
              shouldRevalidate={() => false}
       />
 
@@ -61,6 +62,11 @@ const router = createBrowserRouter(
                }}
         />
       </Route>
+
+      <Route path=':board/catalog/'
+             Component={Catalog}
+             loader={ThreadListLoader}
+      />
 
       <Route path='boards' Component={ErrorPage} />
 

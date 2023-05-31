@@ -9,6 +9,7 @@ from .utils import rm_empty_dir, get_image_path, get_thumb_path, process_post_te
 from djangoconf.settings import env
 
 THREAD_REPLIES_LIMIT = int(env.get('REPLIES_LIMIT'))
+BOARD_THREADS_LIMIT = int(env.get('BOARD_THREADS_LIMIT'))
 PRUNE_BOARDS_AFTER = int(env.get('PRUNE_BOARDS_AFTER'))
 MAIN_BOARDS_COUNT = int(env.get('MAIN_BOARDS_COUNT'))
 
@@ -18,6 +19,7 @@ class User(models.Model):
     uuid = models.UUIDField(
         default=uuid.uuid4)  # https://docs.djangoproject.com/en/dev/ref/databases/#manually-specified-autoincrement-pk
     boards = models.ManyToManyField('Board', related_name='janny')
+    global_janny = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if self.uuid is None:
@@ -59,6 +61,8 @@ class Post(models.Model):
         if self.thread:
             self.prune_replies()
             self.bump_thread()
+        else:
+            self.prune_threads()
 
         set_cache({
             'thread': self.get_thread_pk(),
@@ -86,6 +90,11 @@ class Post(models.Model):
         if self.thread.posts.count() >= THREAD_REPLIES_LIMIT:
             self.thread.posts.last().delete()
 
+    def prune_threads(self):
+        board_threads = self.board.posts.filter(thread__isnull=True)
+        if board_threads.count() > BOARD_THREADS_LIMIT:
+            board_threads.last().delete()
+
     def bump_thread(self):
         Post.objects.filter(pk=self.thread.pk).update(bump=timezone.now())
 
@@ -108,7 +117,7 @@ class Image(models.Model):
 
 class Board(models.Model):
     link = models.CharField(primary_key=True, max_length=5)
-    title = models.CharField(max_length=15, unique=True)
+    title = models.CharField(max_length=16, unique=True)
     userboard = models.BooleanField(default=True)
     bump = models.DateTimeField(auto_now_add=True, null=True)
 

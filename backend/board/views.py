@@ -222,3 +222,17 @@ class BoardsAPI(generics.ListCreateAPIView):
     class BoardCreationThrottle(AnonRateThrottle):
         rate = env.get('NEW_BOARD_THROTTLE')
         scope = 'anon_board_post'
+
+
+class CatalogAPI(generics.ListAPIView):
+    serializer_class = serializers.CatalogSerializer
+
+    def get_queryset(self):
+        return Post.objects.filter(board=self.kwargs.get('board'), thread__isnull=True) \
+            .prefetch_related('images')
+
+    def get_serializer_context(self):
+        return {
+            'request': None,
+            'format': self.format_kwarg, 'view': self
+        }

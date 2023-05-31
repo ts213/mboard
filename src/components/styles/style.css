@@ -97,3 +97,12 @@ summary:hover {
     cursor: pointer;
     outline: inherit;
 }
+
+.catalog-btn {
+    margin-left: 1rem;
+    color: #5e718e;
+}
+
+.catalog-btn:hover {
+    color: white;
+}

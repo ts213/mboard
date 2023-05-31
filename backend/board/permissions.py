@@ -37,6 +37,9 @@ class PostPermission(permissions.BasePermission):
         try:
             self.header_has_userid(request)
 
+            if self.is_global_janny():
+                return not forbidden
+
             if request.method == 'DELETE':
                 self.is_thread_not_closed(post)
                 if self.is_janny(post):
@@ -57,6 +60,9 @@ class PostPermission(permissions.BasePermission):
     def header_has_userid(self, request):
         self.user = get_user_from_header(request)
         assert self.user is not None
+
+    def is_global_janny(self):
+        return self.user.global_janny is True
 
     def is_janny(self, post):
         return user_is_janny(self.user, post)

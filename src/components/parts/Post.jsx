@@ -5,13 +5,14 @@ import { PostDropdown } from './PostDropdown.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage.jsx';
 import { toggleFloatingForm, toRelativeTime } from '../../utils/utils.js';
-import { useFormDispatchContext } from '../posting/PostFormReducer.jsx';
 
 // import PropTypes from 'prop-types';
 
-export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, onEditMenuClick, closed }) {
+export function Post({
+                       post, dateNow, closed, isEditMenu, isDropdown,
+                       onDropdownClick, onEditMenuClick, dispatch = null
+                     }) {
   const postTextElmnt = useRef();
-  const dispatch = useFormDispatchContext();
 
   return (
     <article
@@ -49,7 +50,7 @@ export function Post({ post, dateNow, isEditMenu, isDropdown, onDropdownClick, o
           }
         </div>
 
-        {(!post.thread && !document.location.pathname.includes('thread')) &&
+        {(dispatch && !post.thread && !document.location.pathname.includes('thread')) &&  // todo
           <Link to={'thread/' + post.id + '/'}
           >
             Open

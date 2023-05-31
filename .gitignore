@@ -10,8 +10,8 @@ lerna-debug.log*
 .env
 node_modules
 backend/media
-media
 dist-ssr
+notes
 *.local
 
 

@@ -5,6 +5,10 @@ export function usePostPermissions(post) {
   const postIdList = usePostHistoryContext();
   const userPost = postIdList.find(userPost => userPost.id === post.id);
 
+  if (boards?.includes('*')) {
+    return Permissions({canEdit: true, canDelete: true, canBan: true, canClose: true})
+  }
+
   if (boards?.includes(post.board)) {
     return Permissions({
       canEdit: Boolean(post.thread) && userPost?.ed, canDelete: true, canBan: true, canClose: !post.thread,

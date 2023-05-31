@@ -1,0 +1,50 @@
+.catalog-cont {
+    margin: 5%;
+    font-family: sans-serif;
+    font-size: 15px;
+}
+
+.catalog-thread {
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+}
+
+.catalog-image-wrap {
+    text-align: center;
+}
+
+.catalog-image {
+    max-width: 150px;
+    margin-left: 25px;
+}
+
+.catalog-text {
+    display: block;
+    max-width: 200px;
+    max-height: 200px;
+    overflow: hidden;
+    padding: 4%;
+    column-width: 300px;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.catalog-post-count {
+    font: caption;
+    color: gray;
+    clear: both;
+}
+
+.catalog-link-board {
+    text-align: center;
+    font-size: xxx-large;
+    margin: 0 50% 5% 50%;
+    display: inline-block;
+    color: gray;
+}
+
+.catalog-link-board:hover {
+    color: white;
+}

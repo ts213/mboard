@@ -5,6 +5,7 @@ import { showTooltip } from '../../utils/showTooltip.jsx';
 import { ImageOverlay } from './ImageOverlay.jsx';
 import { useThreadEventListeners } from '../../hooks/useThreadEventListeners.jsx';
 import { addRepliesToPosts, onQuotedPostClick } from '../../utils/utils.js';
+import { useFormDispatchContext } from '../posting/PostFormReducer.jsx';
 
 const PostMemo = memo(Post);
 
@@ -13,6 +14,7 @@ export function PostList({ threadList }) {
   const postEditMenu = useEdiMenuContext();
   const { onDropdownClick, onEditMenuClick } = useGlobalContextApi();
   useThreadEventListeners();
+  const dispatch = useFormDispatchContext();
 
   useEffect(() => {
     addRepliesToPosts();
@@ -59,6 +61,7 @@ export function PostList({ threadList }) {
       isDropdown: dropdown === post.id,
       onDropdownClick,
       onEditMenuClick,
+      dispatch,
     };
   }
 }

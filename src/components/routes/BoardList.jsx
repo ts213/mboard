@@ -7,6 +7,7 @@ import { Button } from '../parts/Button.jsx';
 import { useOnClickOutside } from '../../hooks/useOnClickOutside.jsx';
 import { ArrowDownSvg } from '../svg/ArrowDownSvg.jsx';
 import { VITE_API_PREFIX } from '../../App.jsx';
+import { page } from '../../hooks/useThreadsPagination.jsx';
 
 export function BoardList() {
   const boardList = useLoaderData() ?? [];
@@ -19,6 +20,9 @@ export function BoardList() {
       return acc;
     }, { boards: [], userboards: [] }
   );
+
+  page.nextPageNum = undefined;
+  page.current = undefined;
 
   return (
     <nav id='boards-nav'>
@@ -118,7 +122,7 @@ export async function BoardLoader() {
   return r.json();
 }
 
-export async function BoardAction({ request }) {
+export async function boardAction({ request }) {
   const formData = await request.formData();
   const user_id = localStorage.getItem('user_id');
   if (user_id) {

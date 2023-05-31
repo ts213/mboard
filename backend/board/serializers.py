@@ -68,6 +68,9 @@ class SinglePostSerializer(serializers.ModelSerializer):
         images = data.get('images_write', None)
         text = data.setdefault('text', '')
         post_message_length = len(text)
+        thread = data.get('thread')
+        if not images and not thread:
+            raise serializers.ValidationError({'message': 'Image is required'}, )
 
         if post_message_length == 0 and not images:
             raise serializers.ValidationError(
@@ -92,6 +95,19 @@ class SinglePostSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_date_timestamp(thread: Post):
         return thread.date.timestamp()
+
+
+class CatalogSerializer(SinglePostSerializer):
+    replies_count = serializers.SerializerMethodField(method_name='get_replies_count')
+    images_write = None
+    user_id = None
+
+    @staticmethod
+    def get_replies_count(instance):
+        return instance.posts.count()
+
+    class Meta(SinglePostSerializer.Meta):
+        exclude = ('edited_at', 'user', 'bump')
 
 
 class ThreadListSerializer(SinglePostSerializer):
@@ -137,7 +153,10 @@ class BoardSerializer(serializers.ModelSerializer):
 
                 board = Board.objects.create(**validated_data)  # save() handles None
                 board.janny.add(user)
-                boards = user.boards.values_list('link', flat=True)
+                boards = list(user.boards.values_list('link', flat=True))
+                if user.global_janny:
+                    boards.append('*')
+
                 board.boards = boards
 
                 if created:

@@ -42,7 +42,7 @@ const tooltipProps = {
   arrow: false,
   delay: [150, 150],
   maxWidth: 'none',
-  appendTo: document.body,
+  // appendTo: document.body,
   // onHidden: instance => instance.destroy(),
 };
 
