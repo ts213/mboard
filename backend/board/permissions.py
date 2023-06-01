@@ -8,8 +8,6 @@ class PostPermission(permissions.BasePermission):
     allowed_interval = 60 * 60 * 24  # day
     user = None
     message = None
-    SAFE_TO_EDIT_FIELDS = ('poster', 'text')
-    SAFE_TO_CLOSE_FIELDS = ('closed',)
 
     def has_permission(self, request, view):
         forbidden = False
@@ -94,25 +92,12 @@ class PostPermission(permissions.BasePermission):
             case 'edit':
                 self.has_post_been_edited(post)
                 self.is_thread_not_closed(post)
-                self.pop_extra_fields(request, self.SAFE_TO_EDIT_FIELDS)
                 return False
             case 'close':
                 assert self.is_janny(post)
-                self.pop_extra_fields(request, self.SAFE_TO_CLOSE_FIELDS)
-                request.data.update({
-                    'text': post.text,  # text required by SinglePostSer validate()
-                    'closed': not post.closed,
-                })
                 return True
             case None:
                 raise AssertionError
-
-    @staticmethod
-    def pop_extra_fields(request, safe_fields):
-        request.data._mutable = True
-        for key in request.data.copy():
-            if key not in safe_fields:
-                request.data.pop(key)
 
     def check_ban(self, request, board):
         if ban_time := get_ban_time_from_cache(request, board=board):

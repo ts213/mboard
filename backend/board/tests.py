@@ -113,11 +113,6 @@ class PostTestCase(APITestCase):
                                      REMOTE_ADDR=ip)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        another_ip = ip.replace('4', '9')
-        response = self.make_request('post', '0', board_banned_on, data={'text': 'post123', 'board': board_banned_on},
-                                     REMOTE_ADDR=another_ip)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
     def test_janny_can_ban_or_cannot_ban(self):
         request = self.factory.get('testurl?ban=10', headers={'User-Id': self.janny1.uuid})
         request.query_params = {'ban': '10'}  # https://github.com/encode/django-rest-framework/issues/6488

@@ -1,7 +1,7 @@
 import { useGlobalContextApi } from '../../context/GlobalContext.jsx';
 
 export function PostImage({ thumb, image, width, height }) {
-  const { onImageClick } = useGlobalContextApi();
+  const { onImageClick } = useGlobalContextApi() || {};
   
   return (
     <figure style={{margin: '0 1rem 0 0'}}>

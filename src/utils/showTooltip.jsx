@@ -40,10 +40,12 @@ const tooltipProps = {
   placement: 'top-end',
   showOnCreate: true,
   arrow: false,
-  delay: [150, 150],
+  delay: [100, 100],
   maxWidth: 'none',
+  flip: true,
+  flipOnUpdate: true,
+
   // appendTo: document.body,
-  // onHidden: instance => instance.destroy(),
 };
 
 

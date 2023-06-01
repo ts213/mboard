@@ -6,7 +6,7 @@ export function usePostPermissions(post) {
   const userPost = postIdList.find(userPost => userPost.id === post.id);
 
   if (boards?.includes('*')) {
-    return Permissions({canEdit: true, canDelete: true, canBan: true, canClose: true})
+    return Permissions({canEdit: true, canDelete: true, canBan: true, canClose: !post.thread})
   }
 
   if (boards?.includes(post.board)) {

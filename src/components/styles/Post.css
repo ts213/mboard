@@ -5,15 +5,11 @@
     align-items: flex-start;
 }
 
-main {
-    margin: 3rem 3rem 0 3rem;
-}
-
 .post {
     clear: both;
     padding: 0.5rem;
-    margin: 0.5rem;
     white-space: pre-wrap;
+    margin: 0.5rem;
 }
 
 .post header {
@@ -35,8 +31,16 @@ main {
 
 .post-text {
     overflow: auto;
-    margin: 0.5rem 0.5rem 0.5rem 0;
+    margin: 0;
+    max-width: 1000px;
 }
+
+@media (max-width: 768px) {
+    .post-text {
+        overflow: visible;
+    }
+}
+
 
 .dropdown-menu {
     position: absolute;
@@ -75,4 +79,10 @@ main {
     font-size: 1.125rem;
     line-height: 1.75rem;
     text-align: center;
+}
+
+@media (max-width: 768px) {
+    .img {
+        max-width: 150px;
+    }
 }

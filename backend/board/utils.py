@@ -82,7 +82,7 @@ def ban_user(request, post: 'models.Post'):
 
 
 def user_is_janny(user: 'models.User', post: 'models.Post'):
-    if user.boards.contains(post.board):
+    if user.boards.contains(post.board) or user.global_janny:
         return True
 
 

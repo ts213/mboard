@@ -62,8 +62,12 @@ class ThreadListAPI(generics.ListAPIView):
         return Response(data)
 
     def get_serializer_context(self):
-        return {'request': None,  # for relative urls
-                'format': self.format_kwarg, 'view': self}
+        return {
+            'request': None,  # for relative urls
+            'format': self.format_kwarg,
+            'view': self,
+            'method': self.request.method,
+        }
 
 
 class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
@@ -129,6 +133,7 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
             'request': None,  # for relative urls
             'format': self.format_kwarg,
             'view': self,
+            'method': self.request.method,
         }
 
     def get_throttles(self):
@@ -152,12 +157,33 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        data = self.get_data_for_update(request, instance)
+
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response({'post': serializer.data, 'created': 1})
+
     def perform_update(self, serializer):
         serializer.save(edited_at=timezone.now())
 
-    def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        return Response({'post': response.data, 'created': 1})
+    @staticmethod
+    def get_data_for_update(request, instance: Post):
+        """ get only updatable fields, discarding other possibly passed fields """
+        data = {}
+        match request.data.get('type'):
+            case 'edit':
+                data['text'] = request.data.get('text')
+            case 'close':
+                data['closed'] = not instance.closed
+        return data
 
     def destroy(self, request, *args, **kwargs):
         post = self.get_object()

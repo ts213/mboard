@@ -65,18 +65,18 @@ class SinglePostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'message': 'Error creating a new post'})
 
     def validate(self, data):
-        images = data.get('images_write', None)
-        text = data.setdefault('text', '')
-        post_message_length = len(text)
-        thread = data.get('thread')
-        if not images and not thread:
-            raise serializers.ValidationError({'message': 'Image is required'}, )
+        method = self.context.get('method')
+        if method == 'POST':
+            images = data.get('images_write')
+            thread = data.get('thread')
+            text = data.get('text')
+            if not images and not thread:
+                raise serializers.ValidationError({'message': 'Image is required'}, )
 
-        if post_message_length == 0 and not images:
-            raise serializers.ValidationError(
-                {'text': 'This field is required'},
-                {'images': 'This field is required'},
-            )
+            if not text and not images:
+                raise serializers.ValidationError(
+                    {'message': 'Message or image is required'},
+                )
         return data
 
     @staticmethod

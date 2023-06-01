@@ -60,6 +60,7 @@ export function Post({
       {post.images?.length > 0 &&
         <div style={{
           display: 'flex',
+          flexWrap: 'wrap',
           float: post.images.length > 1 ? '' : 'left',
         }}
         >
