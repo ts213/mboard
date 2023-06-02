@@ -51,8 +51,8 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...pr
     <>
       {errorList.length > 0 &&
         errorList.map((er, idx) =>
-          <output key={idx} className='post-form-error'>
-            {er.message}
+          <output style={{ whiteSpace: 'pre-wrap' }} key={idx} className='post-form-error'>
+            {er.detail}
           </output>
         )
       }

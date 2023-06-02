@@ -9,6 +9,10 @@ export let page = {
   increment() {
     this.current++;
   },
+  reset() {
+    this.current = undefined;
+    this.nextPageNum = undefined;
+  },
 };
 
 export function useThreadsPagination(fetcher, pageNum, nextPageNum) {

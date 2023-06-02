@@ -4,6 +4,8 @@ from django.db import transaction
 from .models import Post, User, Board, Image
 from .utils import make_thumb, CoercingUUIDField
 
+FORBIDDEN_BOARDS = ['all', 'overboard', 'admin']
+
 
 class ImageSerializer(serializers.ModelSerializer):
     width = serializers.SerializerMethodField(method_name='get_width')
@@ -62,7 +64,7 @@ class SinglePostSerializer(serializers.ModelSerializer):
                 return post
         except Exception as e:
             print(e)
-            raise serializers.ValidationError({'message': 'Error creating a new post'})
+            raise serializers.ValidationError({'detail': 'Error creating a new post'})
 
     def validate(self, data):
         method = self.context.get('method')
@@ -71,13 +73,19 @@ class SinglePostSerializer(serializers.ModelSerializer):
             thread = data.get('thread')
             text = data.get('text')
             if not images and not thread:
-                raise serializers.ValidationError({'message': 'Image is required'}, )
+                raise serializers.ValidationError({'detail': 'Image is required'}, )
 
             if not text and not images:
                 raise serializers.ValidationError(
-                    {'message': 'Message or image is required'},
+                    {'detail': 'Message or image is required'},
                 )
         return data
+
+    @staticmethod
+    def validate_board(board):
+        if board.closed:
+            raise serializers.ValidationError('board is closed')
+        return board
 
     @staticmethod
     def validate_images(files):
@@ -130,14 +138,27 @@ class BoardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Board
-        fields = '__all__'
+        exclude = ('closed',)
         read_only_fields = ('userboard',)
+
+    def validate(self, data):
+        title = data.get('title')
+        link = data.get('link')
+        not_allowed_board = next(
+            (board for board in FORBIDDEN_BOARDS if board == title or board == link),
+            None
+        )
+        if not_allowed_board:
+            raise serializers.ValidationError({'detail': f'"{not_allowed_board}" is not allowed'})
+        return data
 
     @staticmethod
     def validate_title(title):  # add spaces TODO
-        if re.fullmatch('^[A-Za-zА-Яа-яЁё]+[0-9]*$', title):  # latin/cyrillic followed by digits
-            return title
-        raise serializers.ValidationError('Incorrect title')
+        if Board.objects.filter(title__iexact=title):
+            raise serializers.ValidationError('Title already exists')
+        if not re.fullmatch('^[A-Za-zА-Яа-яЁё]+[0-9]*$', title):  # latin/cyrillic followed by digits
+            raise serializers.ValidationError('Incorrect title')
+        return title
 
     @staticmethod
     def validate_link(link):

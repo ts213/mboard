@@ -101,5 +101,5 @@ class PostPermission(permissions.BasePermission):
 
     def check_ban(self, request, board):
         if ban_time := get_ban_time_from_cache(request, board=board):
-            self.message = {'type': 'ban', 'message': ban_time}
+            self.message = {'type': 'ban', 'detail': ban_time}
             raise AssertionError

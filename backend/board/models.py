@@ -64,10 +64,7 @@ class Post(models.Model):
         else:
             self.prune_threads()
 
-        set_cache({
-            'thread': self.get_thread_pk(),
-            'board': self.board.link,
-        })
+        self.update_cache()
 
     def delete(self: 'Post', *args, **kwargs):  # "docs: delete is not necessarily called when deleting in bulk"
         if images := self.images.all():  # should be after delete() todo
@@ -77,11 +74,9 @@ class Post(models.Model):
                 image_model.thumb.delete(save=None)
             rm_empty_dir(thread_dir_path)
 
-        set_cache({
-            'thread': self.get_thread_pk(),
-            'board': self.board.link,
-        })
-        return super().delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
+
+        self.update_cache()
 
     def get_thread_pk(self) -> int:
         return self.thread.pk if self.thread else self.pk
@@ -105,6 +100,12 @@ class Post(models.Model):
         thread_pk = self.get_thread_pk()
         cache.delete(key=f'thread:{thread_pk}')
 
+    def update_cache(self):
+        set_cache({
+            'thread': self.get_thread_pk(),
+            'board': self.board.link,
+        })
+
 
 class Image(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
@@ -120,6 +121,7 @@ class Board(models.Model):
     title = models.CharField(max_length=16, unique=True)
     userboard = models.BooleanField(default=True)
     bump = models.DateTimeField(auto_now_add=True, null=True)
+    closed = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-bump']

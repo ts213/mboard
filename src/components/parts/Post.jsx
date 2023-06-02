@@ -10,7 +10,8 @@ import { toggleFloatingForm, toRelativeTime } from '../../utils/utils.js';
 
 export function Post({
                        post, dateNow, closed, isEditMenu, isDropdown,
-                       onDropdownClick, onEditMenuClick, dispatch = null
+                       onDropdownClick, onEditMenuClick, dispatch = null,
+                       board = undefined,
                      }) {
   const postTextElmnt = useRef();
 
@@ -31,7 +32,7 @@ export function Post({
 
         {(closed && !post.thread) && <span title='Thread closed'>🔒</span>}
 
-        <div style={{ display: 'inline-block' }}>
+        <div style={{ marginLeft: '0.5rem', display: 'inline-block' }}>
           <span
             onClick={() => onDropdownClick(post.id)}
             className='dropdown-btn'
@@ -51,10 +52,11 @@ export function Post({
         </div>
 
         {(dispatch && !post.thread && !document.location.pathname.includes('thread')) &&  // todo
-          <Link to={'thread/' + post.id + '/'}
+          <Link to={'/' + post.board + '/thread/' + post.id + '/'}
           >
             Open
           </Link>}
+        {board === 'all' && <span style={{ color: 'gray' }}>/{post.board}/</span>}
       </header>
 
       {post.images?.length > 0 &&

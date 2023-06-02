@@ -6,6 +6,7 @@ import { createContext, useEffect } from 'react';
 import { VITE_API_PREFIX, VITE_REPLIES_PER_PAGE } from '../../App.jsx';
 import { LoadMorePostsBtn } from '../parts/LoadMorePostsBtn.jsx';
 import { ThreadNavigationButtons } from '../parts/ThreadNavigationButtons.jsx';
+import { routeLoaderHandler } from '../../utils/fetchHandler.js';
 
 let loadPostLimit = null;
 export const IsThreadClosed = createContext(false);
@@ -67,9 +68,5 @@ export async function ThreadLoader({ request }) {
     url += `?limit=${loadPostLimit}`;
   }
 
-  const r = await fetch(url);
-  if (!r.ok) {
-    throw new Response('loader error', { status: r.status });
-  }
-  return await r.json();
+  return await routeLoaderHandler(url);
 }

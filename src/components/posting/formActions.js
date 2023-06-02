@@ -1,5 +1,6 @@
 import { redirect } from 'react-router-dom';
 import { VITE_API_PREFIX } from '../../App.jsx';
+import { submitFormHandler } from '../../utils/fetchHandler.js';
 
 export async function newPostAction({ request, params }) {
   const formData = await buildFormData(request, params);
@@ -31,7 +32,6 @@ export async function newPostAction({ request, params }) {
 
 export async function editPostAction(request) {
   const formData = await request.formData();
-
   const editType = formData.get('type');
 
   try {
@@ -80,18 +80,13 @@ async function submitForm(request, formData = undefined) {
     }
   }
 
-  const response = await fetch(url, {
+  const newSubmitRequest = new Request(url, {
     method: request.method,
     body: formData,
     headers: headers,
   });
-  const data = await response.json();
 
-  if (!response.ok) {
-    throw {
-      errors: data.errors ?? 'response error',
-    };
-  }
+  const data = await submitFormHandler(newSubmitRequest);
 
   dispatchCustomEvent('postChange', { postId: data.post.id }, request.method);
   return data;

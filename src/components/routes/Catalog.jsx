@@ -1,13 +1,14 @@
-import { Link, useLoaderData } from 'react-router-dom';
+import { Link, useLoaderData, useParams } from 'react-router-dom';
 import '../styles/Catalog.css';
 
 export function Catalog() {
   const threads = useLoaderData() ?? [];
+  const { board } = useParams();
 
   return (
     <div className='catalog-cont'>
       <Link to='../' relative='path' className='catalog-link-board'>
-        {threads[0].board}
+        {board}
       </Link>
       <br />
       {threads.map(thread =>

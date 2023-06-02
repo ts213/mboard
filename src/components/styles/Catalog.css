@@ -1,7 +1,12 @@
 .catalog-cont {
-    margin: 5%;
     font-family: sans-serif;
     font-size: 15px;
+}
+
+@media (min-width: 768px) {
+    .catalog-cont {
+        margin: 5%;
+    }
 }
 
 .catalog-thread {
@@ -16,7 +21,6 @@
 
 .catalog-image {
     max-width: 150px;
-    margin-left: 25px;
 }
 
 .catalog-text {

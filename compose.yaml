@@ -3,8 +3,6 @@ services:
     build:
       context: .
       dockerfile: backend.dockerfile
-    ports:
-      - "8000:8000"
     env_file: .env
     restart: on-failure:5
     volumes:
@@ -16,7 +14,7 @@ services:
   nginx:
     image: nginx:mainline-alpine3.17-slim
     ports:
-      - 8080:8080
+      - "8080:8080"
     volumes:
       - ./dist:/home/dist
       - ./media:/home/media
@@ -30,10 +28,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
 
   redis:
     image: redis:alpine3.18
-    ports:
-      - "6379:6379"

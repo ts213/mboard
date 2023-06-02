@@ -113,6 +113,7 @@ summary:hover {
 .tippy-content .post {
     background: rgb(30, 41, 59);
     border: 1px solid rgb(75, 85, 99);
+    display: inline-block;
 }
 
 .unstyled-btn {

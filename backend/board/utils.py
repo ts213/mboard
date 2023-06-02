@@ -20,13 +20,37 @@ class CacheItems(TypedDict):
     board_list: NotRequired[str]
 
 
+CACHE_TIME = {
+    'board_list': 1800,
+    'catalog': 1800,
+    'thread': 3600 * 24,
+    'board': 3600 * 24,
+}
+
+
+def get_or_set_board_cache_etag(request, board) -> str | None:
+    board_etag = cache.get(f'board:{board}')
+    if not board_etag:
+        set_cache({'board': board})
+
+    return board_etag
+
+
+def get_or_set_board_list_cache_etag(request) -> str | None:
+    board_list_etag = cache.get('board_list:1')
+    if not board_list_etag:
+        set_cache({'board_list': '1'})
+    return board_list_etag
+
+
 def set_cache(cache_items: CacheItems):
     timestamp = timezone.now().timestamp()
     for prefix, value in cache_items.items():
         cache.set(
             key=f'{prefix}:{value}',
             value=f'{value}:{timestamp}',
-            timeout=3600 * 24 if prefix != 'board_list' else 1800
+            # timeout=3600 * 24 if prefix != 'board_list' else 1800
+            timeout=CACHE_TIME[prefix]
         )
 
 

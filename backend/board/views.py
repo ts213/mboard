@@ -12,7 +12,7 @@ from .models import Post, Board
 from . import serializers
 from .permissions import PostPermission
 from .pagination import ThreadListPagination, SingleThreadPagination
-from .utils import ban_user, set_cache
+from .utils import ban_user, set_cache, get_or_set_board_cache_etag, get_or_set_board_list_cache_etag
 from djangoconf.settings import env
 
 
@@ -21,13 +21,18 @@ class ThreadListAPI(generics.ListAPIView):
     pagination_class = ThreadListPagination
 
     def get_queryset(self):
-        self.board = get_object_or_404(Board, link=self.kwargs.get('board', None))
-        self.request.kwargs = self.kwargs  # for paginator
-
         threads_queryset = Post.objects \
             .select_related('board').prefetch_related('images') \
-            .filter(board=self.board, thread__isnull=True) \
+            .filter(thread__isnull=True) \
             .order_by('-bump')
+
+        if self.kwargs.get('board') == 'all':
+            pass
+        else:
+            board = get_object_or_404(Board, link=self.kwargs.get('board', None))
+            threads_queryset = threads_queryset.filter(board=board)
+
+        self.request.kwargs = self.kwargs  # for paginator
 
         thread_replies_qset = Post.objects \
                                   .select_related('board').prefetch_related('images') \
@@ -41,14 +46,6 @@ class ThreadListAPI(generics.ListAPIView):
         )
         return threads_w_replies
 
-    @staticmethod
-    def get_or_set_board_cache_etag(request, board) -> str | None:
-        board_etag = cache.get(f'board:{board}')
-        if not board_etag:
-            set_cache({'board': board})
-
-        return board_etag
-
     @method_decorator(etag(get_or_set_board_cache_etag))
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -58,7 +55,6 @@ class ThreadListAPI(generics.ListAPIView):
             data = self.get_paginated_response(serializer.data).data
         else:
             data = self.get_serializer(queryset, many=True).data
-
         return Response(data)
 
     def get_serializer_context(self):
@@ -142,7 +138,12 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail={'message': 'Wait before posting again'})
+        class ThreadThrottle(exceptions.Throttled):
+            default_detail = ''
+            extra_detail_singular = 'Wait {wait} second'
+            extra_detail_plural = 'Wait {wait} seconds'
+
+        raise ThreadThrottle(wait)
 
     class PostRequestThrottle(AnonRateThrottle):
         rate = env.get('POST_THROTTLE')
@@ -209,6 +210,17 @@ class BoardsAPI(generics.ListCreateAPIView):
     serializer_class = serializers.BoardSerializer
     USE_THROTTLE = env.get('USE_THROTTLE') == 'True'
 
+    def initial(self, request, *args, **kwargs):
+        self.format_kwarg = self.get_format_suffix(**kwargs)
+
+        neg = self.perform_content_negotiation(request)
+        request.accepted_renderer, request.accepted_media_type = neg
+
+        version, scheme = self.determine_version(request, *args, **kwargs)
+        request.version, request.versioning_scheme = version, scheme
+
+        self.check_permissions(request)
+
     def get_queryset(self):
         last_24h = timezone.now() - timedelta(days=1)
         return Board.objects.all().annotate(
@@ -217,14 +229,8 @@ class BoardsAPI(generics.ListCreateAPIView):
                 'posts',
                 filter=Q(posts__date__gt=last_24h)
             )
-        ).order_by('-posts_last24h')[:30]
-
-    @staticmethod
-    def get_or_set_board_list_cache_etag(request) -> str | None:
-        board_list_etag = cache.get('board_list:1')
-        if not board_list_etag:
-            set_cache({'board_list': '1'})
-        return board_list_etag
+        ).order_by('-bump')[:30]
+        # ).order_by('-posts_last24h')[:30]
 
     @method_decorator(etag(get_or_set_board_list_cache_etag))
     def list(self, request, *args, **kwargs):
@@ -233,9 +239,14 @@ class BoardsAPI(generics.ListCreateAPIView):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        response.data = {'created': 1, 'board': response.data}
-        return response
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        self.check_throttles(request)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({'created': 1, 'board': serializer.data},
+                        status=status.HTTP_201_CREATED, headers=headers)
 
     def get_throttles(self):
         if self.request.method == 'POST' and self.USE_THROTTLE:
@@ -243,7 +254,7 @@ class BoardsAPI(generics.ListCreateAPIView):
         return [throttle() for throttle in self.throttle_classes]
 
     def throttled(self, request, wait):
-        raise exceptions.Throttled(detail={'message': 'Too many requests, try later'})
+        raise exceptions.Throttled(detail={'detail': 'Too many requests, try later'})
 
     class BoardCreationThrottle(AnonRateThrottle):
         rate = env.get('NEW_BOARD_THROTTLE')
@@ -253,9 +264,22 @@ class BoardsAPI(generics.ListCreateAPIView):
 class CatalogAPI(generics.ListAPIView):
     serializer_class = serializers.CatalogSerializer
 
+    @method_decorator(etag(get_or_set_board_cache_etag))
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def get_queryset(self):
-        return Post.objects.filter(board=self.kwargs.get('board'), thread__isnull=True) \
+        queryset = Post.objects.filter(thread__isnull=True) \
             .prefetch_related('images')
+
+        if self.kwargs.get('board') == 'all':
+            pass
+        else:
+            board = get_object_or_404(Board, link=self.kwargs.get('board'))
+            queryset = queryset.filter(board=board)
+        return queryset[:500]
 
     def get_serializer_context(self):
         return {

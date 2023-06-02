@@ -1,15 +1,15 @@
 import { PostList } from '../parts/PostList.jsx';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { Link, useFetcher, useLoaderData } from 'react-router-dom';
-import { useThreadsPagination, page } from '../../hooks/useThreadsPagination.jsx';
+import { useThreadsPagination } from '../../hooks/useThreadsPagination.jsx';
 import { useThreadListEventHandler } from '../../hooks/useThreadListEventHandler.jsx';
 import { VITE_API_PREFIX } from '../../App.jsx';
-
-let threadListCache = [];
+import { threadListCache, useThreadListCache } from '../../hooks/useThreadListCache.jsx';
+import { routeLoaderHandler } from '../../utils/fetchHandler.js';
 
 export function ThreadList() {
-  const { threads = [], pageNum, nextPageNum } = useLoaderData();
+  const { threads = [], pageNum, nextPageNum, board } = useLoaderData();
   const [threadList, setThreadList] = useState(threads);
 
   const fetcher = useFetcher();
@@ -19,20 +19,20 @@ export function ThreadList() {
 
   return (
     <>
-      <PostFormsStateContainer toggleable={true} />
+      {board !== 'all' && <PostFormsStateContainer toggleable={true} />}
       <CatalogButton />
-      <PostList threadList={threadList} />
+      <PostList threadList={threadList} board={board}/>
       <var style={{ visibility: 'hidden' }} ref={paginationIntersectionRef}>treeshold</var>
     </>
   );
 }
 
-export async function ThreadListLoader({ request }) {
+export async function threadListLoader({ request, params }) {
   if (window.threadWasMounted) {
     window.threadWasMounted = false;
 
     if (threadListCache.length > 0) {
-      return { threads: threadListCache };
+      return { threads: threadListCache, board: params.board };
     }
   }
 
@@ -41,37 +41,17 @@ export async function ThreadListLoader({ request }) {
   if (page) {
     url += `?page=${page}`;
   }
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Response('loader error', { status: response.status });
-  }
-  return response.json();
-}
-
-function useThreadListCache(fetcher, setThreadList) {
-  useEffect(() => {
-    if (fetcher.data?.threads) {
-      setThreadList(threads => {
-        const withNewThreads = [...threads, ...fetcher.data.threads];
-        threadListCache = withNewThreads;
-        return withNewThreads;
-      });
-    }
-
-    if (fetcher.data?.nextPageNum === null) {
-      page.nextPageNum = false;
-    }
-  }, [fetcher.data?.threads, fetcher.data?.nextPageNum, setThreadList]);
+  return await routeLoaderHandler(url);
 }
 
 function CatalogButton() {
   return (
     <>
-      <hr style={{ color: '#2e3847' }} />
+      <hr style={{ borderColor: '#2e3847' }} />
       <Link to='catalog/' className='catalog-btn unstyled-btn'>
         Catalog
       </Link>
-      <hr style={{ color: '#2e3847' }} />
+      <hr style={{ borderColor: '#2e3847' }} />
     </>
   )
 }

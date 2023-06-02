@@ -8,21 +8,24 @@ import { useOnClickOutside } from '../../hooks/useOnClickOutside.jsx';
 import { ArrowDownSvg } from '../svg/ArrowDownSvg.jsx';
 import { VITE_API_PREFIX } from '../../App.jsx';
 import { page } from '../../hooks/useThreadsPagination.jsx';
+import { routeLoaderHandler } from '../../utils/fetchHandler.js';
 
 export function BoardList() {
   const boardList = useLoaderData() ?? [];
+  let staticBoard = { link: 'all', title: 'Overboard', userboard: false, posts_last24h: 0 };
+  page.reset();
 
   const boardsByCategory = boardList.reduce((acc, curr) => {
       curr.userboard
         ? acc.userboards.push(curr)
         : acc.boards.push(curr);
 
+      staticBoard.posts_last24h += curr.posts_last24h;
       return acc;
     }, { boards: [], userboards: [] }
   );
 
-  page.nextPageNum = undefined;
-  page.current = undefined;
+  boardsByCategory.boards.push(staticBoard);
 
   return (
     <nav id='boards-nav'>
@@ -74,7 +77,7 @@ const Modal = forwardRef(function Modal(props, ref) {
   const navigation = useNavigation();
   useEffect(() => {
     return () => {
-      if (errors) errors.link = errors.title = errors.message = null; // clear errors on modal closing
+      if (errors) errors.link = errors.title = errors.detail = null; // clear errors on modal closing
     }
   }, []);  //eslint-disable-line
 
@@ -100,7 +103,7 @@ const Modal = forwardRef(function Modal(props, ref) {
                  placeholder={'Board link'} autoComplete='off'
           />
           <sub>Like &quot;/b/&quot;, without slashes</sub>
-          {errors && <output className='error'>{errors.message}</output>}
+          {errors && <output className='error'>{errors.detail}</output>}
         </div>
 
         <div style={{ textAlign: 'center' }}>
@@ -115,11 +118,7 @@ const Modal = forwardRef(function Modal(props, ref) {
 
 export async function BoardLoader() {
   const url = VITE_API_PREFIX + '/boards/';
-  const r = await fetch(url);
-  if (!r.ok) {
-    throw new Response('loader error', { status: r.status });
-  }
-  return r.json();
+  return await routeLoaderHandler(url);
 }
 
 export async function boardAction({ request }) {

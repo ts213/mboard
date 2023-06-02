@@ -39,7 +39,7 @@ export function toggleFloatingForm({ force, post, dispatch } = {}) {
 
   if (post && dispatch) {
     const form = formWrapper.querySelector('.postForm');
-    formWrapper.querySelector('output').innerText = post.id;
+    formWrapper.querySelector('output').innerText = post.thread ?? post.id;
 
     form.action = (
       `/${post.board}/`
@@ -75,9 +75,7 @@ export function setDocumentTitle(route) {
     if (!title) {
       return;
     }
-    document.title = title.length > 50
-      ? title.slice(0, 50)
-      : title;
+    document.title = title.slice(0, 50);
   }
 }
 

@@ -9,7 +9,7 @@ import { useFormDispatchContext } from '../posting/PostFormReducer.jsx';
 
 const PostMemo = memo(Post);
 
-export function PostList({ threadList }) {
+export function PostList({ threadList, board }) {
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
   const { onDropdownClick, onEditMenuClick } = useGlobalContextApi();
@@ -33,13 +33,12 @@ export function PostList({ threadList }) {
           key={thread.id}
           className='thread'
         >
-          <PostMemo {...postProps(thread)} closed={thread.closed} />
+          <PostMemo {...postProps(thread)} board={board}/>
 
           {thread.replies.map(reply =>
             <PostMemo
               key={reply.id}
               {...postProps(reply)}
-              closed={thread.closed}
             />
           )}
         </section>
@@ -57,6 +56,7 @@ export function PostList({ threadList }) {
     return {
       post,
       dateNow,
+      closed: post.closed,
       isEditMenu: postEditMenu === post.id,
       isDropdown: dropdown === post.id,
       onDropdownClick,
