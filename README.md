@@ -34,20 +34,23 @@ Redis 6+
 # repeat steps 1-3 from above
 #
 # install PostgreSQL and Redis and have them running at their default ports
-#
+# create database with the name:
+board-db
 # install python dependecies:
 pip install requirements.txt
 # install nodejs dependecies:
 npm install
-# replace the following variables in .env files with:
+# replace the following variables in .env file with:
 VITE_API=http://127.0.0.1:8000/
 REDIS_HOST=redis://127.0.0.1:6379
 DB_HOST=127.0.0.1
+# run database migrations:
+python backend/manage.py migrate
 # run python server
-python manage.py runserver
+python backend/manage.py runserver
 # run nodejs server
 npm run dev
-# frontend server should be running at:
+# open in a browser:
 http://localhost:5173/
 
 ```
