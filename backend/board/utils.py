@@ -3,12 +3,14 @@ import re
 import shutil
 import uuid
 from io import BytesIO
+from urllib.request import urlopen
 import PIL.Image
 from typing import TypedDict, NotRequired
 from django.core.files.base import ContentFile
 from django.utils.html import escape
-from django.utils import timezone
 from django.core.cache import cache
+from rest_framework.response import Response
+from djangoconf import settings
 from rest_framework.serializers import UUIDField
 from rest_framework.views import exception_handler
 import board.models as models
@@ -18,25 +20,24 @@ class CacheItems(TypedDict):
     thread: NotRequired[int]
     board: NotRequired[str]
     board_list: NotRequired[str]
+    overboard: NotRequired[str]
 
 
 CACHE_TIME = {
     'board_list': 1800,
-    'catalog': 1800,
     'thread': 3600 * 24,
-    'board': 3600 * 24,
+    'board': 360,
 }
 
 
-def get_or_set_board_cache_etag(request, board) -> str | None:
+def get_or_set_board_cache_etag(_request, board: str) -> str | None:
     board_etag = cache.get(f'board:{board}')
     if not board_etag:
         set_cache({'board': board})
-
     return board_etag
 
 
-def get_or_set_board_list_cache_etag(request) -> str | None:
+def get_or_set_board_list_cache_etag(_request) -> str | None:
     board_list_etag = cache.get('board_list:1')
     if not board_list_etag:
         set_cache({'board_list': '1'})
@@ -44,12 +45,10 @@ def get_or_set_board_list_cache_etag(request) -> str | None:
 
 
 def set_cache(cache_items: CacheItems):
-    timestamp = timezone.now().timestamp()
     for prefix, value in cache_items.items():
         cache.set(
             key=f'{prefix}:{value}',
-            value=f'{value}:{timestamp}',
-            # timeout=3600 * 24 if prefix != 'board_list' else 1800
+            value='1',
             timeout=CACHE_TIME[prefix]
         )
 
@@ -173,7 +172,7 @@ def insert_anchor_tag(post_text: str):
         span = ('<a'
                 ' class="quote-link"'
                 ' data-quoted={}'
-                ' href="#{}/">'
+                ' href="#{}/">'  # bug on overboard todo
                 '{}'
                 '</a>')
         return span.format(found_quote.strip('gt;&gt;'),
@@ -224,3 +223,33 @@ def get_thumb_path(instance, filename):
     if post.thread:
         return f'{post.board}/{post.thread.pk}/thumbs/{filename}'
     return f'{post.board}/{post.pk}/thumbs/{filename}'
+
+
+def ban_proxies(make_new_post):
+    def wrapper(request, *args, **kwargs):
+        if settings.BAN_PROXIES:
+            bad_ip = test_if_ip_is_bad(request)
+            if bad_ip:
+                return decline_posting()
+        return make_new_post(request, *args, **kwargs)
+    return wrapper
+
+
+def test_if_ip_is_bad(request):
+    ip = request.META.get("REMOTE_ADDR")
+    bad_ip = False
+    url = 'https://check.getipintel.net/check.php?flag={flag}&ip={ip}&contact={email}'
+    full_url = url.format(flag='m', ip=ip, email=settings.EMAIL)
+    try:
+        ip_check_response = urlopen(full_url)
+        ip_is_bad_chance = ip_check_response.read().decode()
+        if float(ip_is_bad_chance) >= 0.99:
+            bad_ip = True
+    except Exception as e:  # noqa
+        pass
+    finally:
+        return bad_ip
+
+
+def decline_posting():
+    return Response({'errors': {'detail': 'Proxy/VPN'}}, status=403)

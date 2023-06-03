@@ -12,7 +12,7 @@ from .models import Post, Board
 from . import serializers
 from .permissions import PostPermission
 from .pagination import ThreadListPagination, SingleThreadPagination
-from .utils import ban_user, set_cache, get_or_set_board_cache_etag, get_or_set_board_list_cache_etag
+from .utils import ban_user, set_cache, get_or_set_board_cache_etag, get_or_set_board_list_cache_etag, ban_proxies
 from djangoconf.settings import env
 
 
@@ -109,6 +109,7 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
         replies_data = self.get_serializer(page, many=True).data
         return reversed(replies_data)
 
+    @method_decorator(ban_proxies)
     def post(self, request, *args, **kwargs):
         if request.data.get('image', None):
             images_list = request.data.pop('image')
@@ -238,6 +239,7 @@ class BoardsAPI(generics.ListCreateAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_decorator(ban_proxies)
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
