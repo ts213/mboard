@@ -2,12 +2,13 @@ import { createBrowserRouter, createRoutesFromElements, Outlet, Route, RouterPro
 import { ThreadsContainer } from './components/parts/ThreadsContainer.jsx';
 import { newPostAction, deletePostAction, editPostAction } from './components/posting/formActions.js'
 import { ErrorPage } from './components/routes/ErrorPage.jsx';
-import { boardAction, BoardList, BoardLoader } from './components/routes/BoardList.jsx';
+import { BoardAction, IndexPage, BoardLoader } from './components/routes/IndexPage.jsx';
 import { ThreadList, threadListLoader } from './components/routes/ThreadList.jsx';
 import { Thread, ThreadLoader } from './components/routes/Thread.jsx';
 import { useCurrentRoute } from './hooks/useCurrentRoute.jsx';
 import { setDocumentTitle } from './utils/utils.js';
 import { Catalog } from './components/routes/Catalog.jsx';
+import { BoardList } from './components/routes/BoardList.jsx';
 
 let { VITE_API_PREFIX, VITE_REPLIES_PER_PAGE } = import.meta.env;
 VITE_REPLIES_PER_PAGE = Number(VITE_REPLIES_PER_PAGE);
@@ -31,11 +32,17 @@ const router = createBrowserRouter(
     >
 
       <Route path='/'
+             id='indexPage'
+             Component={IndexPage}
+             loader={BoardLoader}
+             action={BoardAction}
+             shouldRevalidate={() => false}
+      />
+
+      <Route path='/boards'
              id='boards'
              Component={BoardList}
-             loader={BoardLoader}
-             action={boardAction}
-             shouldRevalidate={() => false}
+             loader={() => BoardLoader({ urlParams: 'fullList' })}
       />
 
       <Route Component={ThreadsContainer}>

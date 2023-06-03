@@ -1,9 +1,8 @@
 import { createPortal } from 'react-dom';
-import { useGlobalContextApi, useImageOverlayContext } from '../../context/GlobalContext.jsx';
+import { useImageOverlayContext } from '../../context/GlobalContext.jsx';
 
-export function ImageOverlay() {
+export function ImageOverlay({ onClick }) {
   const imageOverlay = useImageOverlayContext();
-  const { onImageClick } = useGlobalContextApi();
 
   return (
     imageOverlay.expanded &&
@@ -11,7 +10,7 @@ export function ImageOverlay() {
       <div id='img-wrapper'>
         <a href={imageOverlay.imageUrl}>
           <img id='expanded-img' className='img' alt='image'
-               onClick={onImageClick}
+               onClick={onClick}
                src={imageOverlay.imageUrl}
           />
         </a>

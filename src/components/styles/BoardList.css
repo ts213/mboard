@@ -1,95 +1,30 @@
-#boards-nav {
-    max-width: 500px;
-    margin: 10vh auto auto;
+.board-list {
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+    width: 100%;
 }
 
-#boards-nav a {
-    line-height: 190%;
-    /*width: min-content;*/
-    font-size: large;
-}
-
-li {
-    list-style: none;
-}
-
-.board-category {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    max-height: 50vh;
-}
-
-.board-category:nth-child(2) {
-    margin-top: 20px;
-}
-
-.userboards svg {
-    margin-left: 5px;
-    position: relative;
-    top: 3px;
-    cursor: pointer;
-}
-
-.boards, .userboards {
-    text-decoration: underline;
-    font-weight: bold;
-}
-
-.modal {
-    background: inherit;
-    position: fixed;
-    left: 50%;
-    top: 30%;
-    transform: translate(-50%, 0);
-    color: white;
-    border: 1px solid rgb(75 85 99);
-}
-
-.modal form {
-    padding: 30px;
-}
-
-.modal header {
-    text-align: center;
-    padding: 10px;
+.board-list tr {
+    padding: 5px;
     color: darkgray;
-    font-size: larger;
 }
 
-.modal input {
+.board-list td {
+    border: 1px solid gray;
+}
+
+.board-list th, .board-list td {
+    padding: 10px;
+    text-align: center;
+}
+
+.board-list th {
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.board-list-title:hover {
     color: white;
-    padding: 10px 10px 10px 10px;
-    outline: 0;
-    border: 1px solid rgb(75 85 99);
-}
-
-.modal input::placeholder {
-    text-align: center;
-    font-size: larger;
-}
-
-.modal button {
-    width: auto;
-}
-
-.modal .input-wrap {
-    margin-bottom: 20px;
-}
-
-.modal sub {
-    display: block;
-    color: gray;
-}
-
-.modal .error {
-    font-size: small;
-    color: orangered;
-    display: block;
-    text-align: center;
-}
-
-.post-count {
-    font-size: small;
-    color: gray;
 }

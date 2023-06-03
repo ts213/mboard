@@ -15,22 +15,30 @@ export async function routeLoaderHandler(url) {
 /** @param {string | Request} url **/
 export async function submitFormHandler(url) {
   const response = await fetch(url);
-  if (!response.ok) {
-    return badFormSubmitHandler(response);
+  const data = await response.json();
+
+  if (response.ok) {
+    return data;
   }
 
-  const data = await response.json();
   if (data.errors) {
     throw { errors: data.errors };
   }
-
-  return data;
+  else {
+    return badFormSubmitHandler(response);
+  }
 }
 
 function badFormSubmitHandler(response) {
+  if (response.status === 429) {
+    return;
+  }
+
   if (response.status === 403) {
     forbiddenResponseHandler(response);
+    return;
   }
+
   throw { errors: 'Submit form error' };
 }
 

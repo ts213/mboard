@@ -224,14 +224,19 @@ class BoardsAPI(generics.ListCreateAPIView):
 
     def get_queryset(self):
         last_24h = timezone.now() - timedelta(days=1)
-        return Board.objects.all().annotate(
+        queryset = Board.objects.all().annotate(
             posts_count=Count('posts'),
             posts_last24h=Count(
                 'posts',
                 filter=Q(posts__date__gt=last_24h)
             )
-        ).order_by('-bump')[:30]
-        # ).order_by('-posts_last24h')[:30]
+        )
+        if self.request.query_params.get("fullList"):
+            queryset = queryset.order_by('-bump')
+        else:
+            queryset = queryset.filter(posts_last24h__gt=0) \
+                           .order_by('-posts_last24h')[:30]
+        return queryset
 
     @method_decorator(etag(get_or_set_board_list_cache_etag))
     def list(self, request, *args, **kwargs):

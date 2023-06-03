@@ -60,7 +60,7 @@ export function setDocumentTitle(route) {
   }
 
   switch (route.id) {
-    case 'boards':
+    case 'indexPage':
       setTitle('boards');
       break;
     case 'board':
@@ -68,6 +68,9 @@ export function setDocumentTitle(route) {
       break;
     case 'thread':
       setTitle(route.data?.thread?.text);
+      break;
+    case 'boards':
+      setTitle('boards');
       break;
   }
 

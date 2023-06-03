@@ -15,9 +15,9 @@ export default defineConfig(({ command, mode }) => {
           secure: false,
         }
       },
-      hmr: {
-        clientPort: 5173,
-      },
+      // hmr: {
+      //   clientPort: 5173,
+      // },
       watch: {
         usePolling: true,
         ignored: [

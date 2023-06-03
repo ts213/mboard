@@ -12,7 +12,7 @@ const PostMemo = memo(Post);
 export function PostList({ threadList, board }) {
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
-  const { onDropdownClick, onEditMenuClick } = useGlobalContextApi();
+  const { onDropdownClick, onEditMenuClick, onImageClick } = useGlobalContextApi();
   useThreadEventListeners();
   const dispatch = useFormDispatchContext();
 
@@ -33,7 +33,7 @@ export function PostList({ threadList, board }) {
           key={thread.id}
           className='thread'
         >
-          <PostMemo {...postProps(thread)} board={board}/>
+          <PostMemo {...postProps(thread)} board={board} />
 
           {thread.replies.map(reply =>
             <PostMemo
@@ -48,7 +48,7 @@ export function PostList({ threadList, board }) {
   return (
     <>
       {postList}
-      <ImageOverlay />
+      <ImageOverlay onClick={onImageClick} />
     </>
   );
 

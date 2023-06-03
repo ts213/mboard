@@ -1,6 +1,6 @@
 import { useMatches } from 'react-router-dom';
 
-const ROUTES_LIST = ['boards', 'board', 'thread',];
+const ROUTES_LIST = ['indexPage', 'board', 'thread', 'boards'];
 
 export function useCurrentRoute() {
   const routes_matched = useMatches();

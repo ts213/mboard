@@ -23,7 +23,7 @@ input, textarea {
 .quote-link, .reply-link {
     color: rgb(232, 170, 81);
     font-size: small;
-    margin-right: 2%;
+    margin-right: 1%;
 }
 
 .tippy-content {

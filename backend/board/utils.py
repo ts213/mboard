@@ -9,6 +9,7 @@ from typing import TypedDict, NotRequired
 from django.core.files.base import ContentFile
 from django.utils.html import escape
 from django.core.cache import cache
+from django.utils import timezone
 from rest_framework.response import Response
 from djangoconf import settings
 from rest_framework.serializers import UUIDField
@@ -45,10 +46,11 @@ def get_or_set_board_list_cache_etag(_request) -> str | None:
 
 
 def set_cache(cache_items: CacheItems):
+    timestamp = timezone.now().timestamp()
     for prefix, value in cache_items.items():
         cache.set(
             key=f'{prefix}:{value}',
-            value='1',
+            value=f'{value}:{timestamp}',
             timeout=CACHE_TIME[prefix]
         )
 

@@ -12,6 +12,9 @@ export async function newPostAction({ request, params }) {
   try {
     var data = await submitForm(request, formData);
   } catch (e) {
+    if (e instanceof Error) {
+      return { 'errors': 'Submit form error.' };
+    }
     return e;
   }
 
