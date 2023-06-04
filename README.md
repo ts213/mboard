@@ -4,7 +4,7 @@ Uses Django REST backend server and lightweight React single page frontend.
 While fully anonymous when browsing, a user gets assigned a random ID after first post or board creation, which is then stored on both server and in the user's browser storage.  
 That ID allows to authenticate the user's request when deleting or editing posts, and also when moderating a user created board.  
 
-**Currently in development and lacking many features.**  
+**Currently in development and lacking many features.**
 
 It can quite easily be installed using [Docker](https://docs.docker.com/get-docker/) (Desktop or Engine with compose plugin):
 ```shell
@@ -27,7 +27,7 @@ Python 3.11 +
 Node.js 16+  
 PostgreSQL 15+  
 Redis 6+  
-<sup><sub>Earlier versions might work too but haven't been tested.</sub></sup>  
+<sub>Earlier versions might work (except Python) but haven't been tested.</sub>
 
 #### Installation:  
 ```shell
@@ -37,7 +37,7 @@ Redis 6+
 # create database with the name:
 board-db
 # install python dependecies:
-pip install requirements.txt
+pip install -r requirements.txt
 # install nodejs dependecies:
 npm install
 # replace the following variables in .env file with:

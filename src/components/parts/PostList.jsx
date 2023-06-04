@@ -1,5 +1,5 @@
 import { useEdiMenuContext, useGlobalContextApi, usePostDropdownContext } from '../../context/GlobalContext.jsx';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Post } from './Post.jsx';
 import { showTooltip } from '../../utils/showTooltip.jsx';
 import { ImageOverlay } from './ImageOverlay.jsx';
@@ -15,39 +15,28 @@ export function PostList({ threadList, board }) {
   const { onDropdownClick, onEditMenuClick, onImageClick } = useGlobalContextApi();
   useThreadEventListeners();
   const dispatch = useFormDispatchContext();
+  let dateNow = useRef(new Date());
 
   useEffect(() => {
     addRepliesToPosts();
+    dateNow.current = new Date()
   }, [threadList]);
-
-  const [dateNow, setDate] = useState(new Date());
-  useEffect(() => setDate(new Date()), [threadList]);
-
-  const postList =
-    <div
-      onMouseOver={ev => showTooltip(ev, threadList, dateNow, threadList[0].board)}
-      onClick={onQuotedPostClick}
-    >
-      {threadList.map(thread =>
-        <section
-          key={thread.id}
-          className='thread'
-        >
-          <PostMemo {...postProps(thread)} board={board} />
-
-          {thread.replies.map(reply =>
-            <PostMemo
-              key={reply.id}
-              {...postProps(reply)}
-            />
-          )}
-        </section>
-      )}
-    </div>;
 
   return (
     <>
-      {postList}
+      <div
+        onMouseOver={ev => showTooltip(ev, threadList, dateNow.current, threadList[0].board, onImageClick)}
+        onClick={onQuotedPostClick}
+      >
+        {threadList.map(thread =>
+          <section key={thread.id} className='thread'>
+            <PostMemo {...postProps(thread)} board={board} />
+            {thread.replies.map(reply =>
+              <PostMemo key={reply.id} {...postProps(reply)} />
+            )}
+          </section>
+        )}
+      </div>
       <ImageOverlay onClick={onImageClick} />
     </>
   );
@@ -55,7 +44,7 @@ export function PostList({ threadList, board }) {
   function postProps(post) {
     return {
       post,
-      dateNow,
+      dateNow: dateNow.current,
       closed: post.closed,
       isEditMenu: postEditMenu === post.id,
       isDropdown: dropdown === post.id,

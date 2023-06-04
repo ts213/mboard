@@ -2,7 +2,12 @@
     border-collapse: collapse;
     margin: 0;
     padding: 0;
-    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .board-list {
+        margin: 0 15% 0 15%;
+    }
 }
 
 .board-list tr {

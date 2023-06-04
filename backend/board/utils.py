@@ -4,7 +4,9 @@ import shutil
 import uuid
 from io import BytesIO
 from urllib.request import urlopen
+from functools import cache as memoize
 import PIL.Image
+import bbcode
 from typing import TypedDict, NotRequired
 from django.core.files.base import ContentFile
 from django.utils.html import escape
@@ -15,6 +17,8 @@ from djangoconf import settings
 from rest_framework.serializers import UUIDField
 from rest_framework.views import exception_handler
 import board.models as models
+
+admin_text_code = settings.env.get('ADMIN_TEXT_CODE')
 
 
 class CacheItems(TypedDict):
@@ -148,41 +152,35 @@ class CoercingUUIDField(UUIDField):
         return data
 
 
-def process_post_text(post_text):
-    """escapes user input, converts '>>' to links, colours quoted text"""
+def process_post_text(post_text: str):
     if not post_text:
         return post_text
     post_text = escape(post_text)
-    post_text = wrap_quoted_text_in_tag(post_text)
-    post_text = insert_anchor_tag(post_text)
+    post_text = wrap_quotes_in_anchor_tag(post_text)
     post_text = color_quoted_text(post_text)
+    post_text = bbcode_parser().format(post_text)
     return post_text
 
 
-def wrap_quoted_text_in_tag(post_text: str):
-    def callback(match_obj):
-        span = '<span style="color:red">{repl}</span>'
-        return span.format(repl=match_obj.group(0).strip())
+@memoize
+def bbcode_parser():
+    parser = bbcode.Parser(install_defaults=False, escape_html=False)
+    parser.add_simple_formatter('b', '<strong>%(value)s</strong>')
+    parser.add_simple_formatter('i', '<em>%(value)s</em>')
+    parser.add_simple_formatter('s', '<strike>%(value)s</strike>')
+    parser.add_simple_formatter('code', '<code>%(value)s</code>')
+    parser.add_simple_formatter('spoiler', '<span class="spoiler">%(value)s</span>', escape_html=False)
+    parser.add_simple_formatter(admin_text_code, '<span class="red-text">%(value)s</span>', escape_html=False)
+    return parser
 
-    post_text = re.sub('(?m)^\\s*::.+', callback, post_text)
-    return post_text
 
-
-def insert_anchor_tag(post_text: str):
-    def callback(match_obj):
-        found_quote = match_obj.group(0)
-        span = ('<a'
-                ' class="quote-link"'
-                ' data-quoted={}'
-                ' href="#{}/">'  # bug on overboard todo
-                '{}'
-                '</a>')
-        return span.format(found_quote.strip('gt;&gt;'),
-                           found_quote.strip('gt;&gt;'),
-                           found_quote.strip())
-
-    post_text = re.sub('(?m)^\\s*&gt;&gt;[0-9]+', callback, post_text)
-    return post_text
+def wrap_quotes_in_anchor_tag(text):
+    if found_quotes := re.findall(pattern='&gt;&gt;[0-9]+', string=text):
+        link = "<a class='quote-link' data-quoted='{}' href='#{}'>{}</a>"
+        for quote in found_quotes:
+            quote_num = quote.strip('&gt;&gt;')
+            text = text.replace(quote, link.format(quote_num, quote_num, quote))
+    return text
 
 
 def color_quoted_text(post_string):

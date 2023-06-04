@@ -13,3 +13,4 @@ pytz==2023.3
 redis==4.5.4
 sqlparse==0.4.4
 typing_extensions==4.6.0
+bbcode~=1.1.0

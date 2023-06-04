@@ -6,6 +6,10 @@ export async function newPostAction({ request, params }) {
   const formData = await buildFormData(request, params);
 
   if (!params.threadId) {
+    if (!formData.get('image').size) {
+      return { errors: 'Image is required'};
+    }
+
     request = buildNewThreadRequest(request, formData);
   }
 

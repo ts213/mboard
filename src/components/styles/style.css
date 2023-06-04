@@ -134,3 +134,16 @@ summary:hover {
 .catalog-btn:hover {
     color: white;
 }
+
+.spoiler, .spoiler a {
+    background-color: black;
+    color: black;
+}
+
+.spoiler:hover, .spoiler a:hover {
+    color: white;
+}
+
+.red-text {
+    color: red;
+}

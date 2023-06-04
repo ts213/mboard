@@ -3,6 +3,7 @@ import { Link, useLoaderData } from 'react-router-dom';
 
 export function BoardList() {
   const boardList = useLoaderData() ?? [];
+  document.title = 'boards';
 
   return (
     <>

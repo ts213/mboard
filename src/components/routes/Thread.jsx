@@ -17,8 +17,9 @@ export function Thread() {
 
   useEffect(() => {
     window.threadWasMounted = true;
+    document.title = thread.text.slice(0, 50);
     return () => loadPostLimit = null;
-  }, []);
+  }, [thread.text]);
 
   return (
     <>

@@ -31,7 +31,7 @@ export async function submitFormHandler(url) {
 
 function badFormSubmitHandler(response) {
   if (response.status === 429) {
-    return;
+    return null;
   }
 
   if (response.status === 403) {

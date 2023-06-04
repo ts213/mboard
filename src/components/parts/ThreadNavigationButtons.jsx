@@ -13,27 +13,35 @@ export function ThreadNavigationButtons({ revalidator, repliesCount }) {
   const [updateButtonText, setUpdateButtonText] = useState('[Update]');
 
   useEffect(() => {
-    if (repliesCount > repliesCountBeforeUpdate.current) {
-      setUpdateButtonText(`[Posts loaded: ${repliesCount - repliesCountBeforeUpdate.current}]`);
-      repliesCountBeforeUpdate.current = repliesCount;
+      if (repliesCount > repliesCountBeforeUpdate.current) {
+        const postsLoaded = repliesCount - repliesCountBeforeUpdate.current;
+        setUpdateButtonText(`[Posts loaded: ${postsLoaded}]`);
+        repliesCountBeforeUpdate.current = repliesCount;
 
-      setTimeout(() => {
-        setUpdateButtonText('[Update]');
-        setUpdateButtonDisabled(false);
-      }, 10_000);
+        setTimeout(() => {
+          setUpdateButtonText('[Update]');
+          setUpdateButtonDisabled(false);
+        }, 10_000);
 
-      dynamic_intervals = [...UPDATE_INTERVALS];
-      return;
-    }
+        if (!document.hasFocus()) {
+          displayLoadedPostCountInTitle(postsLoaded);
+        }
 
-    if (updateButtonDisabled) {
-      setUpdateButtonText('[No new posts]');
-      setTimeout(() => {
-        setUpdateButtonText('[Update]');
-        setUpdateButtonDisabled(false);
-      }, 10_000);
-    }
-  }, [repliesCount, updateButtonDisabled]);
+        dynamic_intervals = [...UPDATE_INTERVALS];
+        return;
+      }
+
+      if (updateButtonDisabled) {
+        setUpdateButtonText('[No new posts]');
+        setTimeout(() => {
+          setUpdateButtonText('[Update]');
+          setUpdateButtonDisabled(false);
+        }, 10_000);
+      }
+
+      return () => clearInterval(counterRef.intervalId);
+    }, [repliesCount, updateButtonDisabled]
+  );
 
   function autoUpdateThreadAtIntervals() {
     let interval = 30;
@@ -96,4 +104,27 @@ export function ThreadNavigationButtons({ revalidator, repliesCount }) {
       </label>
     </div>
   );
+}
+
+let postsLoadedTotal = 0;
+let staticDocumentTitle = '';
+
+function displayLoadedPostCountInTitle(postsLoaded) {
+  if (!staticDocumentTitle) {
+    staticDocumentTitle = document.title;
+  }
+
+  if (!postsLoadedTotal) {
+    window.addEventListener('focus', stripLoadedPostsCountFromTitle, { once: true });
+  }
+
+  postsLoadedTotal += postsLoaded;
+  document.title = '(' + String(postsLoadedTotal) + ') ' + staticDocumentTitle;
+}
+
+function stripLoadedPostsCountFromTitle() {
+  setTimeout(() => {
+    document.title = staticDocumentTitle;
+    postsLoadedTotal = 0;
+  }, 5000);
 }

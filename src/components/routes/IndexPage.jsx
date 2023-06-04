@@ -12,6 +12,7 @@ import { routeLoaderHandler } from '../../utils/fetchHandler.js';
 
 export function IndexPage() {
   const boardList = useLoaderData() ?? [];
+  document.title = 'boards';
   let staticBoard = { link: 'all', title: 'Overboard', userboard: false, posts_last24h: 0 };
   const allBoardsLink = { link: 'boards', title: '[All boards...]', userboard: true };
   page.reset();

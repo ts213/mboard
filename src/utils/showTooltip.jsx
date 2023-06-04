@@ -1,11 +1,10 @@
 import tippy from 'tippy.js';
-import { Post } from '../components/parts/Post.jsx';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { VITE_API_PREFIX } from '../App.jsx';
+import { Post } from '../components/parts/Post.jsx';
 
 const displayTooltipsFor = ['quote-link', 'reply-link'];
 
-export async function showTooltip(ev, threadList, dateNow, board) {
+export async function showTooltip(ev, threadList, dateNow, board, onImageClick) {
   if (
     displayTooltipsFor.some(klass => ev.target.classList.contains(klass))
     && !Object.hasOwn(ev.target, '_tippy')
@@ -13,22 +12,27 @@ export async function showTooltip(ev, threadList, dateNow, board) {
     const regex = /#(\d+)/;
     const quotedPostId = ev.target.href.match(regex)[1];  // [1] first matched group
 
-    // noinspection EqualityComparisonWithCoercionJS
-    let postObject = threadList.concat(
-      threadList.flatMap(thread => thread.replies)
-    ).find(post => post.id == quotedPostId);
+    let tooltipContent;
+    let quotedElement = document.getElementById(quotedPostId);
 
-    if (!postObject) {
-      try {
-        const request = new Request(`/${board}/thread/${quotedPostId}/`);
-        postObject = await loader(request);
-      } catch {
-        tooltipProps.content = '';
-        tippy(ev.nativeEvent.target, tooltipProps);
-        return;
+    if (quotedElement) {
+      let quotedElementClone = quotedElement.cloneNode(true);
+      quotedElementClone.onclick = onImageClick;
+      tooltipContent = quotedElementClone;
+    } else {
+      const postJson = await fetchPostFromServer(quotedPostId, board);
+      if (postJson) {
+        let postContainer = document.createElement('article');
+        postContainer.innerHTML = renderToStaticMarkup(<Post post={postJson} dateNow={dateNow} />);
+        postContainer.onclick = onImageClick;
+        tooltipContent = postContainer;
+      } else {
+        tooltipContent = '<p>Not found</p>';
       }
     }
-    tooltipProps.content = renderToStaticMarkup(<Post post={postObject} dateNow={dateNow} />);
+
+    tooltipProps.content = tooltipContent;
+    tooltipProps.appendTo = ev.nativeEvent.target.closest('.thread');
     tippy(ev.nativeEvent.target, tooltipProps);
   }
 }
@@ -42,18 +46,15 @@ const tooltipProps = {
   arrow: false,
   delay: [100, 100],
   maxWidth: 'none',
-  flip: true,
-  flipOnUpdate: true,
-
   // appendTo: document.body,
 };
 
 
-async function loader(request) {
-  let url = VITE_API_PREFIX + new URL(request.url).pathname;
+async function fetchPostFromServer(quotedPostId, board) {
+  let url = '/api' + `/${board}/thread/${quotedPostId}/`;
   const r = await fetch(url);
   if (!r.ok) {
-    throw new Response('loader error', { status: r.status });
+    return;
   }
   const { thread: post } = await r.json();
   return post;

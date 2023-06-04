@@ -9,8 +9,9 @@ import { threadListCache, useThreadListCache } from '../../hooks/useThreadListCa
 import { routeLoaderHandler } from '../../utils/fetchHandler.js';
 
 export function ThreadList() {
-  const { threads = [], pageNum, nextPageNum, board } = useLoaderData();
+  const { threads = [], pageNum, nextPageNum, board = '' } = useLoaderData();
   const [threadList, setThreadList] = useState(threads);
+  document.title = board;
 
   const fetcher = useFetcher();
   const paginationIntersectionRef = useThreadsPagination(fetcher, pageNum, nextPageNum);
@@ -21,19 +22,16 @@ export function ThreadList() {
     <>
       {board !== 'all' && <PostFormsStateContainer toggleable={true} />}
       <CatalogButton />
-      <PostList threadList={threadList} board={board}/>
+      <PostList threadList={threadList} board={board} />
       <var style={{ visibility: 'hidden' }} ref={paginationIntersectionRef}>treeshold</var>
     </>
   );
 }
 
 export async function threadListLoader({ request, params }) {
-  if (window.threadWasMounted) {
+  if (window.threadWasMounted && threadListCache.length > 0) {
     window.threadWasMounted = false;
-
-    if (threadListCache.length > 0) {
-      return { threads: threadListCache, board: params.board };
-    }
+    return { threads: threadListCache, board: params.board };
   }
 
   let url = VITE_API_PREFIX + new URL(request.url).pathname;

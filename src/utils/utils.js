@@ -54,34 +54,6 @@ export function toggleFloatingForm({ force, post, dispatch } = {}) {
   }
 }
 
-export function setDocumentTitle(route) {
-  if (!route) {
-    return;
-  }
-
-  switch (route.id) {
-    case 'indexPage':
-      setTitle('boards');
-      break;
-    case 'board':
-      setTitle(route.data?.board);
-      break;
-    case 'thread':
-      setTitle(route.data?.thread?.text);
-      break;
-    case 'boards':
-      setTitle('boards');
-      break;
-  }
-
-  function setTitle(title) {
-    if (!title) {
-      return;
-    }
-    document.title = title.slice(0, 50);
-  }
-}
-
 export const onQuotedPostClick = (() => {  // react-router rerenders everything on hash change (??), workaround
   const displayTooltipsFor = ['quote-link', 'reply-link'];
   let previousHightlightedPost;
