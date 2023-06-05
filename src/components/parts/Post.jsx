@@ -51,12 +51,14 @@ export function Post({
           }
         </div>
 
-        {(dispatch && !post.thread && !document.location.pathname.includes('thread')) &&  // todo
-          <Link to={'/' + post.board + '/thread/' + post.id + '/'}
+        {(!post.thread && !document.location.pathname.includes('thread')) &&  // todo
+          <Link className='thread-link'
+                to={'/' + post.board + '/thread/' + post.id + '/'}
+                state={{ from: '/' + board + '/' }}
           >
             Open
           </Link>}
-        {board === 'all' && <span style={{ color: 'gray' }}>/{post.board}/</span>}
+        {board === 'all' && <span className='overboard-board' style={{ color: 'gray' }}>/{post.board}/</span>}
       </header>
 
       {post.images?.length > 0 &&

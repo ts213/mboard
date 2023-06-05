@@ -9,7 +9,7 @@ import { useFormDispatchContext } from '../posting/PostFormReducer.jsx';
 
 const PostMemo = memo(Post);
 
-export function PostList({ threadList, board }) {
+export function PostList({ threadList, board, pageNum }) {
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
   const { onDropdownClick, onEditMenuClick, onImageClick } = useGlobalContextApi();
@@ -34,6 +34,7 @@ export function PostList({ threadList, board }) {
             {thread.replies.map(reply =>
               <PostMemo key={reply.id} {...postProps(reply)} />
             )}
+            {pageNum && <RepliesCount count={thread.replies_count} />}
           </section>
         )}
       </div>
@@ -54,3 +55,12 @@ export function PostList({ threadList, board }) {
     };
   }
 }
+
+function RepliesCount({ count }) {
+  return (
+    <sub style={{ color: 'gray', marginLeft: '0.5rem' }}>
+      Replies: {count}
+    </sub>
+  )
+}
+/** @property {Number} thread.replies_count */

@@ -120,6 +120,7 @@ class CatalogSerializer(SinglePostSerializer):
 
 class ThreadListSerializer(SinglePostSerializer):
     replies = serializers.ListField(child=SinglePostSerializer())
+    replies_count = serializers.IntegerField()
 
     def to_representation(self, instance):
         with_replies_sorted = super().to_representation(instance)

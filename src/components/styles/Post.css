@@ -13,7 +13,7 @@
 }
 
 .post header {
-    margin-bottom: 1%;
+    margin-bottom: 0.5rem;
 }
 
 .post header > * {
@@ -85,4 +85,8 @@
     .img {
         max-width: 150px;
     }
+}
+
+.post-text a {
+    color: rgb(232, 170, 81);
 }

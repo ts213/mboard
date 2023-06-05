@@ -74,7 +74,7 @@ export function ThreadNavigationButtons({ revalidator, repliesCount }) {
 
   return (
     <div id='bottom'>
-      <Link to='../../'
+      <Link to={`${history.state?.usr?.from ?? '../../'}`}
             relative='path'
       >
         [Return]

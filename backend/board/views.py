@@ -24,7 +24,8 @@ class ThreadListAPI(generics.ListAPIView):
         threads_queryset = Post.objects \
             .select_related('board').prefetch_related('images') \
             .filter(thread__isnull=True) \
-            .order_by('-bump')
+            .order_by('-bump') \
+            .annotate(replies_count=Count('posts'))
 
         if self.kwargs.get('board') == 'all':
             pass
@@ -224,7 +225,7 @@ class BoardsAPI(generics.ListCreateAPIView):
 
     def get_queryset(self):
         last_24h = timezone.now() - timedelta(days=1)
-        queryset = Board.objects.all().annotate(
+        queryset = Board.objects.annotate(
             posts_count=Count('posts'),
             posts_last24h=Count(
                 'posts',
@@ -234,8 +235,10 @@ class BoardsAPI(generics.ListCreateAPIView):
         if self.request.query_params.get("fullList"):
             queryset = queryset.order_by('-bump')
         else:
-            queryset = queryset.filter(posts_last24h__gt=0) \
-                           .order_by('-posts_last24h')[:30]
+            queryset1 = queryset.filter(userboard=False)
+            queryset2 = queryset.filter(userboard=True)[:15]
+            queryset = queryset1.union(queryset2).order_by('-bump')
+
         return queryset
 
     @method_decorator(etag(get_or_set_board_list_cache_etag))

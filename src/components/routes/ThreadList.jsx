@@ -22,7 +22,7 @@ export function ThreadList() {
     <>
       {board !== 'all' && <PostFormsStateContainer toggleable={true} />}
       <CatalogButton />
-      <PostList threadList={threadList} board={board} />
+      <PostList threadList={threadList} board={board} pageNum={pageNum} />
       <var style={{ visibility: 'hidden' }} ref={paginationIntersectionRef}>treeshold</var>
     </>
   );

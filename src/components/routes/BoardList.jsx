@@ -16,7 +16,7 @@ export function BoardList() {
         <tr>
           <th>Board</th>
           <th>Title</th>
-          <th>Post last 24 hours</th>
+          <th>Posts last 24 hours</th>
           <th>Posts</th>
         </tr>
         </thead>

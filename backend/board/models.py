@@ -152,6 +152,6 @@ class Board(models.Model):
     @staticmethod
     def prune_inactive_boards():
         inactivity_threshold = timezone.now() - timedelta(days=PRUNE_BOARDS_AFTER)
-        if boards := Board.objects.filter(bump__lt=inactivity_threshold):
+        if boards := Board.objects.filter(bump__lt=inactivity_threshold, userboard=True):
             for b in boards:
                 b.delete()

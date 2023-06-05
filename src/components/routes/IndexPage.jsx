@@ -155,4 +155,4 @@ export async function BoardAction({ request }) {
 }
 
 /** @property {boolean} curr.userboard */
-/** @property {number} board.posts_last24h*/
+/** @property {number} board.posts_last24h */

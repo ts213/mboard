@@ -32,7 +32,7 @@ input, textarea {
     width: max-content;
 }
 
-.tippy-content .dropdown-btn {
+.tippy-content .dropdown-btn, .tippy-content .thread-link, .tippy-content .overboard-board{
     display: none;
 }
 
@@ -147,3 +147,4 @@ summary:hover {
 .red-text {
     color: red;
 }
+
