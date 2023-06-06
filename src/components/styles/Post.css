@@ -35,12 +35,20 @@
     max-width: 1000px;
 }
 
-@media (max-width: 768px) {
-    .post-text {
-        overflow: visible;
-    }
+.board-route .post-text {
+    max-height: 500px;
 }
 
+.post-images-cont {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .post-images-cont {
+        float: none !important;
+    }
+}
 
 .dropdown-menu {
     position: absolute;

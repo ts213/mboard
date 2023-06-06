@@ -43,3 +43,7 @@
 .crumb:hover {
     color: white;
 }
+
+.thread-route .thread-link {
+    display: none;
+}

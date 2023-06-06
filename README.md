@@ -4,7 +4,19 @@ Uses Django REST backend server and lightweight React single page frontend.
 While fully anonymous when browsing, a user gets assigned a random ID after first post or board creation, which is then stored on both server and in the user's browser storage.  
 That ID allows to authenticate the user's request when deleting or editing posts, and also when moderating a user created board.  
 
-**Currently in development and lacking many features.**
+**Currently in development.**
+
+##### Implemented features:
+
+* Posting/Post deletion/Post editing
+* Board creation, inactivate boards auto-pruning
+* Board-wide banning
+* Multiple images upload  
+* BBcode markup
+* Thread auto update for new posts
+* Thread list/thread page pagination 
+* Replies/quotes on-hover previews
+* Permission system: post creator/board creator/global moderator; all have diffrent permissions 
 
 It can quite easily be installed using [Docker](https://docs.docker.com/get-docker/) (Desktop or Engine with compose plugin):
 ```shell

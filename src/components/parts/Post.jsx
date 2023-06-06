@@ -10,7 +10,7 @@ import { toggleFloatingForm, toRelativeTime } from '../../utils/utils.js';
 
 export function Post({
                        post, dateNow, closed, isEditMenu, isDropdown,
-                       onDropdownClick, onEditMenuClick, dispatch = null,
+                       onDropdownClick, onEditMenuClick, dispatch = undefined,
                        board = undefined,
                      }) {
   const postTextElmnt = useRef();
@@ -51,7 +51,7 @@ export function Post({
           }
         </div>
 
-        {(!post.thread && !document.location.pathname.includes('thread')) &&  // todo
+        {!post.thread &&
           <Link className='thread-link'
                 to={'/' + post.board + '/thread/' + post.id + '/'}
                 state={{ from: '/' + board + '/' }}
@@ -62,11 +62,8 @@ export function Post({
       </header>
 
       {post.images?.length > 0 &&
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          float: post.images.length > 1 ? '' : 'left',
-        }}
+        <div className='post-images-cont'
+             style={{ float: post.images.length > 1 ? '' : 'left', }}
         >
           {post.images.map((image, idx) =>
             <PostImage
@@ -96,7 +93,7 @@ export function Post({
         dangerouslySetInnerHTML={{ __html: post.text }}
       />
 
-      <sub className='replies'></sub>
+      <sub className='replies' />
     </article>
   );
 
