@@ -7,15 +7,14 @@ import { Button } from '../parts/Button.jsx';
 import { useOnClickOutside } from '../../hooks/useOnClickOutside.jsx';
 import { ArrowDownSvg } from '../svg/ArrowDownSvg.jsx';
 import { VITE_API_PREFIX } from '../../App.jsx';
-import { page } from '../../hooks/useThreadsPagination.jsx';
 import { routeLoaderHandler } from '../../utils/fetchHandler.js';
+
+const allBoardsLink = { link: 'boards', title: '[All boards...]', userboard: true };
 
 export function IndexPage() {
   const boardList = useLoaderData() ?? [];
   document.title = 'boards';
   let staticBoard = { link: 'all', title: 'Overboard', userboard: false, posts_last24h: 0 };
-  const allBoardsLink = { link: 'boards', title: '[All boards...]', userboard: true };
-  page.reset();
 
   const boardsByCategory = boardList.reduce((acc, curr) => {
       curr.userboard

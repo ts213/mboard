@@ -3,7 +3,7 @@ import { ThreadsContainer } from './components/parts/ThreadsContainer.jsx';
 import { newPostAction, deletePostAction, editPostAction } from './components/posting/formActions.js'
 import { ErrorPage } from './components/routes/ErrorPage.jsx';
 import { BoardAction, IndexPage, BoardLoader } from './components/routes/IndexPage.jsx';
-import { ThreadList, threadListLoader } from './components/routes/ThreadList.jsx';
+import { ThreadList, ThreadListLoader } from './components/routes/ThreadList.jsx';
 import { Thread, ThreadLoader } from './components/routes/Thread.jsx';
 import { Catalog } from './components/routes/Catalog.jsx';
 import { BoardList } from './components/routes/BoardList.jsx';
@@ -41,7 +41,7 @@ const router = createBrowserRouter(
                id='board'
                action={newPostAction}
                Component={ThreadList}
-               loader={threadListLoader}
+               loader={ThreadListLoader}
                shouldRevalidate={() => false}
         />
         <Route path=':board/thread/:threadId/'
@@ -63,7 +63,7 @@ const router = createBrowserRouter(
 
       <Route path=':board/catalog/'
              Component={Catalog}
-             loader={threadListLoader}
+             loader={ThreadListLoader}
       />
 
       <Route path='boards' Component={ErrorPage} />

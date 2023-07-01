@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { page } from './useThreadsPagination.jsx';
 
 export let threadListCache = [];
+export const resetThreadListCache = () => threadListCache = [];
 
-export function useThreadListCache(fetcher, setThreadList) {
+export function useThreadListCache(fetcher, setThreadList, page) {
   useEffect(() => {
     if (fetcher.data?.threads) {
       setThreadList(threads => {
@@ -16,5 +16,5 @@ export function useThreadListCache(fetcher, setThreadList) {
     if (fetcher.data?.nextPageNum === null) {
       page.nextPageNum = false;
     }
-  }, [fetcher.data?.threads, fetcher.data?.nextPageNum, setThreadList]);
+  }, [fetcher.data?.threads, fetcher.data?.nextPageNum, setThreadList, page]);
 }

@@ -7,6 +7,7 @@ import { useThreadListEventHandler } from '../../hooks/useThreadListEventHandler
 import { VITE_API_PREFIX } from '../../App.jsx';
 import { threadListCache, useThreadListCache } from '../../hooks/useThreadListCache.jsx';
 import { routeLoaderHandler } from '../../utils/fetchHandler.js';
+import { page } from '../../hooks/useThreadsPagination.jsx';
 
 export function ThreadList() {
   const { threads = [], pageNum, nextPageNum, board = '' } = useLoaderData();
@@ -14,9 +15,9 @@ export function ThreadList() {
   document.title = board;
 
   const fetcher = useFetcher();
-  const paginationIntersectionRef = useThreadsPagination(fetcher, pageNum, nextPageNum);
+  const paginationIntersectionRef = useThreadsPagination(fetcher, pageNum, nextPageNum, board);
   useThreadListEventHandler(setThreadList);
-  useThreadListCache(fetcher, setThreadList);
+  useThreadListCache(fetcher, setThreadList, page);
 
   return (
     <>
@@ -28,16 +29,16 @@ export function ThreadList() {
   );
 }
 
-export async function threadListLoader({ request, params }) {
-  if (window.threadWasMounted && threadListCache.length > 0) {
+export async function ThreadListLoader({ request, params }) {
+  if (window.threadWasMounted && threadListCache.length && page.board === params.board) {
     window.threadWasMounted = false;
     return { threads: threadListCache, board: params.board };
   }
 
   let url = VITE_API_PREFIX + new URL(request.url).pathname;
-  const page = new URL(request.url).searchParams.get('page');
-  if (page) {
-    url += `?page=${page}`;
+  const pageNum = new URL(request.url).searchParams.get('page');
+  if (pageNum) {
+    url += `?page=${pageNum}`;
   }
   return await routeLoaderHandler(url);
 }
