@@ -17,7 +17,8 @@ export let page = {
 };
 
 export function useThreadsPagination(fetcher, pageNum, nextPageNum, board) {
-  const prevY = useRef(0);
+  const prevY = useRef(0);// last intersection y position
+
   page.board ??= board;
   page.current ??= pageNum;  // init
   page.nextPageNum ??= nextPageNum;

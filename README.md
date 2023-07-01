@@ -6,6 +6,13 @@ That ID allows to authenticate the user's request when deleting or editing posts
 
 **Currently in development.**
 
+<details> 
+  <summary style='font-size: 18px'>Video:</summary>
+   <video preload="none" src="https://github.com/ts213/mboard/assets/107356620/5be4c0c5-fc46-4dbe-ae56-51169a94923e">
+     aaa
+   </video>
+</details>
+
 ##### Implemented features:
 
 * Posting/Post deletion/Post editing
