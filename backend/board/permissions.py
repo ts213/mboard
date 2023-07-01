@@ -57,7 +57,7 @@ class PostPermission(permissions.BasePermission):
 
     def header_has_userid(self, request):
         self.user = get_user_from_header(request)
-        assert self.user is not None
+        assert self.user
 
     def is_global_janny(self):
         return self.user.global_janny is True

@@ -76,10 +76,6 @@
 
 }
 
-.file-input-label:hover {
-    background-color: #374151;
-}
-
 .file-input-label-span {
     text-align: center;
 }
@@ -105,3 +101,23 @@
     font-weight: 700;
     pointer-events: none;
 }
+
+.markup-wrap {
+    display: flex;
+}
+
+.markup-wrap button {
+    background: inherit;
+    color: inherit;
+    border: 1px solid black;
+    cursor: pointer;
+    font-size: 15px;
+    flex-grow: 1;
+}
+
+.file-input-label:hover, .markup-wrap button:hover {
+    background-color: #374151;
+}
+
+
+

@@ -1,7 +1,6 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIRequestFactory, APIClient
-from utils import ban_user
 from .models import *
 
 
@@ -66,34 +65,34 @@ class PostTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_janny_CAN_delete_thread_from_his_board(self):
-        response = self.make_request('delete', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.uuid)
+        response = self.make_request('delete', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.get_uuid())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_janny_can_NOT_delete_thread_from_other_board(self):
-        response = self.make_request('delete', self.user2_thread2.pk, self.user2_thread2.board, self.janny1.uuid)
+        response = self.make_request('delete', self.user2_thread2.pk, self.user2_thread2.board, self.janny1.get_uuid())
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_can_delete_his_post(self):
-        response = self.make_request('delete', self.user1_post.pk, self.user1_post.board, self.user1.uuid)
+        response = self.make_request('delete', self.user1_post.pk, self.user1_post.board, self.user1.get_uuid())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_user_can_NOT_delete_hist_post_after_n_time(self):
         date = timezone.now() - timedelta(days=2)
         self.user1_post.date = date
         self.user1_post.save(update_fields=['date'])
-        response = self.make_request('delete', self.user1_post.pk, self.user1_post.board, self.user1.uuid)
+        response = self.make_request('delete', self.user1_post.pk, self.user1_post.board, self.user1.get_uuid())
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_can_NOT_delete_NOT_his_post(self):
-        response = self.make_request('delete', self.user2_post.pk, self.user2_post.board, self.user1.uuid)
+        response = self.make_request('delete', self.user2_post.pk, self.user2_post.board, self.user1.get_uuid())
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_janny_can_delete_post(self):
-        response = self.make_request('delete', self.user1_post.pk, self.user1_post.board, self.janny1.uuid)
+        response = self.make_request('delete', self.user1_post.pk, self.user1_post.board, self.janny1.get_uuid())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_janny_can_NOT_delete_post_from_other_board(self):
-        response = self.make_request('delete', self.user2_post.pk, self.user2_post.board, self.janny1.uuid)
+        response = self.make_request('delete', self.user2_post.pk, self.user2_post.board, self.janny1.get_uuid())
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cache_works(self):
@@ -113,52 +112,52 @@ class PostTestCase(APITestCase):
                                      REMOTE_ADDR=ip)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_janny_can_ban_or_cannot_ban(self):
-        request = self.factory.get('testurl?ban=10', headers={'User-Id': self.janny1.uuid})
-        request.query_params = {'ban': '10'}  # https://github.com/encode/django-rest-framework/issues/6488
-        self.assertTrue(ban_user(request, self.user1_post))
-        self.assertFalse(ban_user(request, self.user2_post))
+    # def test_janny_can_ban_or_cannot_ban(self):
+    #     request = self.factory.get('testurl?ban=10', headers={'User-Id': self.janny1.get_uuid()})
+    #     request.query_params = {'ban': '10'}  # https://github.com/encode/django-rest-framework/issues/6488
+    #     self.assertTrue(ban_user(request, self.user1_post))
+    #     self.assertFalse(ban_user(request, self.user2_post))
 
     def test_can_or_cannot_edit_post(self):
-        response = self.make_request('patch', self.user1_post.pk, self.user1_post.board, self.user1.uuid,
+        response = self.make_request('patch', self.user1_post.pk, self.user1_post.board, self.user1.get_uuid(),
                                      data={'text': 'edited', 'type': 'edit'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # can edit only once
-        response = self.make_request('patch', self.user1_post.pk, self.user1_post.board, self.user1.uuid,
+        response = self.make_request('patch', self.user1_post.pk, self.user1_post.board, self.user1.get_uuid(),
                                      data={'text': 'edited', 'type': 'edit'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # can't edit other's
-        response = self.make_request('patch', self.user2_post.pk, self.user2_post.board, self.user1.uuid,
+        response = self.make_request('patch', self.user2_post.pk, self.user2_post.board, self.user1.get_uuid(),
                                      data={'text': 'editedddd', 'type': 'edit'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # janny can't
-        response = self.make_request('patch', self.user2_post.pk, self.user2_post.board, self.janny1.uuid,
+        response = self.make_request('patch', self.user2_post.pk, self.user2_post.board, self.janny1.get_uuid(),
                                      data={'text': 'edited', 'type': 'edit'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_thread_closing(self):
         data = {'text': 'post123', 'board': self.user1_thread1.board, 'thread': self.user1_thread1.pk, 'type': 'close'}
         # user
-        response = self.make_request('patch', self.user1_thread1.pk, self.user1_thread1.board, self.user1.uuid, data=data)
+        response = self.make_request('patch', self.user1_thread1.pk, self.user1_thread1.board, self.user1.get_uuid(), data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # janny
-        response = self.make_request('patch', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.uuid, data=data)
+        response = self.make_request('patch', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.get_uuid(), data=data)
         self.assertEqual(response.data['post']['closed'], True)
 
         # janny other board
-        response = self.make_request('patch', self.user2_thread2.pk, self.user2_thread2.board, self.janny1.uuid, data=data)
+        response = self.make_request('patch', self.user2_thread2.pk, self.user2_thread2.board, self.janny1.get_uuid(), data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_can_not_post_if_thread_closed(self):
         data = {'text': 'post123', 'board': self.user1_thread1.board, 'thread': self.user1_thread1.pk}
-        response = self.make_request('post', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.uuid, data=data)
+        response = self.make_request('post', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.get_uuid(), data=data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         self.user1_thread1.closed = True
         self.user1_thread1.save(update_fields=['closed'])
-        response = self.make_request('post', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.uuid, data=data)
+        response = self.make_request('post', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.get_uuid(), data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

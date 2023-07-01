@@ -95,12 +95,11 @@ def user_is_janny(user: 'models.User', post: 'models.Post'):
 
 
 def get_user_from_header(request):
-    if user_id := request.headers.get('User-Id', None):
-
-        try:
-            return models.User.objects.get(uuid=user_id)
-        except models.User.DoesNotExist:
-            return False
+    try:
+        user_id = uuid.UUID(request.headers.get('User-Id'), version=4)
+        return models.User.objects.get(uuid=user_id)
+    except (models.User.DoesNotExist, ValueError, TypeError):
+        return False
 
 
 def custom_exception_handler(exc, context):

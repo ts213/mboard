@@ -3,8 +3,10 @@ from rest_framework import serializers
 from django.db import transaction
 from .models import Post, User, Board, Image
 from .utils import make_thumb, CoercingUUIDField
+from djangoconf.settings import env
 
 FORBIDDEN_BOARDS = ['all', 'overboard', 'admin']
+UPLOAD_LIMIT = int(env.get('VITE_FILESIZE_UPLOAD_LIMIT'))
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -88,9 +90,9 @@ class SinglePostSerializer(serializers.ModelSerializer):
         return board
 
     @staticmethod
-    def validate_images(files):
+    def validate_images_write(files):
         total_file_size = sum([file.size for file in files])
-        if total_file_size > 1_000_000:
+        if total_file_size > UPLOAD_LIMIT:
             raise serializers.ValidationError('Max size of files exceeded')
         return files
 

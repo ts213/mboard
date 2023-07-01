@@ -3,7 +3,7 @@ import { Button } from '../parts/Button.jsx';
 import { FormAttachments } from '../parts/FormAttachments.jsx';
 import { useFetcher } from 'react-router-dom';
 import { useResetFormState } from '../../hooks/useResetFormState.jsx';
-import { toggleFloatingForm, dragHtmlElement } from '../../utils/utils.js';
+import { toggleFloatingForm, dragHtmlElement, onMarkupButtonClick } from '../../utils/utils.js';
 import { useFormErrors } from '../../hooks/useFormErrors.jsx';
 import { useFormDispatchContext, useFormStateContext } from './PostFormReducer.jsx';
 
@@ -86,6 +86,8 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...pr
                   onKeyDown={(ev) => (ev.altKey && ev.key === 'Enter') && ev.target.form.requestSubmit()}
         />
 
+        <MarkupButtons />
+
         <label
           className='file-input-label'>
           <div className='file-input-label-span'>
@@ -144,4 +146,23 @@ function ConditionalToggleableForm({ children, toggleable }) {
 
       : children
   )
+}
+
+function MarkupButtons() {
+  const buttons = [
+    ['s', '[S]'],
+    ['i', '[I]'],
+    ['b', '[B]'],
+    ['spoiler', '[ ]'],
+    ['arrow', '[>]'],
+  ];
+  return (
+    <div onClick={onMarkupButtonClick} className='markup-wrap'>
+      {buttons.map(([name, value], idx) =>
+        <button key={idx} name={name} type='button' tabIndex='-1'>
+          {value}
+        </button>
+      )}
+    </div>
+  );
 }

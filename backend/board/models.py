@@ -30,6 +30,9 @@ class User(models.Model):
     def __str__(self):
         return str(self.uuid)
 
+    def get_uuid(self):
+        return str(self.uuid)
+
 
 class Post(models.Model):
     id = models.BigAutoField(primary_key=True)

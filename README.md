@@ -10,7 +10,6 @@ That ID allows to authenticate the user's request when deleting or editing posts
 
 * Posting/Post deletion/Post editing
 * Board creation, inactivate boards auto-pruning
-* Board-wide banning
 * Multiple images upload  
 * BBcode markup
 * Thread auto update for new posts

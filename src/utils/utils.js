@@ -131,3 +131,30 @@ export const toRelativeTime = (function () {
     }
   }
 })();
+
+export const onMarkupButtonClick = (function () {
+  const bbCodes = {
+    s: ['[s]', '[/s]'],
+    i: ['[i]', '[/i]'],
+    b: ['[b]', '[/b]'],
+    spoiler: ['[spoiler]', '[/spoiler]'],
+    arrow: ['>', ''],
+  };
+
+  function insertTag(textarea, tagStart, tagEnd) {
+    const selStart = textarea.selectionStart;
+    const selEnd = textarea.selectionEnd;
+    const textBefore = textarea.value.substring(0, selStart);
+    const selected = textarea.value.substring(selStart, selEnd);
+    const textAfter = textarea.value.substring(selEnd, textarea.value.length);
+    textarea.value = textBefore + tagStart + selected + tagEnd + textAfter;
+    textarea.setSelectionRange(selStart + tagStart.length, selEnd + tagStart.length);
+  }
+
+  return function (ev) {
+    const [tagStart, tagEnd] = bbCodes[ev.target.name];
+    let textarea = ev.target.form.querySelector('textarea');
+    insertTag(textarea, tagStart, tagEnd,);
+    textarea.focus();
+  }
+})();

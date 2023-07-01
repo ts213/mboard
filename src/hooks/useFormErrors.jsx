@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
 
+let { VITE_FILESIZE_UPLOAD_LIMIT: UPLOAD_LIMIT } = import.meta.env;
+UPLOAD_LIMIT = Number(UPLOAD_LIMIT);
+
 export function useFormErrors(fileList, data) {
   return useMemo(
     () => formErrorList(fileList, data),
@@ -12,7 +15,7 @@ const fileTypes = ['image/jpeg', 'image/png', 'image/bmp', 'image/gif', 'image/w
 export function formErrorList(fileList, data) {
   function fileTooLarge() {
     const totalSize = fileList.reduce((sum, v) => sum + v.size, 0);
-    return totalSize > 1_000_000 ? { blockForm: true, detail: 'file too large' } : null;
+    return totalSize > UPLOAD_LIMIT ? { blockForm: true, detail: 'file too large' } : null;
   }
 
   function checkFileType() {
