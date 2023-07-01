@@ -89,27 +89,6 @@ def get_ban_time_from_cache(request, board: str) -> int | None:
     return None
 
 
-def ban_user(request, post: 'models.Post'):
-    if ban_time := request.query_params.get('ban', None):
-        user = get_user_from_header(request)
-
-        try:
-            ban_time = int(ban_time)
-
-            assert user is not False
-            assert user_is_janny(user, post)
-            assert 30 >= ban_time >= 1
-        except (AssertionError, ValueError):
-            return
-
-        ip = request.META['REMOTE_ADDR']
-        ban_time_days_to_secs = ban_time * 24 * 60 * 60
-        cache.set('ban' + ':' + ip + ':' + post.board.link,
-                  '1',
-                  timeout=ban_time_days_to_secs)
-        return True
-
-
 def user_is_janny(user: 'models.User', post: 'models.Post'):
     if user.boards.contains(post.board) or user.global_janny:
         return True

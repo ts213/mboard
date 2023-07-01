@@ -12,7 +12,7 @@ from .models import Post, Board
 from . import serializers
 from .permissions import PostPermission
 from .pagination import ThreadListPagination, SingleThreadPagination
-from .utils import ban_user, set_cache, get_or_set_board_cache_etag, get_or_set_board_list_cache_etag, ban_proxies
+from .utils import set_cache, get_or_set_board_cache_etag, get_or_set_board_list_cache_etag, ban_proxies
 from djangoconf.settings import env
 
 
@@ -203,7 +203,6 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
         return Response(status=status.HTTP_200_OK, data=data)
 
     def perform_destroy(self, post: Post, request):  # noqa
-        ban_user(request, post)
         post.delete()
 
 

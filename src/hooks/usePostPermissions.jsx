@@ -6,12 +6,12 @@ export function usePostPermissions(post) {
   const userPost = postIdList.find(userPost => userPost.id === post.id);
 
   if (boards?.includes('*')) {
-    return Permissions({canEdit: true, canDelete: true, canBan: true, canClose: !post.thread})
+    return Permissions({canEdit: true, canDelete: true, canClose: !post.thread})
   }
 
   if (boards?.includes(post.board)) {
     return Permissions({
-      canEdit: Boolean(post.thread) && userPost?.ed, canDelete: true, canBan: true, canClose: !post.thread,
+      canEdit: Boolean(post.thread) && userPost?.ed, canDelete: true, canClose: !post.thread,
     });
   }
 
@@ -19,27 +19,26 @@ export function usePostPermissions(post) {
   const allowed_interval = (timeDiff / 1000 / 60 / 60 / 24) <= 1;
   if (!allowed_interval) {
     return Permissions({
-      canEdit: false, canDelete: false, canBan: false, canClose: false,
+      canEdit: false, canDelete: false, canClose: false,
     });
   }
 
   if (!post.thread) {
     return Permissions({
-      canEdit: false, canDelete: false, canBan: false, canClose: false,
+      canEdit: false, canDelete: false, canClose: false,
     });
   }
 
   return Permissions({
-      canEdit: Boolean(userPost?.ed), canDelete: Boolean(userPost?.del), canBan: false, canClose: !post.thread,
+      canEdit: Boolean(userPost?.ed), canDelete: Boolean(userPost?.del), canClose: !post.thread,
     }
   );
 }
 
-function Permissions({ canEdit, canDelete, canBan, canClose }) {
+function Permissions({ canEdit, canDelete, canClose }) {
   return {
     canEdit,
     canDelete,
-    canBan,
     canClose,
   }
 }
