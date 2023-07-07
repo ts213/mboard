@@ -4,10 +4,10 @@ WORKDIR /home/backend
 
 ENV PYTHONUNBUFFERED=1
 
-COPY requirements.txt ./requirements.txt
+COPY backend/requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 
-COPY backend/ .env gunicorn.conf.py ./
+COPY backend/ .env scripts/gunicorn.conf.py ./
 
 RUN adduser -S 1000 -G users
 
