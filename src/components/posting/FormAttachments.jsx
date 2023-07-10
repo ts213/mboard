@@ -22,5 +22,5 @@ export function FormAttachments({ fileList, onClick }) {
     <div className='form-files-wrap'>
       {attachments}
     </div>
-  )
+  );
 }

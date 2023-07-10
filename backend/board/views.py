@@ -235,8 +235,8 @@ class BoardsAPI(generics.ListCreateAPIView):
             queryset = queryset.order_by('-bump')
         else:
             queryset1 = queryset.filter(userboard=False)
-            queryset2 = queryset.filter(userboard=True).order_by('-bump')[:15]
-            queryset = queryset1.union(queryset2)
+            queryset2 = queryset.filter(userboard=True)
+            queryset = queryset1.union(queryset2).order_by('-bump')[:15]
 
         return queryset
 

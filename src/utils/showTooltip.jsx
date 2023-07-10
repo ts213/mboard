@@ -4,7 +4,14 @@ import { Post } from '../components/parts/Post.jsx';
 
 const displayTooltipsFor = ['quote-link', 'reply-link'];
 
-export async function showTooltip(ev, threadList, dateNow, board, onImageClick) {
+export function showDateTooltip(ev, postDate = '') {
+  tippy(ev.target, {
+    content: new Date(postDate * 1000).toLocaleString(),
+    delay: [600, 100],
+  });
+}
+
+export async function showQuotedPostTooltip(ev, dateNow, board, onImageClick) {
   if (
     displayTooltipsFor.some(klass => ev.target.classList.contains(klass))
     && !Object.hasOwn(ev.target, '_tippy')

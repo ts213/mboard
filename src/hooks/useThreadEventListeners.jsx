@@ -1,4 +1,4 @@
-import { useGlobalContextApi } from '../context/GlobalContext.jsx';
+import { useGlobalContextApi } from '../context/ThreadsContext.jsx';
 import { usePostHistoryContextApi } from '../context/PostHistoryContext.jsx';
 import { useEffect } from 'react';
 import { addRepliesToPosts } from '../utils/utils.js';

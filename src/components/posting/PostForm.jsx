@@ -1,16 +1,19 @@
 import '../styles/PostForm.css';
 import { Button } from '../parts/Button.jsx';
-import { FormAttachments } from '../parts/FormAttachments.jsx';
+import { FormAttachments } from './FormAttachments.jsx';
 import { useFetcher } from 'react-router-dom';
 import { useResetFormState } from '../../hooks/useResetFormState.jsx';
 import { toggleFloatingForm, dragHtmlElement, onMarkupButtonClick } from '../../utils/utils.js';
 import { useFormErrors } from '../../hooks/useFormErrors.jsx';
 import { useFormDispatchContext, useFormStateContext } from './PostFormReducer.jsx';
+import { useContext } from 'react';
+import { TranslationContext } from '../parts/RoutesWrapper.jsx';
 
 export function PostFormsStateContainer({ toggleable = false }) {
   const fetcher = useFetcher();
   const state = useFormStateContext();
   const dispatch = useFormDispatchContext();
+  const i18n = useContext(TranslationContext);
 
   useResetFormState(dispatch, fetcher);
   const [errorList, isSubmitDisabled] = useFormErrors(state.fileList, fetcher.data);
@@ -32,21 +35,25 @@ export function PostFormsStateContainer({ toggleable = false }) {
     e.target.image.files = dt.files;
   }
 
-  const formProps = { dispatch, state, fetcher, errorList, isSubmitDisabled, syncFormFilesWithState, onFormFilesInput };
+  const formProps = {
+    dispatch, state, fetcher, errorList, isSubmitDisabled,
+    syncFormFilesWithState, onFormFilesInput,
+    i18n,
+  };
 
   return (
     <>
-      <FloatingFormWrapper>
+      <FloatingFormWrapper i18n={i18n}>
         <PostForm {...formProps} />
       </FloatingFormWrapper>
-      <ConditionalToggleableForm toggleable={toggleable}>
+      <ConditionalToggleableForm toggleable={toggleable} i18n={i18n}>
         <PostForm {...formProps} />
       </ConditionalToggleableForm>
     </>
   )
 }
 
-function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...props }) {
+function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, i18n, ...props }) {
   return (
     <>
       {errorList.length > 0 &&
@@ -74,6 +81,7 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...pr
             disabled={isSubmitDisabled || fetcher.state !== 'idle'}
             submitting={fetcher.state === 'submitting'}
             buttonType='submit'
+            value={i18n.submitButton}
           />
         </div>
 
@@ -91,7 +99,7 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...pr
         <label
           className='file-input-label'>
           <div className='file-input-label-span'>
-            SELECT A FILE
+            {i18n.selectFile}
           </div>
           <input
             name='image' type='file' accept='image/*'
@@ -111,7 +119,7 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, ...pr
   );
 }
 
-function FloatingFormWrapper({ children }) {
+function FloatingFormWrapper({ children, i18n }) {
   return (
     <div className='floatingFormWrapper hidden'>
       <header
@@ -124,7 +132,7 @@ function FloatingFormWrapper({ children }) {
             ⨯
           </span>
         <span style={{ flexGrow: '1', cursor: 'move' }}>
-          Reply to thread:
+          {i18n.replyToThread}
           <output style={{ marginLeft: '1%', color: 'cornflowerblue' }} />
           </span>
       </header>
@@ -133,13 +141,13 @@ function FloatingFormWrapper({ children }) {
   )
 }
 
-function ConditionalToggleableForm({ children, toggleable }) {
+function ConditionalToggleableForm({ children, toggleable, i18n }) {
   return (
     toggleable
       ?
       <details>
         <summary>
-          New Thread
+          {i18n.newThread}
         </summary>
         {children}
       </details>

@@ -20,6 +20,10 @@ li {
     max-height: 50vh;
 }
 
+.board-category li {
+    margin-right: 1rem;
+}
+
 .board-category:nth-child(2) {
     margin-top: 20px;
 }
@@ -99,6 +103,6 @@ li {
 
 .post-count {
     font-size: small;
-    color: gray;
-    margin-right: 0.5rem;
+    color: #75b0ee;
+    margin-left: 0.1rem;
 }

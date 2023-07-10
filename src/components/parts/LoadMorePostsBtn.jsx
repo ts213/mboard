@@ -1,9 +1,14 @@
+import { useContext } from 'react';
+import { TranslationContext } from './RoutesWrapper.jsx';
+
 export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMoreReplies, revalidator }) {
+  const i18n = useContext(TranslationContext);
+
   return (
     <div
       className='load-more-wrap'
     >
-      Posts loaded:
+      {i18n.postsLoaded}:
       <span style={{ marginLeft: '0.25rem' }}>
         {repliesLoaded}/{repliesCount}
       </span>
@@ -13,7 +18,7 @@ export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMoreReplies,
         name='loadMore'
         onClick={loadMoreReplies}
       >
-        [Load More]
+        {i18n.loadMore}
       </button>
 
       <button
@@ -21,11 +26,11 @@ export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMoreReplies,
         name='loadAll'
         onClick={loadMoreReplies}
       >
-        [All]
+        {i18n.loadAll}
       </button>
 
       <button hidden={revalidator.state === 'idle'}>
-        Loading...
+        {i18n.loading}
       </button>
     </div>
   )

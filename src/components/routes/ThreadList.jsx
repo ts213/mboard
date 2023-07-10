@@ -1,5 +1,5 @@
 import { PostList } from '../parts/PostList.jsx';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { Link, useFetcher, useLoaderData } from 'react-router-dom';
 import { useThreadsPagination } from '../../hooks/useThreadsPagination.jsx';
@@ -8,6 +8,7 @@ import { VITE_API_PREFIX } from '../../App.jsx';
 import { threadListCache, useThreadListCache } from '../../hooks/useThreadListCache.jsx';
 import { routeLoaderHandler } from '../../utils/fetchHandler.js';
 import { page } from '../../hooks/useThreadsPagination.jsx';
+import { TranslationContext } from '../parts/RoutesWrapper.jsx';
 
 export function ThreadList() {
   const { threads = [], pageNum, nextPageNum, board = '' } = useLoaderData();
@@ -44,13 +45,15 @@ export async function ThreadListLoader({ request, params }) {
 }
 
 function CatalogButton() {
+  const i18n = useContext(TranslationContext);
+
   return (
     <>
       <hr style={{ borderColor: '#2e3847' }} />
       <Link to='catalog/' className='catalog-btn unstyled-btn'>
-        Catalog
+        {i18n.catalog}
       </Link>
       <hr style={{ borderColor: '#2e3847' }} />
     </>
-  )
+  );
 }

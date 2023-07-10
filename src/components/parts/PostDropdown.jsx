@@ -2,11 +2,12 @@ import { Button } from './Button.jsx';
 import { useFetcher } from 'react-router-dom';
 import { usePostPermissions } from '../../hooks/usePostPermissions.jsx';
 import { toggleFloatingForm } from '../../utils/utils.js';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
+import { TranslationContext } from './RoutesWrapper.jsx';
 
 export function PostDropdown({ post, onEditMenuClick, onDropdownClick, dispatch, closed }) {
   const fetcher = useFetcher();
-
+  const i18n = useContext(TranslationContext);
   const { canEdit, canDelete, canClose } = usePostPermissions(post);
 
   useEffect(() => {
@@ -18,7 +19,7 @@ export function PostDropdown({ post, onEditMenuClick, onDropdownClick, dispatch,
   return (
     <div className='dropdown-menu'>
       <Button
-        value='Reply'
+        value={i18n.reply}
         clickHandler={() => toggleFloatingForm({ force: false, post, dispatch })}
         disabled={closed}
       />
@@ -26,7 +27,7 @@ export function PostDropdown({ post, onEditMenuClick, onDropdownClick, dispatch,
       {canEdit &&
         <Button
           clickHandler={() => onEditMenuClick(post.id)}
-          value='Edit'
+          value={i18n.edit}
           extraStyle={{ display: 'block' }}
           disabled={closed}
         />
@@ -36,7 +37,7 @@ export function PostDropdown({ post, onEditMenuClick, onDropdownClick, dispatch,
         <>
           <Button
             clickHandler={deletePost}
-            value='Delete'
+            value={i18n.delete}
             extraStyle={{ display: 'block' }}
             extraClass='fetcher-btn'
             submitting={fetcher.state !== 'idle'}
@@ -47,7 +48,7 @@ export function PostDropdown({ post, onEditMenuClick, onDropdownClick, dispatch,
 
       {canClose &&
         <Button
-          value={closed ? 'Open' : 'Close'}
+          value={closed ? i18n.open : i18n.close}
           clickHandler={closeThread}
           extraClass='fetcher-btn'
           submitting={fetcher.state !== 'idle'}

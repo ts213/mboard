@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { TranslationContext } from './RoutesWrapper.jsx';
 
 const UPDATE_INTERVALS = [30, 60, 90, 150, 300, 600];
 const MAX_UPDATE_INTERVAL = UPDATE_INTERVALS[UPDATE_INTERVALS.length - 1];
@@ -8,18 +9,19 @@ let dynamic_intervals = [...UPDATE_INTERVALS];
 export function ThreadNavigationButtons({ revalidator, repliesCount }) {
   const counterRef = useRef();
   const repliesCountBeforeUpdate = useRef(repliesCount);
+  const i18n = useContext(TranslationContext);
 
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(false);
-  const [updateButtonText, setUpdateButtonText] = useState('[Update]');
+  const [updateButtonText, setUpdateButtonText] = useState(i18n.update);
 
   useEffect(() => {
       if (repliesCount > repliesCountBeforeUpdate.current) {
         const postsLoaded = repliesCount - repliesCountBeforeUpdate.current;
-        setUpdateButtonText(`[Posts loaded: ${postsLoaded}]`);
+        setUpdateButtonText(`[${i18n.postsLoaded}: ${postsLoaded}]`);
         repliesCountBeforeUpdate.current = repliesCount;
 
         setTimeout(() => {
-          setUpdateButtonText('[Update]');
+          setUpdateButtonText(i18n.update);
           setUpdateButtonDisabled(false);
         }, 10_000);
 
@@ -32,15 +34,15 @@ export function ThreadNavigationButtons({ revalidator, repliesCount }) {
       }
 
       if (updateButtonDisabled) {
-        setUpdateButtonText('[No new posts]');
+        setUpdateButtonText(i18n.noNewPosts);
         setTimeout(() => {
-          setUpdateButtonText('[Update]');
+          setUpdateButtonText(i18n.update);
           setUpdateButtonDisabled(false);
         }, 10_000);
       }
 
       return () => clearInterval(counterRef.intervalId);
-    }, [repliesCount, updateButtonDisabled]
+    }, [i18n, repliesCount, updateButtonDisabled]
   );
 
   function autoUpdateThreadAtIntervals() {
@@ -62,7 +64,7 @@ export function ThreadNavigationButtons({ revalidator, repliesCount }) {
       autoUpdateThreadAtIntervals();
     } else {
       clearInterval(counterRef.intervalId);
-      counterRef.current.innerText = '[Auto]';
+      counterRef.current.innerText = i18n.auto;
       dynamic_intervals = [...UPDATE_INTERVALS];
     }
   }
@@ -77,12 +79,12 @@ export function ThreadNavigationButtons({ revalidator, repliesCount }) {
       <Link to={`${history.state?.usr?.from ?? '../../'}`}
             relative='path'
       >
-        [Return]
+        {i18n.return}
       </Link>
       <a
         onClick={() => document.body.scrollIntoView()}
       >
-        [Top]
+        {i18n.top}
       </a>
       <button
         className='unstyled-btn'
@@ -100,7 +102,7 @@ export function ThreadNavigationButtons({ revalidator, repliesCount }) {
         ref={counterRef}
         htmlFor='auto-update'
       >
-        [Auto]
+        {i18n.auto}
       </label>
     </div>
   );

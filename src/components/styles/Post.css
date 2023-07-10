@@ -59,10 +59,6 @@
     cursor: pointer;
 }
 
-.files-cont {
-    display: flex;
-}
-
 .edit-menu {
     border-width: 2px;
     border-style: dotted;

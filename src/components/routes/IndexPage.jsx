@@ -1,20 +1,21 @@
 import '../styles/IndexPage.css'
 import { Form, redirect, useActionData, useLoaderData, useNavigation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '../parts/Button.jsx';
 import { useOnClickOutside } from '../../hooks/useOnClickOutside.jsx';
 import { ArrowDownSvg } from '../svg/ArrowDownSvg.jsx';
 import { VITE_API_PREFIX } from '../../App.jsx';
 import { routeLoaderHandler } from '../../utils/fetchHandler.js';
-
-const allBoardsLink = { link: 'boards', title: '[All boards...]', userboard: true };
+import { TranslationContext } from '../parts/RoutesWrapper.jsx';
 
 export function IndexPage() {
+  const i18n = useContext(TranslationContext);
   const boardList = useLoaderData() ?? [];
   document.title = 'boards';
   let staticBoard = { link: 'all', title: 'Overboard', userboard: false, posts_last24h: 0 };
+  const allBoardsLink = { link: 'boards', title: `[${i18n.allBoards}]`, userboard: true };
 
   const boardsByCategory = boardList.reduce((acc, curr) => {
       curr.userboard
@@ -34,17 +35,18 @@ export function IndexPage() {
       {Object.entries(boardsByCategory).map(([category, boards], idx) =>
         <ul className='board-category' key={idx}>
           <span className={category}>
-            {category}
-            {category === 'userboards' && <CategoryButton />}
+            {i18n[category]}
+            {category === 'userboards' && <CategoryButton i18n={i18n} />}
           </span>
           {boards.map((board, idx) =>
             <li key={idx}>
               <Link to={'../' + board.link + '/'}>
                 {board.title}
               </Link>
-              <span className='post-count' title='posts in the last 24 hours'>
+              {board.posts_last24h > 0 &&
+                <span className='post-count' title={i18n.postsLast24h}>
                 [{board.posts_last24h}]
-              </span>
+              </span>}
             </li>
           )}
         </ul>
@@ -53,7 +55,7 @@ export function IndexPage() {
   )
 }
 
-function CategoryButton() {
+function CategoryButton({ i18n }) {
   const ref = useRef();
   const [isModalShown, setModalShown] = useState(false);
   useOnClickOutside(ref, () => setModalShown(false));
@@ -67,16 +69,17 @@ function CategoryButton() {
     <>
       <ArrowDownSvg handler={svgClickHandler} />
       {isModalShown && createPortal(
-        <Modal ref={ref} />,
+        <Modal ref={ref} i18n={i18n} />,
         document.body
       )}
     </>
   )
 }
 
-const Modal = forwardRef(function Modal(props, ref) {
+const Modal = forwardRef(function Modal({ i18n }, ref) {
   const errors = useActionData();
   const navigation = useNavigation();
+
   useEffect(() => {
     return () => {
       if (errors) errors.link = errors.title = errors.detail = null; // clear errors on modal closing
@@ -86,30 +89,32 @@ const Modal = forwardRef(function Modal(props, ref) {
   return (
     <div className='modal' ref={ref}>
       <header>
-        New board
+        {i18n.newBoard}
       </header>
       <Form method='POST'>
         <div className='input-wrap'>
           {errors && <output className='error'>{errors.title || errors.error}</output>}
           <input type='text' name='title'
                  required maxLength='15' minLength='1' pattern='^[A-Za-zА-Яа-яЁё]+[0-9]*$'
-                 placeholder='Board title' autoComplete='off'
+                 placeholder={i18n.boardTitle} autoComplete='off'
           />
-          <sub>Any title less than 15 characters</sub>
+          <sub>{i18n.newBoardTitleDesc}</sub>
         </div>
 
         <div className='input-wrap'>
           {errors && <output className='error'>{errors.link}</output>}
           <input type='text' name='link'
                  required maxLength='5' minLength='1' pattern='^[a-z]+[0-9]*$'
-                 placeholder={'Board link'} autoComplete='off'
+                 placeholder={i18n.boardLink} autoComplete='off'
           />
-          <sub>Like &quot;/b/&quot;, without slashes</sub>
+          <sub>{i18n.newBoardLinkDesc}</sub>
           {errors && <output className='error'>{errors.detail}</output>}
         </div>
 
         <div style={{ textAlign: 'center' }}>
-          <Button buttonType='submit' extraStyle={{ width: '100%' }}
+          <Button buttonType='submit'
+                  value={i18n.submitButton}
+                  extraStyle={{ width: '100%' }}
                   disabled={navigation.state !== 'idle'}
           />
         </div>

@@ -1,5 +1,31 @@
+body {
+    background-color: #0f172a;
+    font-family: Noto Sans, serif;
+    /*font-size: 13px;*/
+    color: #e2dcdc;
+}
+
+body footer {
+    text-align: center;
+    color: gray;
+    font-size: small;
+    margin: 1%;
+}
+
+body footer * {
+    margin-right: 1%;
+}
+
+#root {
+    min-height: 98vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 main {
     margin: 3rem 3rem 0 3rem;
+    flex-grow: 1;
 }
 
 @media (max-width: 768px) {
@@ -7,13 +33,6 @@ main {
         margin-left: 0;
         margin-right: 0;
     }
-}
-
-body {
-    background-color: #0f172a;
-    font-family: Noto Sans, serif;
-    /*font-size: 13px;*/
-    color: white;
 }
 
 input, textarea {
@@ -26,13 +45,18 @@ input, textarea {
     margin-right: 1%;
 }
 
+.tippy-box {
+    background: rgb(32, 36, 43);
+    padding: 5px;
+}
+
 .tippy-content {
     font-size: 16px;
     max-width: 70vw;
     width: max-content;
 }
 
-.tippy-content .dropdown-btn, .tippy-content .thread-link, .tippy-content .overboard-board{
+.tippy-content .dropdown-btn, .tippy-content .thread-link, .tippy-content .overboard-board {
     display: none;
 }
 
@@ -147,4 +171,3 @@ summary:hover {
 .red-text {
     color: red;
 }
-

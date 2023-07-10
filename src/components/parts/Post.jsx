@@ -5,13 +5,12 @@ import { PostDropdown } from './PostDropdown.jsx';
 import { PostEdit } from './PostEdit.jsx';
 import { PostImage } from './PostImage.jsx';
 import { toggleFloatingForm, toRelativeTime } from '../../utils/utils.js';
-
-// import PropTypes from 'prop-types';
+import { showDateTooltip } from '../../utils/showTooltip.jsx';
 
 export function Post({
                        post, dateNow, closed, isEditMenu, isDropdown,
                        onDropdownClick, onEditMenuClick, dispatch = undefined,
-                       board = undefined,
+                       board = undefined, i18n,
                      }) {
   const postTextElmnt = useRef();
 
@@ -22,7 +21,9 @@ export function Post({
     >
       <header>
         <span>{post.poster ? post.poster : 'Anon'}</span>
-        <time>{toRelativeTime(post.date, dateNow)}</time>
+        <time onMouseEnter={(ev) => showDateTooltip(ev, post.date)}>
+          {toRelativeTime(post.date, dateNow)}
+        </time>
         <a href={`#${post.id}`}
            onClick={onPostIdClick}
            className='postId'
@@ -56,7 +57,7 @@ export function Post({
                 to={'/' + post.board + '/thread/' + post.id + '/'}
                 state={{ from: '/' + board + '/' }}
           >
-            Open
+            {i18n.open}
           </Link>}
         {board === 'all' && <span className='overboard-board' style={{ color: 'gray' }}>/{post.board}/</span>}
       </header>

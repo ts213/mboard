@@ -7,6 +7,7 @@ import { ThreadList, ThreadListLoader } from './components/routes/ThreadList.jsx
 import { Thread, ThreadLoader } from './components/routes/Thread.jsx';
 import { Catalog } from './components/routes/Catalog.jsx';
 import { BoardList } from './components/routes/BoardList.jsx';
+import { RoutesWrapper } from './components/parts/RoutesWrapper.jsx';
 
 let { VITE_API_PREFIX, VITE_REPLIES_PER_PAGE } = import.meta.env;
 VITE_REPLIES_PER_PAGE = Number(VITE_REPLIES_PER_PAGE);
@@ -19,6 +20,7 @@ export default function App() {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route
+      Component={RoutesWrapper}
       ErrorBoundary={ErrorPage}
     >
 

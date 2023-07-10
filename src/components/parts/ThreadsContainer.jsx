@@ -1,5 +1,5 @@
 import { Outlet, ScrollRestoration, useParams } from 'react-router-dom';
-import { GlobalContext } from '../../context/GlobalContext.jsx';
+import { ThreadsContext } from '../../context/ThreadsContext.jsx';
 import { PostHistoryContext } from '../../context/PostHistoryContext.jsx';
 import { Breadcrumbs } from './Breadcrumbs.jsx';
 import { PostFormReducer } from '../posting/PostFormReducer.jsx';
@@ -11,13 +11,13 @@ export function ThreadsContainer() {
       <ScrollRestoration />
       <main className={threadId ? 'thread-route' : 'board-route'}>
         <Breadcrumbs />
-        <GlobalContext>
+        <ThreadsContext>
           <PostHistoryContext>
             <PostFormReducer>
               <Outlet />
             </PostFormReducer>
           </PostHistoryContext>
-        </GlobalContext>
+        </ThreadsContext>
       </main>
     </>
   );

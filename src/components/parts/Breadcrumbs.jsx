@@ -1,9 +1,12 @@
 import { Link, useParams } from 'react-router-dom';
 import { page } from '../../hooks/useThreadsPagination.jsx';
 import { resetThreadListCache } from '../../hooks/useThreadListCache.jsx';
+import { useContext } from 'react';
+import { TranslationContext } from './RoutesWrapper.jsx';
 
 export function Breadcrumbs() {
   const { board, threadId } = useParams();
+  const i18n = useContext(TranslationContext);
 
   function onThreadListClick() {
     if (board !== page.board) {
@@ -23,7 +26,7 @@ export function Breadcrumbs() {
             className='crumb'
             to='/'
       >
-        Boards
+        {i18n.boards}
       </Link>
       <span className='crumb-arrow'>&gt;</span>
       <Link onClick={onThreadListClick}

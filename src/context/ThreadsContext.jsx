@@ -9,10 +9,10 @@ const initialState = {
   },
 };
 
-export function GlobalContext({ children }) {
+export function ThreadsContext({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const api = useMemo(() => {
 
+  const api = useMemo(() => {
     function onClick(ev) {
       const classList = ['img', 'dropdown-btn', 'fetcher-btn'];
       if (!classList.some(klass => ev.target.classList.contains(klass))) {
@@ -35,7 +35,6 @@ export function GlobalContext({ children }) {
     }
 
     return { onClick, onDropdownClick, onImageClick, onEditMenuClick }
-
   }, []);
 
   return (
