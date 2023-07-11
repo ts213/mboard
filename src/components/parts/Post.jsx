@@ -20,8 +20,8 @@ export function Post({
       className={`post ${post.thread ? 'reply-post' : ''} ${isEditMenu ? 'edit-menu' : ''}`}
     >
       <header>
-        <span>{post.poster ? post.poster : 'Anon'}</span>
-        <time onMouseEnter={(ev) => showDateTooltip(ev, post.date)}>
+        {post.poster && <span>{post.poster}</span>}
+        <time onMouseEnter={ev => showDateTooltip(ev, post.date)}>
           {toRelativeTime(post.date, dateNow)}
         </time>
         <a href={`#${post.id}`}
@@ -100,10 +100,8 @@ export function Post({
 
   function onPostIdClick(ev) {
     ev.preventDefault();
-    if (closed) {
-      return;
+    if (!closed) {
+      toggleFloatingForm({ force: false, post, dispatch });
     }
-
-    toggleFloatingForm({ force: false, post, dispatch });
   }
 }

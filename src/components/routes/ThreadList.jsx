@@ -1,14 +1,13 @@
 import { PostList } from '../parts/PostList.jsx';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { PostFormsStateContainer } from '../posting/PostForm.jsx';
 import { Link, useFetcher, useLoaderData } from 'react-router-dom';
 import { useThreadsPagination } from '../../hooks/useThreadsPagination.jsx';
 import { useThreadListEventHandler } from '../../hooks/useThreadListEventHandler.jsx';
-import { VITE_API_PREFIX } from '../../App.jsx';
-import { threadListCache, useThreadListCache } from '../../hooks/useThreadListCache.jsx';
 import { routeLoaderHandler } from '../../utils/fetchHandler.js';
-import { page } from '../../hooks/useThreadsPagination.jsx';
-import { TranslationContext } from '../parts/RoutesWrapper.jsx';
+import { threadListCache } from '../../hooks/useThreadsPagination.jsx';
+import i18n from '../../utils/translation.js';
+
 
 export function ThreadList() {
   const { threads = [], pageNum, nextPageNum, board = '' } = useLoaderData();
@@ -16,9 +15,8 @@ export function ThreadList() {
   document.title = board;
 
   const fetcher = useFetcher();
-  const paginationIntersectionRef = useThreadsPagination(fetcher, pageNum, nextPageNum, board);
+  const paginationIntersectionRef = useThreadsPagination(fetcher, nextPageNum, setThreadList);
   useThreadListEventHandler(setThreadList);
-  useThreadListCache(fetcher, setThreadList, page);
 
   return (
     <>
@@ -31,22 +29,17 @@ export function ThreadList() {
 }
 
 export async function ThreadListLoader({ request, params }) {
-  if (window.threadWasMounted && threadListCache.length && page.board === params.board) {
+  if (window.threadWasMounted && threadListCache.length) {
     window.threadWasMounted = false;
     return { threads: threadListCache, board: params.board };
   }
 
-  let url = VITE_API_PREFIX + new URL(request.url).pathname;
-  const pageNum = new URL(request.url).searchParams.get('page');
-  if (pageNum) {
-    url += `?page=${pageNum}`;
-  }
+  const { pathname, search } = new URL(request.url);
+  const url = '/api' + pathname + search;
   return await routeLoaderHandler(url);
 }
 
 function CatalogButton() {
-  const i18n = useContext(TranslationContext);
-
   return (
     <>
       <hr style={{ borderColor: '#2e3847' }} />

@@ -1,6 +1,8 @@
 import { useFetcher } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { Button } from './Button.jsx';
+import i18n from '../../utils/translation.js';
+
 
 export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
   const fetcher = useFetcher();
@@ -19,7 +21,7 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
                 defaultValue={postTextElmnt.innerText}
                 ref={textareaRef}
                 autoFocus
-                onFocus={(ev) => ev.target.selectionStart = ev.target.value.length}
+                onFocus={ev => ev.target.selectionStart = ev.target.value.length}
       />
 
       {fetcher.data?.errors &&
@@ -30,12 +32,12 @@ export function PostEdit({ postId, onEditMenuClick, postTextElmnt, board }) {
 
       <div style={{ clear: 'both', marginTop: '1.25rem' }}>
         <Button type='button'
-                value='Cancel'
+                value={i18n.cancel}
                 clickHandler={() => onEditMenuClick(0)}
                 extraStyle={{ marginRight: '1rem' }}
         />
         <Button type='button'
-                value='Update'
+                value={i18n.update}
                 clickHandler={editPost}
                 submitting={fetcher.state === 'submitting'}
                 disabled={fetcher.state !== 'idle'}

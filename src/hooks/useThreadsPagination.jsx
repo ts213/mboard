@@ -1,27 +1,35 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-// should be outside in order to properly work when going back to thread list from thread page
-// since react router loads out components when url changes; can't keep state inside
 export let page = {
-  current: undefined,
+  current: 1,
   nextPageNum: undefined,
-  board: undefined,
-  increment() {
-    this.current++;
-  },
   reset() {
-    this.current = undefined;
+    this.current = 1;
     this.nextPageNum = undefined;
-    this.board = undefined;
   },
 };
 
-export function useThreadsPagination(fetcher, pageNum, nextPageNum, board) {
-  const prevY = useRef(0);// last intersection y position
+export let threadListCache = [];
+export const resetThreadListCache = () => void (threadListCache = []);
 
-  page.board ??= board;
-  page.current ??= pageNum;  // init
-  page.nextPageNum ??= nextPageNum;
+export function useThreadsPagination(fetcher, nextPageNum, setThreadList) {
+  const prevY = useRef(0);  // last intersection y position
+
+  useEffect(() => {
+    page.nextPageNum ??= nextPageNum;  // init
+
+    if (fetcher.data) {  // after paginated
+      page.nextPageNum = fetcher.data?.nextPageNum;
+    }
+
+    if (fetcher.data?.threads) {  // after paginated
+      setThreadList(threads => {
+        threadListCache = [...threads, ...fetcher.data.threads];
+        return threadListCache;
+      });
+    }
+
+  }, [fetcher.data, nextPageNum, setThreadList]);
 
   return useCallback(function (intersectionRef) {
     if (!intersectionRef) {
@@ -34,8 +42,7 @@ export function useThreadsPagination(fetcher, pageNum, nextPageNum, board) {
       const y = target[0].boundingClientRect.y;
 
       if (prevY.current > y && page.nextPageNum) {
-        page.increment();
-        fetcher.load(location.pathname + '?page=' + page.current);
+        fetcher.load(location.pathname + '?page=' + (page.current += 1));
       }
 
       prevY.current = y;

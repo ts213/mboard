@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.core.cache import cache
 from datetime import timedelta
 from .utils import rm_empty_dir, get_image_path, get_thumb_path, process_post_text, \
-    get_board_path, delete_dir, set_cache
+    get_board_path, delete_dir, set_cache, log_deleted_post
 from djangoconf.settings import env
 
 THREAD_REPLIES_LIMIT = int(env.get('REPLIES_LIMIT'))
@@ -69,14 +69,11 @@ class Post(models.Model):
 
         self.update_cache()
 
-    def delete(self: 'Post', *args, **kwargs):  # "docs: delete is not necessarily called when deleting in bulk"
-        if images := self.images.all():  # should be after delete() todo
-            thread_dir_path = pathlib.Path(images[0].image.path).parent.parent  # img -> img dir -> thread dir
-            for image_model in images:
-                image_model.image.delete(save=None)
-                image_model.thumb.delete(save=None)
-            rm_empty_dir(thread_dir_path)
+    def delete(self: 'Post', deleter: User = None,
+               *args, **kwargs):  # "docs: delete is not necessarily called when deleting in bulk"
+        log_deleted_post(self, deleter)
 
+        self.delete_post_images()
         super().delete(*args, **kwargs)
 
         self.update_cache()
@@ -99,6 +96,14 @@ class Post(models.Model):
     def bump_board(self):
         Board.objects.filter(link=self.board.link).update(bump=timezone.now())
 
+    def delete_post_images(self):
+        if images := self.images.all():
+            thread_dir_path = pathlib.Path(images[0].image.path).parent.parent  # img -> img dir -> thread dir
+            for image_model in images:
+                image_model.image.delete(save=None)
+                image_model.thumb.delete(save=None)
+            rm_empty_dir(thread_dir_path)
+
     def reset_cache(self):
         thread_pk = self.get_thread_pk()
         cache.delete(key=f'thread:{thread_pk}')
@@ -108,6 +113,14 @@ class Post(models.Model):
             'thread': self.get_thread_pk(),
             'board': self.board.link,
         })
+
+    def get_deleter_role(self: 'Post', deleter: User):
+        if self.user.uuid == deleter.uuid:
+            return 'user'
+        elif deleter.global_janny is True:
+            return 'admin'
+        else:
+            return f'/{self.board.link}/'
 
 
 class Image(models.Model):

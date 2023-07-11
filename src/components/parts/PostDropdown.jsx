@@ -2,12 +2,12 @@ import { Button } from './Button.jsx';
 import { useFetcher } from 'react-router-dom';
 import { usePostPermissions } from '../../hooks/usePostPermissions.jsx';
 import { toggleFloatingForm } from '../../utils/utils.js';
-import { useContext, useEffect } from 'react';
-import { TranslationContext } from './RoutesWrapper.jsx';
+import { useEffect } from 'react';
+import i18n from '../../utils/translation.js';
+
 
 export function PostDropdown({ post, onEditMenuClick, onDropdownClick, dispatch, closed }) {
   const fetcher = useFetcher();
-  const i18n = useContext(TranslationContext);
   const { canEdit, canDelete, canClose } = usePostPermissions(post);
 
   useEffect(() => {

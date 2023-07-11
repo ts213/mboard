@@ -1,12 +1,13 @@
 import { useEdiMenuContext, useGlobalContextApi, usePostDropdownContext } from '../../context/ThreadsContext.jsx';
-import { memo, useContext, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Post } from './Post.jsx';
 import { showQuotedPostTooltip } from '../../utils/showTooltip.jsx';
 import { ImageOverlay } from './ImageOverlay.jsx';
 import { useThreadEventListeners } from '../../hooks/useThreadEventListeners.jsx';
 import { addRepliesToPosts, onQuotedPostClick } from '../../utils/utils.js';
 import { useFormDispatchContext } from '../posting/PostFormReducer.jsx';
-import { TranslationContext } from './RoutesWrapper.jsx';
+import i18n from '../../utils/translation.js';
+
 
 const PostMemo = memo(Post);
 
@@ -14,7 +15,6 @@ export function PostList({ threadList, board, pageNum }) {
   const dropdown = usePostDropdownContext();
   const postEditMenu = useEdiMenuContext();
   const { onDropdownClick, onEditMenuClick, onImageClick } = useGlobalContextApi();
-  const i18n = useContext(TranslationContext);
   useThreadEventListeners();
   const dispatch = useFormDispatchContext();
   let dateNow = useRef(new Date());

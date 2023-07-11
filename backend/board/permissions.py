@@ -1,7 +1,7 @@
 from rest_framework import permissions
 from django.utils import timezone
-from .models import Post
-from .utils import get_user_from_header, user_is_janny, get_ban_time_from_cache
+from .models import Post, User
+from .utils import user_is_janny
 
 
 class PostPermission(permissions.BasePermission):
@@ -14,7 +14,7 @@ class PostPermission(permissions.BasePermission):
 
         if request.method == 'POST':
             try:
-                self.check_ban(request, board=view.kwargs.get('board'))
+                # self.check_ban(request, board=view.kwargs.get('board'))
 
                 post = Post.objects.get(pk=request.data.get('thread'))
                 self.is_thread_not_closed(post)
@@ -26,14 +26,18 @@ class PostPermission(permissions.BasePermission):
         else:
             return not forbidden
 
-    def has_object_permission(self, request, view, post: Post | None):
+    def has_object_permission(self, request, view,
+                              post: Post | None,
+                              user: User | None = None):
+        """ called after 'has_permission' for all methods except POST """
         forbidden = False
 
         if request.method in permissions.SAFE_METHODS:
             return not forbidden
 
         try:
-            self.header_has_userid(request)
+            self.user = user
+            assert user
 
             if self.is_global_janny():
                 return not forbidden
@@ -44,8 +48,16 @@ class PostPermission(permissions.BasePermission):
                     return not forbidden
 
             if request.method == 'PATCH':
-                if self.determine_safe_patch_action(request, post):
-                    return not forbidden
+                patch_type = request.data.get('type')
+                match patch_type:
+                    case 'edit':
+                        self.has_post_been_edited(post)
+                        self.is_thread_not_closed(post)
+                    case 'close':
+                        assert self.is_janny(post)
+                        return not forbidden
+                    case None:
+                        raise AssertionError
 
             self.verify_user(post, self.user)
             self.is_not_thread(post)
@@ -54,10 +66,6 @@ class PostPermission(permissions.BasePermission):
             return not forbidden
         except AssertionError:
             return forbidden
-
-    def header_has_userid(self, request):
-        self.user = get_user_from_header(request)
-        assert self.user
 
     def is_global_janny(self):
         return self.user.global_janny is True
@@ -87,19 +95,7 @@ class PostPermission(permissions.BasePermission):
             assert post.thread.closed is False
         assert post.closed is False
 
-    def determine_safe_patch_action(self, request, post):
-        match request.data.get('type'):
-            case 'edit':
-                self.has_post_been_edited(post)
-                self.is_thread_not_closed(post)
-                return False
-            case 'close':
-                assert self.is_janny(post)
-                return True
-            case None:
-                raise AssertionError
-
-    def check_ban(self, request, board):
-        if ban_time := get_ban_time_from_cache(request, board=board):
-            self.message = {'type': 'ban', 'detail': ban_time}
-            raise AssertionError
+    # def check_ban(self, request, board):
+    #     if ban_time := get_ban_time_from_cache(request, board=board):
+    #         self.message = {'type': 'ban', 'detail': ban_time}
+    #         raise AssertionError

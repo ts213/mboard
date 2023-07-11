@@ -1,5 +1,4 @@
 import { redirect } from 'react-router-dom';
-import { VITE_API_PREFIX } from '../../App.jsx';
 import { submitFormHandler } from '../../utils/fetchHandler.js';
 
 export async function newPostAction({ request, params }) {
@@ -75,7 +74,7 @@ export async function deletePostAction(request) {
 }
 
 async function submitForm(request, formData = undefined) {
-  let url = VITE_API_PREFIX + new URL(request.url).pathname;
+  let url = '/api' + new URL(request.url).pathname;
   url += url.endsWith('/') ? '' : '/';
   url += new URL(request.url).search;
 

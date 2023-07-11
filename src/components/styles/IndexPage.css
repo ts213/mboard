@@ -1,6 +1,7 @@
 #boards-nav {
     max-width: 500px;
-    margin: 10vh auto auto;
+    /*margin: 10vh auto auto;*/
+    margin: 5% 0 0 20%
 }
 
 #boards-nav a {
@@ -37,7 +38,7 @@ li {
 }
 
 .userboards svg {
-    margin-left: 5px;
+    margin-right: 10px;
     position: relative;
     top: 3px;
     cursor: pointer;

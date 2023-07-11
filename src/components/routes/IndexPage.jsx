@@ -1,17 +1,15 @@
 import '../styles/IndexPage.css'
 import { Form, redirect, useActionData, useLoaderData, useNavigation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '../parts/Button.jsx';
 import { useOnClickOutside } from '../../hooks/useOnClickOutside.jsx';
 import { ArrowDownSvg } from '../svg/ArrowDownSvg.jsx';
-import { VITE_API_PREFIX } from '../../App.jsx';
 import { routeLoaderHandler } from '../../utils/fetchHandler.js';
-import { TranslationContext } from '../parts/RoutesWrapper.jsx';
+import i18n from '../../utils/translation.js';
 
 export function IndexPage() {
-  const i18n = useContext(TranslationContext);
   const boardList = useLoaderData() ?? [];
   document.title = 'boards';
   let staticBoard = { link: 'all', title: 'Overboard', userboard: false, posts_last24h: 0 };
@@ -124,7 +122,7 @@ const Modal = forwardRef(function Modal({ i18n }, ref) {
 });
 
 export async function BoardLoader({ urlParams }) {
-  let url = VITE_API_PREFIX + '/boards/';
+  let url = '/api' + '/boards/';
   urlParams ? url += `?${urlParams}=1` : url;
   return await routeLoaderHandler(url);
 }
@@ -136,7 +134,7 @@ export async function BoardAction({ request }) {
     formData.set('user_id', user_id);
   }
 
-  const url = VITE_API_PREFIX + '/boards/';
+  const url = '/api' + '/boards/';
   const r = await fetch(url, {
     method: request.method,
     body: formData,

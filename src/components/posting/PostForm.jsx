@@ -6,14 +6,13 @@ import { useResetFormState } from '../../hooks/useResetFormState.jsx';
 import { toggleFloatingForm, dragHtmlElement, onMarkupButtonClick } from '../../utils/utils.js';
 import { useFormErrors } from '../../hooks/useFormErrors.jsx';
 import { useFormDispatchContext, useFormStateContext } from './PostFormReducer.jsx';
-import { useContext } from 'react';
-import { TranslationContext } from '../parts/RoutesWrapper.jsx';
+import i18n from '../../utils/translation.js';
+
 
 export function PostFormsStateContainer({ toggleable = false }) {
   const fetcher = useFetcher();
   const state = useFormStateContext();
   const dispatch = useFormDispatchContext();
-  const i18n = useContext(TranslationContext);
 
   useResetFormState(dispatch, fetcher);
   const [errorList, isSubmitDisabled] = useFormErrors(state.fileList, fetcher.data);
@@ -73,7 +72,7 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, i18n,
         <div className='post-form-poster-input-wrap'>
           <input name='poster'
                  value={state.posterName}
-                 onChange={(e) => dispatch({ type: 'posterEdited', value: e.target.value })}
+                 onChange={ev => dispatch({ type: 'posterEdited', value: ev.target.value })}
                  className='post-form-poster-input'
                  type='text' maxLength='35' placeholder='Anon'
           />
@@ -87,11 +86,11 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, i18n,
 
         <textarea value={state.postText}
                   name='text'
-                  onChange={(e) => dispatch({ type: 'textEdited', value: e.target.value })}
+                  onChange={ev => dispatch({ type: 'textEdited', value: ev.target.value })}
                   required={state.fileList.length < 1}
                   rows='7' minLength='1' maxLength='10000'
                   className='post-form-textarea'
-                  onKeyDown={(ev) => (ev.altKey && ev.key === 'Enter') && ev.target.form.requestSubmit()}
+                  onKeyDown={ev => (ev.altKey && ev.key === 'Enter') && ev.target.form.requestSubmit()}
         />
 
         <MarkupButtons />

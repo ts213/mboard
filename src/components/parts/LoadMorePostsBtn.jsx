@@ -1,9 +1,6 @@
-import { useContext } from 'react';
-import { TranslationContext } from './RoutesWrapper.jsx';
+import i18n from '../../utils/translation.js';
 
 export function LoadMorePostsBtn({ repliesLoaded, repliesCount, loadMoreReplies, revalidator }) {
-  const i18n = useContext(TranslationContext);
-
   return (
     <div
       className='load-more-wrap'

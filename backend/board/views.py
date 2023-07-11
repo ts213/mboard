@@ -8,11 +8,12 @@ from django.views.decorators.http import etag
 from rest_framework import generics, mixins, status, exceptions
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
-from .models import Post, Board
+from .models import Post, Board, User
 from . import serializers
 from .permissions import PostPermission
 from .pagination import ThreadListPagination, SingleThreadPagination
-from .utils import set_cache, get_or_set_board_cache_etag, get_or_set_board_list_cache_etag, ban_proxies
+from .utils import set_cache, get_or_set_board_cache_etag, get_or_set_board_list_cache_etag, ban_proxies, \
+    get_user_from_header
 from djangoconf.settings import env
 
 
@@ -95,9 +96,20 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
     def get_object(self):
         pk = self.kwargs.get('thread_id')
         board = self.kwargs.get('board')
-        self.post = get_object_or_404(Post, board=board, pk=pk)
-        self.check_object_permissions(self.request, self.post)
-        return self.post
+        post = get_object_or_404(Post, board=board, pk=pk)
+        self.check_object_permissions(self.request, post)
+        return post
+
+    def check_object_permissions(self, request, obj):
+        permission = PostPermission()
+        self.user: User | None = get_user_from_header(self.request)
+
+        if not permission.has_object_permission(request, self, obj, self.user):
+            self.permission_denied(
+                request,
+                message=getattr(permission, 'message', None),
+                code=getattr(permission, 'code', None)
+            )
 
     @staticmethod
     def get_replies_queryset(thread):
@@ -191,19 +203,19 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
     def destroy(self, request, *args, **kwargs):
         post = self.get_object()
         post_id, thread_id, board = post.id, post.thread_id, post.board_id
-        self.perform_destroy(post, request)
+        self.perform_destroy(post)
         data = {
             'deleted': 1,
             'post': {
                 'id': post_id,
                 'thread': thread_id,
-                'board': board
+                'board': board,
             }
         }
         return Response(status=status.HTTP_200_OK, data=data)
 
-    def perform_destroy(self, post: Post, request):  # noqa
-        post.delete()
+    def perform_destroy(self, post: Post):
+        post.delete(self.user)
 
 
 class BoardsAPI(generics.ListCreateAPIView):
@@ -231,14 +243,7 @@ class BoardsAPI(generics.ListCreateAPIView):
                 filter=Q(posts__date__gt=last_24h)
             )
         )
-        if self.request.query_params.get("fullList"):
-            queryset = queryset.order_by('-bump')
-        else:
-            queryset1 = queryset.filter(userboard=False)
-            queryset2 = queryset.filter(userboard=True)
-            queryset = queryset1.union(queryset2).order_by('-bump')[:15]
-
-        return queryset
+        return queryset.order_by('-bump')[:25]
 
     @method_decorator(etag(get_or_set_board_list_cache_etag))
     def list(self, request, *args, **kwargs):

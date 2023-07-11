@@ -59,6 +59,19 @@ def set_cache(cache_items: CacheItems):
         )
 
 
+def log_deleted_post(post: 'models.Post', deleter: 'models.User'):
+    with open(f'{settings.BASE_DIR}/deleted.log', 'a') as f:
+        line = '{id} {thread_id} /{board}/ {who} {time}'.format(
+            id=str(post.pk),
+            thread_id=str(post.get_thread_pk()),
+            board=post.board.link,
+            who=post.get_deleter_role(deleter),
+            time=timezone.now().strftime('%d/%m/%Y/%H:%M'),
+        ).split(' ')
+
+        f.write('{:<10}  {:<10}  {:<10} {:<10} {:<10}\n'.format(*line))
+
+
 def delete_dir(path: pathlib.Path) -> None:
     try:
         shutil.rmtree(path)
@@ -78,15 +91,15 @@ def get_board_path(board: 'models.Board') -> pathlib.Path | None:
         return board_dir_path
 
 
-def get_ban_time_from_cache(request, board: str) -> int | None:
-    ip = request.META['REMOTE_ADDR']
-    cache_key = 'ban' + ':' + ip + ':' + board
-    banned: str | None = cache.get(cache_key)
-    if banned:
-        ban_time_remaining_secs: int = cache.ttl(cache_key)
-        if ban_time_remaining_secs and ban_time_remaining_secs > 0:
-            return ban_time_remaining_secs
-    return None
+# def get_ban_time_from_cache(request, board: str) -> int | None:
+#     ip = request.META['REMOTE_ADDR']
+#     cache_key = 'ban' + ':' + ip + ':' + board
+#     banned: str | None = cache.get(cache_key)
+#     if banned:
+#         ban_time_remaining_secs: int = cache.ttl(cache_key)
+#         if ban_time_remaining_secs and ban_time_remaining_secs > 0:
+#             return ban_time_remaining_secs
+#     return None
 
 
 def user_is_janny(user: 'models.User', post: 'models.Post'):
@@ -99,7 +112,7 @@ def get_user_from_header(request):
         user_id = uuid.UUID(request.headers.get('User-Id'), version=4)
         return models.User.objects.get(uuid=user_id)
     except (models.User.DoesNotExist, ValueError, TypeError):
-        return False
+        return None
 
 
 def custom_exception_handler(exc, context):

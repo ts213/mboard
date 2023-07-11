@@ -3,9 +3,21 @@ import { ThreadsContext } from '../../context/ThreadsContext.jsx';
 import { PostHistoryContext } from '../../context/PostHistoryContext.jsx';
 import { Breadcrumbs } from './Breadcrumbs.jsx';
 import { PostFormReducer } from '../posting/PostFormReducer.jsx';
+import { useEffect } from 'react';
+import { page } from '../../hooks/useThreadsPagination.jsx';
+import { resetThreadListCache } from '../../hooks/useThreadsPagination.jsx';
+
 
 export function ThreadsContainer() {
-  const { threadId } = useParams();
+  const { threadId, board } = useParams();
+
+  useEffect(() => {
+    return () => {
+      page.reset();
+      resetThreadListCache();
+    };
+  }, [board]);
+
   return (
     <>
       <ScrollRestoration />

@@ -1,6 +1,6 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { TranslationContext } from './RoutesWrapper.jsx';
+import i18n from '../../utils/translation.js';
 
 const UPDATE_INTERVALS = [30, 60, 90, 150, 300, 600];
 const MAX_UPDATE_INTERVAL = UPDATE_INTERVALS[UPDATE_INTERVALS.length - 1];
@@ -9,7 +9,6 @@ let dynamic_intervals = [...UPDATE_INTERVALS];
 export function ThreadNavigationButtons({ revalidator, repliesCount }) {
   const counterRef = useRef();
   const repliesCountBeforeUpdate = useRef(repliesCount);
-  const i18n = useContext(TranslationContext);
 
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(false);
   const [updateButtonText, setUpdateButtonText] = useState(i18n.update);

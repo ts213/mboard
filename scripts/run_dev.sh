@@ -19,6 +19,7 @@ trap terminate SIGINT
 $docker up -d
 startScreen python backend/manage.py runserver
 startScreen npm run dev
+echo http://localhost:5173
 
 while true; do
   sleep 3600000

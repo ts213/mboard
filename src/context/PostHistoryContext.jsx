@@ -15,7 +15,7 @@ export function PostHistoryContext({ children }) {
     localStorage.setItem('posts', JSON.stringify(postIdList));
   }, [postIdList]);
 
-  const onPostChange = useCallback((ev) => {
+  const onPostChange = useCallback(ev => {
     switch (ev.detail.method) {
       case 'POST':
         return dispatch({ type: 'postCreated', postId: ev.detail.postId });

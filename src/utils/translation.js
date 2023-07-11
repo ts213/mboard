@@ -1,4 +1,4 @@
-export function getTranslationObj() {
+function selectTranslation(translation) {
   const lang = navigator.language.includes('ru') ? 'ru' : 'en';
   return Object.keys(translation).reduce((acc, curr) => {
     acc[curr] = translation[curr][lang];
@@ -11,6 +11,14 @@ const translation = {
     'en': 'Boards',
     'ru': 'Доски'
   },
+  'board': {
+    'en': 'Board',
+    'ru': 'Доска'
+  },
+  'posts': {
+    'en': 'Posts',
+    'ru': 'Постов'
+  },
   'userboards': {
     'en': 'Userboards',
     'ru': 'Пользовательские'
@@ -20,7 +28,7 @@ const translation = {
     'ru': 'Все доски'
   },
   'postsLast24h': {
-    'en': 'Posts in the last 24 hours',
+    'en': 'Posts last 24 hours',
     'ru': 'Постов за сутки'
   },
   'newBoard': {
@@ -79,6 +87,10 @@ const translation = {
     'en': 'Delete',
     'ru': 'Удалить'
   },
+  'cancel': {
+    'en': 'Cancel',
+    'ru': 'Отменить'
+  },
   'newThread': {
     'en': 'New Thread',
     'ru': 'Новый тред'
@@ -88,16 +100,16 @@ const translation = {
     'ru': 'Каталог'
   },
   'return': {
-    'en': '[Return]',
-    'ru': '[Назад]'
+    'en': 'Return',
+    'ru': 'Назад'
   },
   'top': {
-    'en': '[Top]',
-    'ru': '[Вверх]'
+    'en': 'Top',
+    'ru': 'Вверх'
   },
   'update': {
-    'en': '[Update]',
-    'ru': '[Обновить]'
+    'en': 'Update',
+    'ru': 'Обновить'
   },
   'auto': {
     'en': '[Auto]',
@@ -122,5 +134,7 @@ const translation = {
   'loading': {
     'en': 'Loading...',
     'ru': 'Загрузка...'
-  },
+  }
 };
+
+export default selectTranslation(translation);
