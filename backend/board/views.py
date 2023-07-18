@@ -4,7 +4,8 @@ from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.decorators.http import etag
+from django.views.decorators.cache import cache_control
+from django.views.decorators.http import etag, condition
 from rest_framework import generics, mixins, status, exceptions
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -83,22 +84,43 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
 
         return thread_etag
 
-    @method_decorator(etag(get_or_set_thread_cache_etag))
-    def get(self, request, *args, **kwargs):
-        thread: Post = self.get_object()
-        replies: [Post] = self.get_replies_queryset(thread)
-
-        thread_data = serializers.SinglePostSerializer(thread).data
-        thread_data['replies'] = self.paginate_replies(replies)
-        response_data = self.get_paginated_response(thread_data).data
-        return Response(response_data)
-
     def get_object(self):
         pk = self.kwargs.get('thread_id')
         board = self.kwargs.get('board')
         post = get_object_or_404(Post, board=board, pk=pk)
         self.check_object_permissions(self.request, post)
         return post
+
+    @staticmethod
+    def dec(view_func):
+        def wrapper(self, request, *args, **kwargs):
+            # print(self.request.headers)
+
+            def get_last_modified_time(*_, **__):
+                self.thread = Post.objects.get(pk=kwargs.get('thread_id'))
+                return self.thread.posts.latest('bump').bump
+
+            decorator = method_decorator([
+                cache_control(no_cache=True),
+                condition(last_modified_func=get_last_modified_time),
+            ])
+            decorated_view_func = decorator(view_func)
+            return decorated_view_func(self, request, *args, **kwargs)
+
+        return wrapper
+
+    @dec
+    def get(self, request, *args, **kwargs):
+        print('geeeeeeeeeeeet')
+
+        # self.thread: Post = self.get_object()   #########
+
+        replies: [Post] = self.get_replies_queryset(self.thread)
+
+        thread_data = serializers.SinglePostSerializer(self.thread).data
+        thread_data['replies'] = self.paginate_replies(replies)
+        response_data = self.get_paginated_response(thread_data).data
+        return Response(response_data)
 
     def check_object_permissions(self, request, obj):
         permission = PostPermission()
