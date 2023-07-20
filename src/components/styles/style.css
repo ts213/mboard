@@ -6,10 +6,11 @@
     --textAreaBg: rgb(30 41 59);
     --borderColor: rgb(75 85 99);
     --hoverColor: #ffffff;
+    --backgroundClr: #0f172a
 }
 
 body {
-    background-color: #0f172a;
+    background-color: var(--backgroundClr);
     font-family: Noto Sans, serif;
     color: var(--postTextColor);
 }
@@ -174,4 +175,43 @@ summary:hover {
 
 .red-text {
     color: red;
+}
+
+.settingsBtn {
+    position: absolute;
+    left: 90%;
+    transform: translate(-80%, 0);
+    font-size: smaller;
+    color: var(--textColor2);
+    font-weight: bold;
+}
+
+.settingsBtn:hover {
+    color: var(--hoverColor);
+}
+
+.settings {
+    padding: 1rem;
+    background: var(--backgroundClr);
+    border: 1px solid var(--borderColor);
+    top: 35px;
+    position: absolute;
+    left: 80%;
+    width: max-content;
+    transform: translate(-80%, 0%);
+}
+
+.settings input {
+    margin-right: 5%;
+}
+
+.settings sub {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.copyBtn {
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
 }

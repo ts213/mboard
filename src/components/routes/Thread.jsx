@@ -6,6 +6,7 @@ import { createContext, useEffect } from 'react';
 import { LoadMorePostsBtn } from '../parts/LoadMorePostsBtn.jsx';
 import { ThreadNavigationButtons } from '../parts/ThreadNavigationButtons.jsx';
 import { routeLoaderHandler } from '../../utils/fetchHandler.js';
+import { isScrollToBottom } from '../../context/staticSettings.js';
 
 let loadPostLimit = null;
 export const IsThreadClosed = createContext(false);
@@ -18,6 +19,8 @@ export function Thread() {
   useEffect(() => {
     window.threadWasMounted = true;
     document.title = thread.text.slice(0, 50);
+    isScrollToBottom && scroll({ top: 9999 });
+
     return () => loadPostLimit = null;
   }, [thread.text]);
 

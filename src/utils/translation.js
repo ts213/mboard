@@ -49,7 +49,7 @@ const translation = {
   },
   'newBoardLinkDesc': {
     'en': 'Like "/b/" without slashes',
-    'ru': 'Как "/b/" без слэшей'
+    'ru': 'Как "/b/" без слешей'
   },
   'submitButton': {
     'en': 'Submit',
