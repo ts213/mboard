@@ -1,11 +1,9 @@
 from datetime import timedelta
 from django.db.models import Prefetch, Count, Q
 from django.shortcuts import get_object_or_404
-from django.core.cache import cache
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_control
-from django.views.decorators.http import etag, condition
+from django.views.decorators.http import etag
 from rest_framework import generics, mixins, status, exceptions
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -13,9 +11,9 @@ from .models import Post, Board, User
 from . import serializers
 from .permissions import PostPermission
 from .pagination import ThreadListPagination, SingleThreadPagination
-from .utils import set_cache, get_or_set_board_cache_etag, get_or_set_board_list_cache_etag, ban_proxies, \
-    get_user_from_header
+from .utils import get_user_from_header, RoutesCache
 from djangoconf.settings import env
+from .decorators import log_deleted_post, block_proxies
 
 
 class ThreadListAPI(generics.ListAPIView):
@@ -49,7 +47,7 @@ class ThreadListAPI(generics.ListAPIView):
         )
         return threads_w_replies
 
-    @method_decorator(etag(get_or_set_board_cache_etag))
+    @method_decorator(etag(RoutesCache.get_etag))
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
@@ -76,13 +74,15 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
     permission_classes = [PostPermission]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    @staticmethod
-    def get_or_set_thread_cache_etag(request, thread_id, **kwargs) -> str | None:
-        thread_etag = cache.get(f'thread:{thread_id}')
-        if not thread_etag:
-            set_cache({'thread': thread_id})
+    @method_decorator(etag(RoutesCache.get_etag))
+    def get(self, request, *args, **kwargs):
+        thread: Post = self.get_object()
+        replies: [Post] = self.get_replies_queryset(thread)
 
-        return thread_etag
+        thread_data = serializers.SinglePostSerializer(thread).data
+        thread_data['replies'] = self.paginate_replies(replies)
+        response_data = self.get_paginated_response(thread_data).data
+        return Response(response_data)
 
     def get_object(self):
         pk = self.kwargs.get('thread_id')
@@ -90,37 +90,6 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
         post = get_object_or_404(Post, board=board, pk=pk)
         self.check_object_permissions(self.request, post)
         return post
-
-    @staticmethod
-    def dec(view_func):
-        def wrapper(self, request, *args, **kwargs):
-            # print(self.request.headers)
-
-            def get_last_modified_time(*_, **__):
-                self.thread = Post.objects.get(pk=kwargs.get('thread_id'))
-                return self.thread.posts.latest('bump').bump
-
-            decorator = method_decorator([
-                cache_control(no_cache=True),
-                condition(last_modified_func=get_last_modified_time),
-            ])
-            decorated_view_func = decorator(view_func)
-            return decorated_view_func(self, request, *args, **kwargs)
-
-        return wrapper
-
-    @dec
-    def get(self, request, *args, **kwargs):
-        print('geeeeeeeeeeeet')
-
-        # self.thread: Post = self.get_object()   #########
-
-        replies: [Post] = self.get_replies_queryset(self.thread)
-
-        thread_data = serializers.SinglePostSerializer(self.thread).data
-        thread_data['replies'] = self.paginate_replies(replies)
-        response_data = self.get_paginated_response(thread_data).data
-        return Response(response_data)
 
     def check_object_permissions(self, request, obj):
         permission = PostPermission()
@@ -144,7 +113,7 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
         replies_data = self.get_serializer(page, many=True).data
         return reversed(replies_data)
 
-    @method_decorator(ban_proxies)
+    @method_decorator(block_proxies)
     def post(self, request, *args, **kwargs):
         if request.data.get('image', None):
             images_list = request.data.pop('image')
@@ -154,8 +123,8 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         response_data = {'created': 1, 'post': serializer.data}
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
@@ -201,15 +170,12 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
 
         serializer = self.get_serializer(instance, data=data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        serializer.save(edited_at=timezone.now())
 
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
 
         return Response({'post': serializer.data, 'created': 1})
-
-    def perform_update(self, serializer):
-        serializer.save(edited_at=timezone.now())
 
     @staticmethod
     def get_data_for_update(request, instance: Post):
@@ -224,7 +190,7 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
 
     def destroy(self, request, *args, **kwargs):
         post = self.get_object()
-        post_id, thread_id, board = post.id, post.thread_id, post.board_id
+        post_id, thread_id, board = post.id, post.thread_id, post.board.link
         self.perform_destroy(post)
         data = {
             'deleted': 1,
@@ -236,6 +202,7 @@ class ThreadAPI(generics.RetrieveUpdateDestroyAPIView, mixins.CreateModelMixin):
         }
         return Response(status=status.HTTP_200_OK, data=data)
 
+    @log_deleted_post
     def perform_destroy(self, post: Post):
         post.delete(self.user)
 
@@ -267,19 +234,20 @@ class BoardsAPI(generics.ListCreateAPIView):
         )
         return queryset.order_by('-bump')[:25]
 
-    @method_decorator(etag(get_or_set_board_list_cache_etag))
+    @method_decorator(etag(RoutesCache.get_etag))
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    @method_decorator(ban_proxies)
+    @method_decorator(block_proxies)
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         self.check_throttles(request)
         self.perform_create(serializer)
+
         headers = self.get_success_headers(serializer.data)
         return Response({'created': 1, 'board': serializer.data},
                         status=status.HTTP_201_CREATED, headers=headers)
@@ -300,7 +268,7 @@ class BoardsAPI(generics.ListCreateAPIView):
 class CatalogAPI(generics.ListAPIView):
     serializer_class = serializers.CatalogSerializer
 
-    @method_decorator(etag(get_or_set_board_cache_etag))
+    @method_decorator(etag(RoutesCache.get_etag))
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)

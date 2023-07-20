@@ -1,7 +1,6 @@
 from rest_framework import permissions
 from django.utils import timezone
 from .models import Post, User
-from .utils import user_is_janny
 
 
 class PostPermission(permissions.BasePermission):
@@ -71,7 +70,7 @@ class PostPermission(permissions.BasePermission):
         return self.user.global_janny is True
 
     def is_janny(self, post):
-        return user_is_janny(self.user, post)
+        return self.user_is_janny(self.user, post)
 
     @staticmethod
     def verify_user(post, user):
@@ -94,6 +93,11 @@ class PostPermission(permissions.BasePermission):
         if post.thread:
             assert post.thread.closed is False
         assert post.closed is False
+
+    @staticmethod
+    def user_is_janny(user: User, post: Post):
+        if user.boards.contains(post.board) or user.global_janny:
+            return True
 
     # def check_ban(self, request, board):
     #     if ban_time := get_ban_time_from_cache(request, board=board):

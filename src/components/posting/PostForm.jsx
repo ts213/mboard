@@ -74,7 +74,7 @@ function PostForm({ dispatch, state, fetcher, errorList, isSubmitDisabled, i18n,
                  value={state.posterName}
                  onChange={ev => dispatch({ type: 'posterEdited', value: ev.target.value })}
                  className='post-form-poster-input'
-                 type='text' maxLength='35' placeholder='Anon'
+                 type='text' maxLength='35'
           />
           <Button
             disabled={isSubmitDisabled || fetcher.state !== 'idle'}

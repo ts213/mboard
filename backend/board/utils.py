@@ -2,81 +2,63 @@ import pathlib
 import re
 import shutil
 import uuid
-from io import BytesIO
-from urllib.request import urlopen
 from functools import cache as memoize
+from io import BytesIO
+from enum import Enum
 import PIL.Image
 import bbcode
-from typing import TypedDict, NotRequired
 from django.core.files.base import ContentFile
 from django.utils.html import escape
 from django.core.cache import cache
 from django.utils import timezone
-from rest_framework.response import Response
-from djangoconf import settings
 from rest_framework.serializers import UUIDField
 from rest_framework.views import exception_handler
+from djangoconf import settings
 import board.models as models
 
 admin_text_code = settings.env.get('ADMIN_TEXT_CODE')
 
 
-class CacheItems(TypedDict):
-    thread: NotRequired[int]
-    board: NotRequired[str]
-    board_list: NotRequired[str]
-    overboard: NotRequired[str]
+class RoutesCache(Enum):
+    board = 3600 * 24
+    thread = 3600 * 24
+    board_list = 1800
 
-
-CACHE_TIME = {
-    'board_list': 1800,
-    'thread': 3600 * 24,
-    'board': 360,
-}
-
-
-def get_or_set_board_cache_etag(_request, board: str) -> str | None:
-    board_etag = cache.get(f'board:{board}')
-    if not board_etag:
-        set_cache({'board': board})
-    return board_etag
-
-
-def get_or_set_board_list_cache_etag(_request) -> str | None:
-    board_list_etag = cache.get('board_list:1')
-    if not board_list_etag:
-        set_cache({'board_list': '1'})
-    return board_list_etag
-
-
-def set_cache(cache_items: CacheItems):
-    timestamp = timezone.now().timestamp()
-    for prefix, value in cache_items.items():
+    @classmethod
+    def update_cache(cls, cache_key, cache_id):
+        """ simply use timestamp as ETag as ETags are per URL """
+        timestamp = str(timezone.now().timestamp())
         cache.set(
-            key=f'{prefix}:{value}',
-            value=f'{value}:{timestamp}',
-            timeout=CACHE_TIME[prefix]
+            key=f'{cache_key}:{cache_id}',
+            value=timestamp,
+            timeout=cls[cache_key].value
         )
+        return timestamp
 
+    @classmethod
+    def get_etag(cls, _request, **route_kwargs):
+        """ get (or set and get) etag from cache
+        if client's request header etag is the same as etag from cache,
+        return 304 Not-Modified response without further processing """
 
-def log_deleted_post(post: 'models.Post', deleter: 'models.User'):
-    with open(f'{settings.BASE_DIR}/deleted.log', 'a') as f:
-        line = '{id} {thread_id} /{board}/ {who} {time}'.format(
-            id=str(post.pk),
-            thread_id=str(post.get_thread_pk()),
-            board=post.board.link,
-            who=post.get_deleter_role(deleter),
-            time=timezone.now().strftime('%d/%m/%Y/%H:%M'),
-        ).split(' ')
+        if board := route_kwargs.get('board'):
+            board_etag = cache.get(f'{cls.board.name}:{board}')
+            if not board_etag:
+                board_etag = cls.update_cache(cls.board.name, board)
+            return board_etag
 
-        f.write('{:<10}  {:<10}  {:<10} {:<10} {:<10}\n'.format(*line))
+        else:
+            board_list_etag = cache.get(f'{cls.board_list.name}:1')
+            if not board_list_etag:
+                board_list_etag = cls.update_cache(cls.board_list.name, '1')
+            return board_list_etag
 
 
 def delete_dir(path: pathlib.Path) -> None:
     try:
         shutil.rmtree(path)
-    except FileNotFoundError:
-        pass
+    except FileNotFoundError as e:
+        print(e)
 
 
 def get_board_path(board: 'models.Board') -> pathlib.Path | None:
@@ -102,11 +84,6 @@ def get_board_path(board: 'models.Board') -> pathlib.Path | None:
 #     return None
 
 
-def user_is_janny(user: 'models.User', post: 'models.Post'):
-    if user.boards.contains(post.board) or user.global_janny:
-        return True
-
-
 def get_user_from_header(request):
     try:
         user_id = uuid.UUID(request.headers.get('User-Id'), version=4)
@@ -128,7 +105,7 @@ def store_ip_temporarily(request):
 
 
 class CoercingUUIDField(UUIDField):
-    """ passed user_id might be tampered with // coercing to None instead of raising
+    """ received user_id might be tampered with // coercing to None instead of raising
         allows to continue as if nothing were passed in case of an error """
 
     def to_internal_value(self, data):
@@ -214,33 +191,3 @@ def get_thumb_path(instance, filename):
     if post.thread:
         return f'{post.board}/{post.thread.pk}/thumbs/{filename}'
     return f'{post.board}/{post.pk}/thumbs/{filename}'
-
-
-def ban_proxies(make_new_post):
-    def wrapper(request, *args, **kwargs):
-        if settings.BAN_PROXIES:
-            bad_ip = test_if_ip_is_bad(request)
-            if bad_ip:
-                return decline_posting()
-        return make_new_post(request, *args, **kwargs)
-    return wrapper
-
-
-def test_if_ip_is_bad(request):
-    ip = request.META.get("REMOTE_ADDR")
-    bad_ip = False
-    url = 'https://check.getipintel.net/check.php?flag={flag}&ip={ip}&contact={email}'
-    full_url = url.format(flag='m', ip=ip, email=settings.EMAIL)
-    try:
-        ip_check_response = urlopen(full_url)
-        ip_is_bad_chance = ip_check_response.read().decode()
-        if float(ip_is_bad_chance) >= 0.99:
-            bad_ip = True
-    except Exception as e:  # noqa
-        pass
-    finally:
-        return bad_ip
-
-
-def decline_posting():
-    return Response({'errors': {'detail': 'Proxy/VPN'}}, status=403)

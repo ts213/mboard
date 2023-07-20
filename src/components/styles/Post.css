@@ -5,6 +5,10 @@
     align-items: flex-start;
 }
 
+.thread-link {
+    color: #f7dcbe;
+}
+
 .post {
     clear: both;
     padding: 0.5rem;
@@ -14,19 +18,25 @@
 
 .post header {
     margin-bottom: 0.5rem;
+    color: var(--textColor2);
 }
 
 .post header > * {
     margin-right: 0.5rem;
 }
 
+.poster {
+    color: var(--textColor);
+}
+
 .reply-post {
-    background-color: rgb(30 41 59);
-    border: 1px solid rgb(75 85 99);
+    background-color: var(--textAreaBg);
+    border: 1px solid var(--borderColor);
 }
 
 .postId {
     cursor: pointer;
+    color: #bcc6da;
 }
 
 .post-text {
@@ -74,7 +84,7 @@
     width: 100%;
     border-width: 2px;
     border-style: dotted;
-    border-color: lightblue;
+    border-color: var(--borderColor);
     font: inherit;
 }
 
@@ -93,5 +103,5 @@
 }
 
 .post-text a {
-    color: rgb(232, 170, 81);
+    color: var(--postLinkColor);
 }

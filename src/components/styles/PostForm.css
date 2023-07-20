@@ -1,17 +1,17 @@
 .postForm {
-    color: #9CA3AF;
-    background-color: rgb(30 41 59);
+    color: var(--textColor);
+    background-color: var(--textAreaBg);
     margin: auto auto 5rem;
     width: 35%;
     max-width: 400px;
     min-width: min-content; /* input elmnt has fixed default width */
-    border: 1px solid rgb(75 85 99);
+    border: 1px solid var(--borderColor);
 }
 
 .floatingFormWrapper {
     z-index: 1;
-    color: #9CA3AF;
-    background-color: rgb(30 41 59);
+    color: var(--textColor);
+    background-color: var(--textAreaBg);
     position: fixed;
     left: 20%;
     top: 40%;
@@ -21,7 +21,7 @@
     display: flex;
     text-align: center;
     padding: 2% 0 2% 0;
-    border: 1px solid rgb(75 85 99);
+    border: 1px solid var(--borderColor);
     border-bottom: none;
 }
 
@@ -56,9 +56,9 @@
 }
 
 .post-form-textarea {
-    color: #ffffff;
+    color: var(--postTextColor);
     padding: 0;
-    border: 1px solid rgb(75 85 99);
+    border: 1px solid var(--borderColor);
     font-size: large;
     outline: 0;
     resize: both;

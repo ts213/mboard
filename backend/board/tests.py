@@ -1,3 +1,6 @@
+import base64
+from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIRequestFactory, APIClient
@@ -7,9 +10,13 @@ from djangoconf.settings import env
 client = APIClient()
 
 
-def make_request(method, thread_id, board, user_id=None, data=None, **kwargs):
+def make_request(method, thread_id: int, board: Board | str,
+                 user_id=None, data=None, **kwargs):
     params = {'board': board}
-    if thread_id is not None:
+
+    if thread_id is None:
+        params['thread_id'] = 0
+    else:
         params['thread_id'] = thread_id
 
     url = reverse('thread', kwargs=params)
@@ -50,6 +57,47 @@ class PostTestCase(APITestCase):
 
         cls.user2_post = Post.objects.create(text='test', user=cls.user2, thread=cls.user2_thread2,
                                              board=cls.board_with_janny2)
+
+    def test_can_create_new_thread(self):
+        board = self.user1_thread1.board
+        image = SimpleUploadedFile('file.jpeg',
+                                   base64.b64decode(
+                                       "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="),
+                                   content_type='image/jpeg')
+        response = make_request('post', 0, board,
+                                data={'board': board, 'text': 'test', 'image': image})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_new_post_and_throttling(self):
+        get_requests_until_throttled = int(env.get('DEFAULT_THROTTLE').split('/')[0])
+        posts_until_throttled = int(env.get('POST_THROTTLE').split('/')[0])
+
+        get_request_params = {
+            'method': 'get', 'thread_id': self.user1_thread1, 'board': self.user1_thread1.board,
+        }
+        post_request_params = {
+            'method': 'post',
+            'thread_id': self.user1_thread1,
+            'board': self.user1_thread1.board,
+            'data': {
+                'text': 'testpost',
+                'board': self.user1_thread1.board,
+                'thread': self.user1_thread1.pk
+            }
+        }
+
+        def make_multiple_requests(request_params, num_requests, success_code):
+            for i in range(num_requests + 1):
+                response = make_request(**request_params)
+                if response.status_code == success_code:
+                    continue
+                self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+                break
+            else:
+                self.fail()
+
+        make_multiple_requests(get_request_params, get_requests_until_throttled, status.HTTP_200_OK)
+        make_multiple_requests(post_request_params, posts_until_throttled, status.HTTP_201_CREATED)
 
     def test_no_id_no_delete(self):
         response = make_request('delete', self.user1_post.pk, self.user1_post.board)
@@ -146,37 +194,6 @@ class PostTestCase(APITestCase):
         response = make_request('post', self.user1_thread1.pk, self.user1_thread1.board, self.janny1.get_uuid(),
                                 data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_throttling(self):
-        get_requests_until_throttled = int(env.get('DEFAULT_THROTTLE').split('/')[0])
-        posts_until_throttled = int(env.get('POST_THROTTLE').split('/')[0])
-
-        get_request_params = {
-            'method': 'get', 'thread_id': self.user1_thread1, 'board': self.user1_thread1.board,
-        }
-        post_request_params = {
-            'method': 'post',
-            'thread_id': self.user1_thread1,
-            'board': self.user1_thread1.board,
-            'data': {
-                'text': 'testpost',
-                'board': self.user1_thread1.board,
-                'thread': self.user1_thread1.pk
-            }
-        }
-
-        def make_multiple_requests(request_params, num_requests, success_code):
-            for i in range(num_requests + 1):
-                response = make_request(**request_params)
-                if response.status_code == success_code:
-                    continue
-                self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
-                break
-            else:
-                self.fail()
-
-        make_multiple_requests(get_request_params, get_requests_until_throttled, status.HTTP_200_OK)
-        make_multiple_requests(post_request_params, posts_until_throttled, status.HTTP_201_CREATED)
 
     # def test_ban_works(self):
     #     ip = '192.168.1.134'

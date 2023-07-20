@@ -56,7 +56,7 @@ li {
     top: 30%;
     transform: translate(-50%, 0);
     color: white;
-    border: 1px solid rgb(75 85 99);
+    border: 1px solid var(--borderColor);
 }
 
 .modal form {
@@ -74,7 +74,7 @@ li {
     color: white;
     padding: 10px 10px 10px 10px;
     outline: 0;
-    border: 1px solid rgb(75 85 99);
+    border: 1px solid var(--borderColor);
 }
 
 .modal input::placeholder {

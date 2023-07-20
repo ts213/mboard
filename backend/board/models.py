@@ -2,11 +2,10 @@ import pathlib
 import uuid
 from django.db import models
 from django.utils import timezone
-from django.core.cache import cache
 from datetime import timedelta
-from .utils import rm_empty_dir, get_image_path, get_thumb_path, process_post_text, \
-    get_board_path, delete_dir, set_cache, log_deleted_post
 from djangoconf.settings import env
+from .utils import rm_empty_dir, get_image_path, get_thumb_path, process_post_text, \
+    get_board_path, delete_dir
 
 THREAD_REPLIES_LIMIT = int(env.get('REPLIES_LIMIT'))
 BOARD_THREADS_LIMIT = int(env.get('BOARD_THREADS_LIMIT'))
@@ -62,23 +61,20 @@ class Post(models.Model):
 
         self.bump_board()
         if self.thread:
+            assert self.board == self.thread.board, 'post and thread must have the same board'
             self.prune_replies()
             self.bump_thread()
         else:
             self.prune_threads()
 
-        self.update_cache()
-
     def delete(self: 'Post', deleter: User = None,
                *args, **kwargs):  # "docs: delete is not necessarily called when deleting in bulk"
-        log_deleted_post(self, deleter)
 
         self.delete_post_images()
         super().delete(*args, **kwargs)
 
-        self.update_cache()
-
-    def get_thread_pk(self) -> int:
+    @property
+    def thread_id(self) -> int:
         return self.thread.pk if self.thread else self.pk
 
     def prune_replies(self):
@@ -103,24 +99,6 @@ class Post(models.Model):
                 image_model.image.delete(save=None)
                 image_model.thumb.delete(save=None)
             rm_empty_dir(thread_dir_path)
-
-    def reset_cache(self):
-        thread_pk = self.get_thread_pk()
-        cache.delete(key=f'thread:{thread_pk}')
-
-    def update_cache(self):
-        set_cache({
-            'thread': self.get_thread_pk(),
-            'board': self.board.link,
-        })
-
-    def get_deleter_role(self: 'Post', deleter: User):
-        if self.user.uuid == deleter.uuid:
-            return 'user'
-        elif deleter.global_janny is True:
-            return 'admin'
-        else:
-            return f'/{self.board.link}/'
 
 
 class Image(models.Model):
@@ -149,8 +127,6 @@ class Board(models.Model):
         if Board.objects.count() <= MAIN_BOARDS_COUNT:
             self.userboard = False
 
-        set_cache({'board_list': '1', })
-
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):  # add frontend board del todo
@@ -159,8 +135,6 @@ class Board(models.Model):
 
         if board_files_path:
             delete_dir(board_files_path)
-
-        set_cache({'board_list': '1', })
 
     def __str__(self):
         return self.link

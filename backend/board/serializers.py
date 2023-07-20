@@ -49,11 +49,11 @@ class SinglePostSerializer(serializers.ModelSerializer):
         user_id = validated_data.pop('user_id', None)
         try:
             with transaction.atomic():
-                user, created = User.objects.get_or_create(uuid=user_id)  # save() handles None
+                user, user_created = User.objects.get_or_create(uuid=user_id)  # save() handles None
                 validated_data['user'] = user
 
                 post = Post.objects.create(**validated_data)
-                if created:
+                if user_created:
                     self.fields['user_id'].write_only = False
                     post.user_id = user.uuid
 

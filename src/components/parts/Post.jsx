@@ -20,7 +20,7 @@ export function Post({
       className={`post ${post.thread ? 'reply-post' : ''} ${isEditMenu ? 'edit-menu' : ''}`}
     >
       <header>
-        {post.poster && <span>{post.poster}</span>}
+        {post.poster && <span className='poster'>{post.poster}</span>}
         <time onMouseEnter={ev => showDateTooltip(ev, post.date)}>
           {toRelativeTime(post.date, dateNow)}
         </time>

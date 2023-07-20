@@ -2,7 +2,6 @@
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     margin-left: 0.5rem;
-    color: #ffffff;
     font-weight: 100;
     text-align: center;
     border: 2px solid rgb(30 41 59);
@@ -23,10 +22,11 @@
 
 .load-more-wrap button:hover {
     background: #2f3943;
+    color: var(--hoverColor)
 }
 
 #bottom {
-    color: #5e718e;
+    color: var(--textColor2);
     font-weight: bold;
     margin-left: 0.5rem;
 }
@@ -37,11 +37,11 @@
 
 #bottom *:hover {
     cursor: pointer;
-    color: white;
+    color: var(--hoverColor);
 }
 
 .crumb:hover {
-    color: white;
+    color: var(--hoverColor);
 }
 
 .thread-route .thread-link {

@@ -13,7 +13,7 @@ DEBUG = env.get('DEBUG') == 'True'
 
 SECRET_KEY = env.get('SECRET_KEY')
 
-BAN_PROXIES = env.get('BAN_PROXIES') == 'True'  # getipintel.net service suspicious ip check
+BLOCK_PROXIES = env.get('BLOCK_PROXIES') == 'True'  # getipintel.net service suspicious ip check
 EMAIL = env.get('EMAIL')  # queries to getipintel.net require email be included
 
 ALLOWED_HOSTS = env.get('ALLOWED_HOSTS').split()

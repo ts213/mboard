@@ -1,8 +1,17 @@
+:root {
+    --textColor: #9CA3AF;
+    --textColor2: #5e718e;
+    --postTextColor: rgb(189, 199, 219);
+    --postLinkColor: rgb(232, 170, 81);
+    --textAreaBg: rgb(30 41 59);
+    --borderColor: rgb(75 85 99);
+    --hoverColor: #ffffff;
+}
+
 body {
     background-color: #0f172a;
     font-family: Noto Sans, serif;
-    /*font-size: 13px;*/
-    color: #e2dcdc;
+    color: var(--postTextColor);
 }
 
 body footer {
@@ -36,17 +45,13 @@ main {
 }
 
 input, textarea {
-    background-color: rgb(30 41 59);
+    background-color: var(--textAreaBg);
 }
 
 .quote-link, .reply-link {
-    color: rgb(232, 170, 81);
+    color: var(--postLinkColor);
     font-size: small;
     margin-right: 1%;
-}
-
-.tippy-box {
-    background: rgb(32, 36, 43);
 }
 
 .tippy-content {
@@ -80,7 +85,7 @@ input, textarea {
 }
 
 section:not(:last-child)::after {
-    border-top: 1px solid gray;
+    border-top: 1px solid var(--borderColor);
     width: 90vw;
     clear: both;
     display: block;
@@ -106,23 +111,23 @@ summary {
     width: 10em;
     padding: 0.5rem 0.25rem;
     background-color: #1F2937;
-    color: #9CA3AF;
+    color: var(--textColor);
 }
 
 summary:hover {
     background-color: #374151;
-    color: #ffffff;
+    color: var(--hoverColor);
 }
 
 .crumb {
-    color: #5e718e;
+    color: var(--textColor2);
     font-size: large;
     font-weight: bold;
 }
 
 .crumb-arrow {
     margin: 0 1% 0 1%;
-    color: #5e718e;
+    color: var(--textColor2);
 }
 
 .hidden {
@@ -151,7 +156,7 @@ summary:hover {
 
 .catalog-btn {
     margin-left: 1rem;
-    color: #5e718e;
+    color: var(--textColor2);
 }
 
 .catalog-btn:hover {
